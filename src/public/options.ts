@@ -707,4 +707,6 @@ export type AutoRenderOptions = {
       inline: [openDelim: string, closeDelim: string][];
     };
   };
+
+  onCreateNode?: (node: Node) => void;
 };

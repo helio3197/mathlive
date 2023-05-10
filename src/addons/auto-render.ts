@@ -262,10 +262,10 @@ function createMarkupNode(
       format: 'html',
     });
     const element = document.createElement('span');
-    element.style.display =
-      mathstyle === 'displaystyle' ? 'flex' : 'inline-flex';
+    element.dataset.latex = text;
     element.setAttribute('aria-hidden', 'true');
     element.innerHTML = window.MathfieldElement.createHTML(html);
+    options.onCreateNode?.(element);
     return element;
   } catch (error: unknown) {
     console.error("Could not parse'" + text + "' with ", error);
