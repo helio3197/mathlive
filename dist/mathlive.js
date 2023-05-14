@@ -1,4 +1,4 @@
-/** MathLive 0.93 */
+/** MathLive 0.93.0 */
     (function(global,factory){typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) : typeof define === 'function' && define.amd ? define(['exports'],factory):(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.MathLive = {}));})(this, (function (exports) { 'use strict';
 var MathLive = (() => {
   var __defProp = Object.defineProperty;
@@ -16414,7 +16414,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
           "root",
           "space"
         ].includes(type),
-        `MathLive 0.93: an unexpected atom type "${type}" was encountered. Add new atom constructors to \`fromJson()\` in "atom.ts"`
+        `MathLive 0.93.0: an unexpected atom type "${type}" was encountered. Add new atom constructors to \`fromJson()\` in "atom.ts"`
       );
       result = Atom.fromJson(json);
     }
@@ -19479,7 +19479,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
         return;
       } catch (error) {
         console.error(
-          `MathLive 0.93: The math fonts could not be loaded from "${fontsFolder}"`,
+          `MathLive 0.93.0: The math fonts could not be loaded from "${fontsFolder}"`,
           { cause: error }
         );
         document.body.classList.add("ML__fonts-did-not-load");
@@ -20269,6 +20269,9 @@ body > .ML__keyboard.is-visible.animate > .MLK__backdrop {
 }
 .MLK__rows > .row .w20 {
   width: calc(2 * min(var(--private-keycap-max-width, 100px), 10cqw) - var(--private-keycap-gap));
+}
+.MLK__rows > .row .w40 {
+  width: calc(4 * min(var(--private-keycap-max-width, 100px), 10cqw) - var(--private-keycap-gap));
 }
 .MLK__rows > .row .w50 {
   width: calc(5 * min(var(--private-keycap-max-width, 100px), 10cqw) - var(--private-keycap-gap));
@@ -22200,7 +22203,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     if (typeof layout === "string") {
       console.assert(
         LAYOUTS[layout] !== void 0,
-        `MathLive 0.93: unknown keyboard layout "${layout}"`
+        `MathLive 0.93.0: unknown keyboard layout "${layout}"`
       );
       return normalizeLayout(LAYOUTS[layout]);
     }
@@ -22208,7 +22211,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     if ("rows" in layout && Array.isArray(layout.rows)) {
       console.assert(
         !("layers" in layout || "markup" in layout),
-        `MathLive 0.93: when providing a "rows" property, "layers" and "markup" are ignored`
+        `MathLive 0.93.0: when providing a "rows" property, "layers" and "markup" are ignored`
       );
       const _a3 = layout, { rows } = _a3, partialLayout = __objRest(_a3, ["rows"]);
       result = __spreadProps(__spreadValues({}, partialLayout), {
@@ -22225,7 +22228,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
         result.layers = normalizeLayer(layout.layers);
       else {
         console.error(
-          `MathLive 0.93: provide either a "rows", "markup" or "layers" property`
+          `MathLive 0.93.0: provide either a "rows", "markup" or "layers" property`
         );
       }
     }
@@ -23028,6 +23031,8 @@ Note there are a different set of tooltip rules for the keyboard toggle
       this._layouts = "default";
       this._editToolbar = "default";
       this._container = (_b3 = (_a3 = window.document) == null ? void 0 : _a3.body) != null ? _b3 : null;
+      this.overrideAutoClose = false;
+      this.renderKeycap = renderKeycap;
       this._visible = false;
       this._rebuilding = false;
       this.observer = new ResizeObserver((_entries) => {
@@ -23047,6 +23052,8 @@ Note there are a different set of tooltip rules for the keyboard toggle
         }
       });
       document.addEventListener("focusout", (evt) => {
+        if (this.overrideAutoClose)
+          return;
         const target = evt.target;
         if (target.mathVirtualKeyboardPolicy !== "manual") {
           setTimeout(() => {
@@ -23547,6 +23554,11 @@ Note there are a different set of tooltip rules for the keyboard toggle
           { targetOrigin: this.targetOrigin }
         );
       } else {
+        if (payload.command) {
+          this.dispatchEvent(
+            new CustomEvent("mathkb-command", { detail: payload.command })
+          );
+        }
         if (action === "execute-command" && Array.isArray(payload.command) && payload.command[0] === "insert") {
           const s = payload.command[1].split("");
           for (const c of s) {
@@ -23693,7 +23705,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
             updates.defaultMode
           )) {
             console.error(
-              `MathLive 0.93:  valid values for defaultMode are "text", "math" or "inline-math"`
+              `MathLive 0.93.0:  valid values for defaultMode are "text", "math" or "inline-math"`
             );
             result.defaultMode = "math";
           } else
@@ -25208,7 +25220,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
           result2 = SRE.toSpeech(mathML);
         } catch (e) {
           console.error(
-            `MathLive 0.93: \`SRE.toSpeech()\` runtime error`,
+            `MathLive 0.93.0: \`SRE.toSpeech()\` runtime error`,
             e
           );
         }
@@ -25343,7 +25355,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     } else if (window.MathfieldElement.speechEngine === "amazon") {
       if (!("AWS" in window)) {
         console.error(
-          `MathLive 0.93: AWS SDK not loaded. See https://www.npmjs.com/package/aws-sdk`
+          `MathLive 0.93.0: AWS SDK not loaded. See https://www.npmjs.com/package/aws-sdk`
         );
       } else {
         const polly = new window.AWS.Polly({ apiVersion: "2016-06-10" });
@@ -25371,7 +25383,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
         polly.synthesizeSpeech(parameters, (err, data) => {
           if (err) {
             console.trace(
-              `MathLive 0.93: \`polly.synthesizeSpeech()\` error: ${err}`
+              `MathLive 0.93.0: \`polly.synthesizeSpeech()\` error: ${err}`
             );
           } else if (data == null ? void 0 : data.AudioStream) {
             const uInt8Array = new Uint8Array(data.AudioStream);
@@ -25385,7 +25397,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
       }
     } else if (window.MathfieldElement.speechEngine === "google") {
       console.error(
-        `MathLive 0.93: The Google speech engine is not supported yet. Please come again.`
+        `MathLive 0.93.0: The Google speech engine is not supported yet. Please come again.`
       );
     }
   }
@@ -25813,7 +25825,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
       }
       if (format === "ascii-math")
         return atomToAsciiMath(atom);
-      console.error(`MathLive 0.93: Unknown format "${format}`);
+      console.error(`MathLive 0.93.0: Unknown format "${format}`);
       return "";
     }
     getValue(arg1, arg2, arg3) {
@@ -32004,7 +32016,7 @@ data-command='["setEnvironment","pmatrix"]'>
       );
       if (!this.element.children) {
         console.error(
-          `%cMathLive 0.93: Something went wrong and the mathfield could not be created.%c
+          `%cMathLive 0.93.0: Something went wrong and the mathfield could not be created.%c
 If you are using Vue, this may be because you are using the runtime-only build of Vue. Make sure to include \`runtimeCompiler: true\` in your Vue configuration. There may a warning from Vue in the log above.`,
           "color:red;font-family:system-ui;font-size:1.2rem;font-weight:bold",
           "color:inherit;font-family:system-ui;font-size:inherit;font-weight:inherit"
@@ -32199,7 +32211,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
         this._keybindings = keybindings;
         if (errors.length > 0) {
           console.error(
-            `MathLive 0.93: Invalid keybindings for current keyboard layout`,
+            `MathLive 0.93.0: Invalid keybindings for current keyboard layout`,
             errors
           );
         }
@@ -32384,7 +32396,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
       const ce = window.MathfieldElement.computeEngine;
       if (!ce) {
         console.error(
-          `MathLive 0.93:  no compute engine available. Make sure the Compute Engine library is loaded.`
+          `MathLive 0.93.0:  no compute engine available. Make sure the Compute Engine library is loaded.`
         );
         return null;
       }
@@ -32656,14 +32668,14 @@ If you are using Vue, this may be because you are using the runtime-only build o
       );
       console.assert(
         prompt !== void 0,
-        `MathLive 0.93:  no prompts with matching ID found`
+        `MathLive 0.93.0:  no prompts with matching ID found`
       );
       return prompt;
     }
     getPromptValue(id, format) {
       const prompt = this.getPrompt(id);
       if (!prompt) {
-        console.error(`MathLive 0.93: unknown prompt ${id}`);
+        console.error(`MathLive 0.93.0: unknown prompt ${id}`);
         return "";
       }
       const first = this.model.offsetOf(prompt.firstChild);
@@ -32691,7 +32703,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
       if (value !== void 0) {
         const prompt = this.getPrompt(id);
         if (!prompt) {
-          console.error(`MathLive 0.93: unknown prompt ${id}`);
+          console.error(`MathLive 0.93.0: unknown prompt ${id}`);
           return;
         }
         const branchRange = this.model.getBranchRange(
@@ -32710,7 +32722,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
     setPromptState(id, state, locked) {
       const prompt = this.getPrompt(id);
       if (!prompt) {
-        console.error(`MathLive 0.93: unknown prompt ${id}`);
+        console.error(`MathLive 0.93.0: unknown prompt ${id}`);
         return;
       }
       if (state === "undefined")
@@ -32750,7 +32762,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
     getPromptState(id) {
       const prompt = this.getPrompt(id);
       if (!prompt) {
-        console.error(`MathLive 0.93: unknown prompt ${id}`);
+        console.error(`MathLive 0.93.0: unknown prompt ${id}`);
         return [void 0, true];
       }
       return [prompt.correctness, prompt.locked];
@@ -33493,7 +33505,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
       return;
     if (window.MathfieldElement.speechEngine !== "amazon") {
       console.error(
-        `MathLive 0.93: Use Amazon TTS Engine for synchronized highlighting`
+        `MathLive 0.93.0: Use Amazon TTS Engine for synchronized highlighting`
       );
       if (typeof window.MathfieldElement.speakHook === "function")
         window.MathfieldElement.speakHook(text);
@@ -33501,7 +33513,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
     }
     if (!window.AWS) {
       console.error(
-        `MathLive 0.93: AWS SDK not loaded. See https://www.npmjs.com/package/aws-sdk`
+        `MathLive 0.93.0: AWS SDK not loaded. See https://www.npmjs.com/package/aws-sdk`
       );
       return;
     }
@@ -33519,7 +33531,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
     polly.synthesizeSpeech(parameters, (err, data) => {
       if (err) {
         console.trace(
-          `MathLive 0.93: \`polly.synthesizeSpeech()\` error: ${err}`
+          `MathLive 0.93.0: \`polly.synthesizeSpeech()\` error: ${err}`
         );
         return;
       }
@@ -33541,7 +33553,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
       polly.synthesizeSpeech(parameters, (err2, data2) => {
         if (err2) {
           console.trace(
-            `MathLive 0.93: \`polly.synthesizeSpeech("${text}") error:${err2}`
+            `MathLive 0.93.0: \`polly.synthesizeSpeech("${text}") error:${err2}`
           );
           return;
         }
@@ -33614,7 +33626,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
   // src/public/mathfield-element.ts
   if (!isBrowser()) {
     console.error(
-      `MathLive 0.93: this version of the MathLive library is for use in the browser. A subset of the API is available on the server side in the "mathlive-ssr" library. If using server side rendering (with React for example) you may want to do a dynamic import of the MathLive library inside a \`useEffect()\` call.`
+      `MathLive 0.93.0: this version of the MathLive library is for use in the browser. A subset of the API is available on the server side in the "mathlive-ssr" library. If using server side rendering (with React for example) you may want to do a dynamic import of the MathLive library inside a \`useEffect()\` call.`
     );
   }
   var MATHFIELD_TEMPLATE = isBrowser() ? document.createElement("template") : null;
@@ -33735,7 +33747,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
         }
         if (warnings.length > 0) {
           console.group(
-            `%cMathLive 0.93: %cInvalid Options`,
+            `%cMathLive 0.93.0: %cInvalid Options`,
             "color:#12b; font-size: 1.1rem",
             "color:#db1111; font-size: 1.1rem"
           );
@@ -34093,7 +34105,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
           this._computeEngine = new ComputeEngineCtor();
         else {
           console.error(
-            `MathLive 0.93: The CortexJS Compute Engine library is not available.
+            `MathLive 0.93.0: The CortexJS Compute Engine library is not available.
           
           Load the library, for example with:
           
@@ -34224,7 +34236,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
         return void 0;
       if (!window[Symbol.for("io.cortexjs.compute-engine")]) {
         console.error(
-          `MathLive 0.93: The CortexJS Compute Engine library is not available.
+          `MathLive 0.93.0: The CortexJS Compute Engine library is not available.
         
         Load the library, for example with:
         
@@ -34242,7 +34254,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
         this._mathfield.setValue(latex);
       if (!window[Symbol.for("io.cortexjs.compute-engine")]) {
         console.error(
-          `MathLive 0.93: The CortexJS Compute Engine library is not available.
+          `MathLive 0.93.0: The CortexJS Compute Engine library is not available.
         
         Load the library, for example with:
         
@@ -34266,7 +34278,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
     }
     getOptions(keys) {
       console.warn(
-        `%cMathLive 0.93: %cDeprecated Usage%c
+        `%cMathLive 0.93.0: %cDeprecated Usage%c
       \`mf.getOptions()\` is deprecated. Read the property directly on the mathfield instead.
       See https://cortexjs.io/mathlive/changelog/ for details.`,
         "color:#12b; font-size: 1.1rem",
@@ -34313,7 +34325,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
      */
     getOption(key) {
       console.warn(
-        `%cMathLive 0.93: %cDeprecated Usage%c
+        `%cMathLive 0.93.0: %cDeprecated Usage%c
       \`mf.getOption()\` is deprecated. Read the property directly on the mathfield instead.
       See https://cortexjs.io/mathlive/changelog/ for details.`,
         "color:#12b; font-size: 1.1rem",
@@ -34351,7 +34363,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
      */
     setOptions(options) {
       console.group(
-        `%cMathLive 0.93: %cDeprecated Usage`,
+        `%cMathLive 0.93.0: %cDeprecated Usage`,
         "color:#12b; font-size: 1.1rem",
         "color:#db1111; font-size: 1.1rem"
       );
@@ -35040,7 +35052,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
     }
   };
   var MathfieldElement = _MathfieldElement;
-  MathfieldElement.version = "0.93";
+  MathfieldElement.version = "0.93.0";
   MathfieldElement._fontsDirectory = "./fonts";
   MathfieldElement._soundsDirectory = "./sounds";
   /**
@@ -35138,7 +35150,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
   if (isBrowser() && !((_a2 = window.customElements) == null ? void 0 : _a2.get("math-field"))) {
     (_c = window[_b2 = Symbol.for("io.cortexjs.mathlive")]) != null ? _c : window[_b2] = {};
     const global = window[Symbol.for("io.cortexjs.mathlive")];
-    global.version = "0.93";
+    global.version = "0.93.0";
     window.MathfieldElement = MathfieldElement;
     (_d = window.customElements) == null ? void 0 : _d.define("math-field", MathfieldElement);
   }
@@ -35200,7 +35212,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
         gComputeEngine = new ComputeEngineCtor();
       else {
         console.error(
-          `MathLive 0.93: The CortexJS Compute Engine library is not available.
+          `MathLive 0.93.0: The CortexJS Compute Engine library is not available.
         
         Load the library, for example with:
         
@@ -35349,7 +35361,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
       span.innerHTML = window.MathfieldElement.createHTML(html);
     } catch (error) {
       console.error(
-        `MathLive 0.93:  Could not convert "${latex}"' to MathML with ${error}`
+        `MathLive 0.93.0:  Could not convert "${latex}"' to MathML with ${error}`
       );
       span.textContent = latex;
     }
@@ -35649,7 +35661,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
   }
   function makeSharedVirtualKeyboard() {
     console.warn(
-      `%cMathLive 0.93: %cmakeSharedVirtualKeyboard() is deprecated. 
+      `%cMathLive 0.93.0: %cmakeSharedVirtualKeyboard() is deprecated. 
     Use \`window.mathVirtualKeyboard\` to access the virtual keyboard instance.
     See https://cortexjs.io/mathlive/changelog/ for details.`,
       "color:#12b; font-size: 1.1rem",
@@ -35682,7 +35694,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
     autoRenderMathInElement(el, optionsPrivate);
   }
   var version = {
-    mathlive: "0.93"
+    mathlive: "0.93.0"
   };
   return __toCommonJS(mathlive_exports);
 })();

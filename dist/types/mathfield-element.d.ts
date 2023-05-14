@@ -1,4 +1,4 @@
-/* 0.93 */import type { Selector } from './commands';
+/* 0.93.0 */import type { Selector } from './commands';
 import type { LatexSyntaxError, MacroDictionary, ParseMode, Registers, Style } from './core-types';
 import type { InsertOptions, OutputFormat, Offset, Range, Selection, Mathfield } from './mathfield';
 import type { InlineShortcutDefinitions, Keybinding, MathfieldOptions } from './options';

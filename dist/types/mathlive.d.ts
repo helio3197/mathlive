@@ -1,4 +1,4 @@
-/* 0.93 *//**
+/* 0.93.0 *//**
  *
  * Use MathLive to render and edit mathematical formulas.
  *
@@ -11,8 +11,8 @@
  * console.log(convertLatexToSpeakableText('e^{i\\pi}+1=0'));
  * </script>
  *
- * @packageDocumentation MathLive SDK Reference 0.93
- * @version 0.93
+ * @packageDocumentation MathLive SDK Reference 0.93.0
+ * @version 0.93.0
  *
  */
 import type { VirtualKeyboardOptions } from './virtual-keyboard';

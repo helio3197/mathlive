@@ -1,4 +1,4 @@
-/* 0.93 *//**
+/* 0.93.0 *//**
  * Server-side rendering exports.
  *
  * These functions do not require a DOM environment and can

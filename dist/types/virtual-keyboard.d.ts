@@ -1,4 +1,4 @@
-/* 0.93 */import type { Selector } from './commands';
+/* 0.93.0 */import type { Selector } from './commands';
 import type { ParseMode, Style } from './core-types';
 import type { OriginValidator } from './options';
 export type AlphabeticKeyboardLayout = 'auto' | 'qwerty' | 'azerty' | 'qwertz' | 'dvorak' | 'colemak';
