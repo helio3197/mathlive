@@ -964,102 +964,99 @@ Note there are a different set of tooltip rules for the keyboard toggle
 //
 // Dark theme
 //
-@media (prefers-color-scheme: dark) {
-  .ML__keyboard {
-    --_accent-color: var(--keyboard-accent-color, #0b5c9c); // blue-300
-    --_background: var(--keyboard-background, #151515);
-    --_border: var(--keyboard-border, transparent);
-    --_toolbar-text: var(--keyboard-toolbar-text,  #e3e4e8);
+// @media (prefers-color-scheme: dark) {
+//   .ML__keyboard {
+//     --keyboard-accent-color: #0b5c9c; // blue-700
+//     --keyboard-background: #151515;
+//     --keyboard-border: transparent;
+//     --keyboard-toolbar-text: #e3e4e8;
+//     --keyboard-toolbar-text-active: var(--keyboard-accent-color);
+//     --keyboard-toolbar-background: transparent;
+//     --keyboard-toolbar-background-hover: #303030;
+//     --keyboard-toolbar-background-selected: transparent;
 
-    --_toolbar-background-hover: var(--keyboard-toolbar-background-hover, #303030);
-    --keyboard-toolbar-background-hover: #303030;
+//     --keyboard-horizontal-rule: 1px solid #303030;
 
-    --_horizontal-rule: var(--keyboard-horizontal-rule, 1px solid #303030);
+//     --keycap-background: #1f2022;
+//     --keycap-background-hover: #2f3032;
+//     --keycap-border: transparent;
+//     --keycap-border-bottom: transparent;
+//     --keycap-text: #e3e4e8;
+//     --keycap-secondary-text: #e7ebee;
 
-    --_keycap-background:var(--keycap-background,  #1f2022);
-    --_keycap-background-hover:var(--keycap-background,  #2f3032); ;
-    --_keycap-border: var(--_keycap-border, transparent);
-    --_keycap-border-bottom: var(--_keycap-border-bottom, transparent);
-    --_keycap-text: var(--keycap-text,  #e3e4e8);
+//     --keycap-secondary-background: #3d4144;
+//     --keycap-secondary-background-hover: #4d5154;
+//     --keycap-secondary-text: #e7ebee;
+//     --keycap-secondary-border: transparent;
+//     --keycap-secondary-border-bottom: transparent;
 
-    --_keycap-secondary-background:var(--keycap-secondary-background,  #3d4144);
-    --_keycap-secondary-background-hover: var(--keycap-secondary-background-hover,  #4d5154);
-    --_keycap-secondary-text:var(--keycap-secondary-text,  #e7ebee);
-    --keycap-secondary-border: transparent;
-    --keycap-secondary-border-bottom: transparent;
-    --_keycap-secondary-border: var(--keycap-secondary-border, transparent);
-    --_keycap-secondary-border-bottom:var(--keycap-secondary-border-bottom,  transparent);
-  
-    --_variant-panel-background: var(--variant-panel-background, #303030);
-    --_variant-keycap-text-active: var(--variant-keycap-text-active, #fff);
-  }
-}
+//     --variant-panel-background: #303030;
+//     --variant-keycap-text: var(--keycap-text);
+//     --variant-keycap-text-active: #fff;
+//   }
+// }
+// /* Same as the media query, but with a class */
+// [theme='dark'] .ML__keyboard {
+//   --keyboard-accent-color: #0b5c9c; // blue-300
+//   --keyboard-background: #151515;
+//   --keyboard-border: transparent;
+//   --keyboard-toolbar-text: #e3e4e8;
+//   --keyboard-toolbar-text-active: var(--keyboard-accent-color);
+//   --keyboard-toolbar-background: transparent;
+//   --keyboard-toolbar-background-hover: #303030;
+//   --keyboard-toolbar-background-selected: transparent;
 
-/* Same as the media query, but with a class */
-[theme='dark'] .ML__keyboard {
-  .ML__keyboard {
-    --_accent-color: var(--keyboard-accent-color, #0b5c9c); // blue-300
-    --_background: var(--keyboard-background, #151515);
-    --_border: var(--keyboard-border, transparent);
-    --_toolbar-text: var(--keyboard-toolbar-text,  #e3e4e8);
+//   --keyboard-horizontal-rule: 1px solid #303030;
 
-    --_toolbar-background-hover: var(--keyboard-toolbar-background-hover, #303030);
-    --keyboard-toolbar-background-hover: #303030;
+//   --keycap-background: #1f2022;
+//   --keycap-background-hover: #2f3032;
+//   --keycap-border: transparent;
+//   --keycap-border-bottom: transparent;
+//   --keycap-text: #e3e4e8;
+//   --keycap-secondary-text: #e7ebee;
 
-    --_horizontal-rule: var(--keyboard-horizontal-rule, 1px solid #303030);
+//   --keycap-secondary-background: #3d4144;
+//   --keycap-secondary-background-hover: #4d5154;
+//   --keycap-secondary-text: #e7ebee;
+//   --keycap-secondary-border: transparent;
+//   --keycap-secondary-border-bottom: transparent;
 
-    --_keycap-background:var(--keycap-background,  #1f2022);
-    --_keycap-background-hover:var(--keycap-background,  #2f3032); ;
-    --_keycap-border: var(--_keycap-border, transparent);
-    --_keycap-border-bottom: var(--_keycap-border-bottom, transparent);
-    --_keycap-text: var(--keycap-text,  #e3e4e8);
+//   --variant-panel-background: #303030;
+//   --variant-keycap-text: var(--keycap-text);
+//   --variant-keycap-text-active: #fff;
+// }
 
-    --_keycap-secondary-background:var(--keycap-secondary-background,  #3d4144);
-    --_keycap-secondary-background-hover: var(--keycap-secondary-background-hover,  #4d5154);
-    --_keycap-secondary-text:var(--keycap-secondary-text,  #e7ebee);
-    --keycap-secondary-border: transparent;
-    --keycap-secondary-border-bottom: transparent;
-    --_keycap-secondary-border: var(--keycap-secondary-border, transparent);
-    --_keycap-secondary-border-bottom:var(--keycap-secondary-border-bottom,  transparent);
-  
-    --_variant-panel-background: var(--variant-panel-background, #303030);
-    --_variant-keycap-text-active: var(--variant-keycap-text-active, #fff);
-  }
-}
+// [theme='light'] .ML__keyboard {
+//   --keyboard-accent-color: #0c75d8; // blue-600
+//   --keyboard-background: #cacfd7;
+//   --keyboard-border: #ddd;
 
-[theme='light'] .ML__keyboard {
-  --_accent-color: var(--keyboard-accent-color, #0c75d8); // blue-600
-  --_background: var(--keyboard-background, #cacfd7);
-  --_border: var(--keyboard-border, #ddd);
+//   --keyboard-toolbar-text: #2c2e2f;
+//   --keyboard-toolbar-text-active: var(--keyboard-accent-color);
+//   --keyboard-toolbar-background: transparent;
+//   --keyboard-toolbar-background-hover: #eee;
+//   --keyboard-toolbar-background-selected: transparent;
 
-  --_toolbar-text:var(--keyboard-toolbar-text,  #2c2e2f);
-  --_toolbar-background:var(--keyboard-toolbar-background, transparent);
-  --_toolbar-background-hover: var(--keyboard-toolbar-background-hover, #eee);
-  --_toolbar-background-selected: var(--keyboard-toolbar-background-selected, transparent);
+//   --keyboard-horizontal-rule: 1px solid #fff;
 
-  --_horizontal-rule: var(--keyboard-horizontal-rule, 1px solid #fff);
+//   --keycap-background: white;
+//   --keycap-background-hover: #f5f5f7;
+//   --keycap-border: #e5e6e9;
+//   --keycap-border-bottom: #8d8f92;
+//   --keycap-text: #000;
+//   --keycap-text-active: var(--keycap-text);
+//   --keycap-text-pressed: #fff;
+//   --keycap-secondary-text: #333;
 
-  --_keycap-background:var(--keycap-background,  white);
-  --_keycap-background-hover:var(--keycap-background,  #f5f5f7); ;
-  --_keycap-background-active: var(--keycap-background-active, var(--_accent-color));
-  --_keycap-background-pressed: var(--keycap-background-pressed, var(--_accent-color));
-  --_keycap-border: var(--_keycap-border, #e5e6e9);
-  --_keycap-border-bottom: var(--_keycap-border-bottom, #8d8f92);
-  --_keycap-text: var(--keycap-text,  #000);
-  --_keycap-text-active:var(--keycap-text-active, #fff);
-  --_keycap-text-hover: var(--keycap-text-hover, var(--_keycap-text));
-  --_keycap-text-pressed: var(--keycap-text-pressed, #fff);
-  --_keycap-shift-text: var(--keycap-shift-text, var(--_accent-color));
-
-  --_keycap-secondary-background:var(--keycap-secondary-background,  #a0a9b8);
-  --_keycap-secondary-background-hover: var(--keycap-secondary-background-hover,  #7d8795);
-  --_keycap-secondary-text: var(--keycap-secondary-text, #060707);
-  --_keycap-secondary-border: var(--keycap-secondary-border, #c5c9d0);
-  --_keycap-secondary-border-bottom:var(--keycap-secondary-border-bottom,  #989da6);
+//   --keycap-secondary-background: #a0a9b8;
+//   --keycap-secondary-background-hover: #7d8795;
+//   --keycap-secondary-text: #060707;
+//   --keycap-secondary-border: #c5c9d0;
+//   --keycap-secondary-border-bottom: #989da6;
 
 
-  --_variant-panel-background: var(--variant-panel-background,  #fff);
-  --_variant-keycap-text: var(--variant-keycap-textvar, var(--_keycap-text));
-  --_variant-keycap-text-active: var(--variant-keycap-text-active, var(--_keycap-text-active));
-  --_variant-keycap-background-active: var(--variant-keycap-background-active, var(--_accent-color));
-}
+//   --variant-panel-background: #fff;
+//   --variant-keycap-text: var(--keycap-text, #000);
+//   --variant-keycap-text-active: var(--keycap-text-active, #fff);
+//   --variant-keycap-background-active: var(--keyboard-accent-color);
+// }
