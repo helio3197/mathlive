@@ -1,34 +1,47 @@
+## [Unreleased]
+
+## Improvements
+
+- Use constructable stylesheets. This results in improved performance and a
+  reduction of memory consuption by 2/3 in a page with 1,000 mathfields.
+
+## Bug Fixes
+
+- **#1963** Typing a "/" after a digit containing a french decimal (`,`) did not
+  include the digits before the decimal.
+
 ## 0.94.0 (2023-05-18)
 
 ## New Features
 
 - Added support for `\raise`, `\lower` and `\raisebox` commands. Those commands
   were necessary to render some chemical bonds.
-- Pressing `(`, `[` or `{` with a selection will enclose the selection with 
-  this delimiter.
+- Pressing `(`, `[` or `{` with a selection will enclose the selection with this
+  delimiter.
+
 ## Improvements
 
-- Improved parsing/serialization/rendering of content with a mix of text and math.
+- Improved parsing/serialization/rendering of content with a mix of text and
+  math.
 - Various rendering improvements, mostly of edge cases.
-- Improved behavior of the Shift key in the math keyboard. Single-press
-  the Shift key to set it temporarily, double-press it key to lock it (similar 
-  to CapsLock), triple-press it to unlock. This is similar behavior to the 
-  ones of mobile virtual keyboards.
+- Improved behavior of the Shift key in the math keyboard. Single-press the
+  Shift key to set it temporarily, double-press it key to lock it (similar to
+  CapsLock), triple-press it to unlock. This is similar behavior to the ones of
+  mobile virtual keyboards.
 - **#1647** Improved rendering of chemical bonds, e.g. `\ce{ O\bond{~-}H}`
-- Only on iOS, intercepts the cmd+XCV keyboard shortcut. On other platforms,
-  use the standard cut/copy/paste commands, which do not require user 
-  permission.
-- The tooltips displayed by the `\mathtooltip{}` and `\texttip{}` commands
-  are now displayed when used with a static formula.
+- Only on iOS, intercepts the cmd+XCV keyboard shortcut. On other platforms, use
+  the standard cut/copy/paste commands, which do not require user permission.
+- The tooltips displayed by the `\mathtooltip{}` and `\texttip{}` commands are
+  now displayed when used with a static formula.
 - Improvements to smart fence behavior, including better undoability.
-
 
 ## Bug Fixes
 
-- Selection display was incorrect when the equation included a colored 
+- Selection display was incorrect when the equation included a colored
   background.
 - Pasing text while in LaTeX mode now works.
-- Some of the arrows for mhchem have been renamed and are now displaying correctly
+- Some of the arrows for mhchem have been renamed and are now displaying
+  correctly
 - **#1964** Prevent a runtime error when a mathfield is embedded in an iframe
   and MathLive is not loaded in the host document.
 - **#1970** The environment popover was not always positioned correctly.
@@ -41,40 +54,46 @@
 
 ## New Features
 
-- Support for `\the` command. For example, `\the\year`. Its argument can 
-  be a literal or a register, preceded by an optional factor literal.
+- Support for `\the` command. For example, `\the\year`. Its argument can be a
+  literal or a register, preceded by an optional factor literal.
 - In addition to the `label` property, the `key` property can also now be used
   for keycap shortcuts. This allow overriding of the shortcut label. For example
   `{key: "[undo]", label: "undo"}`
-- Added support for `--keyboard-row-padding-left` and `--keyboard-row-padding-right` as an option to account for shadows or other decoration that may spill outside the box of a keycap.
-- Fixed opacity of Undo button in virtual keyboard, when the button is not applicable.
-- The minFontScale property has been added that specifies the minimum font
-  size that should be used for nested superscripts and fractions. The value 
-  should be between 0 and 1. The size is in releative `em` units 
-  relative to the font size of the `math-field`. The default value is 0, 
-  which allows the `math-field` to use its default sizing logic.
-- If no mathfield is focused the virtual keyboard will dispatch a `keydown`/`keyup`
-  event pair. Add an event listener to the keyboard to receive those events.
+- Added support for `--keyboard-row-padding-left` and
+  `--keyboard-row-padding-right` as an option to account for shadows or other
+  decoration that may spill outside the box of a keycap.
+- Fixed opacity of Undo button in virtual keyboard, when the button is not
+  applicable.
+- The minFontScale property has been added that specifies the minimum font size
+  that should be used for nested superscripts and fractions. The value should be
+  between 0 and 1. The size is in releative `em` units relative to the font size
+  of the `math-field`. The default value is 0, which allows the `math-field` to
+  use its default sizing logic.
+- If no mathfield is focused the virtual keyboard will dispatch a
+  `keydown`/`keyup` event pair. Add an event listener to the keyboard to receive
+  those events.
 
 ## Improvements
+
 - Improved performance of creation and destruction of mathfields by 50%.
-- Fixed memory and listener leaks. After creating, inserting in the DOM, then 
-  removing over 100,000, the memory is back to its starting point and there
-  are no listeners left (except for those associated with the Virtual Keyboard).
+- Fixed memory and listener leaks. After creating, inserting in the DOM, then
+  removing over 100,000, the memory is back to its starting point and there are
+  no listeners left (except for those associated with the Virtual Keyboard).
 - Improved behavior of undo/redo. **#1924** works in LaTeX mode. Undo shortcut
   substitution. Repeated operations (e.g. backspace) are considered a sinle
   operation for undo/redo purposes.
-- Importing the Compute Engine and MathLive in the same projec should no 
-  longer trigger a conflict.
+- Importing the Compute Engine and MathLive in the same projec should no longer
+  trigger a conflict.
 
 ## Bug Fixes
-- **#1646** **mhchem**: states of aggregation is now rendered correctly. Added 
+
+- **#1646** **mhchem**: states of aggregation is now rendered correctly. Added
   support for the `\mskip` command
-- When editing a mathfield, after inserting both a superscript and 
-  subscript, the subscript would be offset from the superscript.
+- When editing a mathfield, after inserting both a superscript and subscript,
+  the subscript would be offset from the superscript.
 - **#1668** Correctly handle `\space`, `~`
-- **#1939** When the parent of the Mathfield is scaled, apply the scaling to 
-  the selection rectangles
+- **#1939** When the parent of the Mathfield is scaled, apply the scaling to the
+  selection rectangles
 - Fixed parsing of emojis such as 🧑🏻‍🚀
 - The focus outline is no longer displayed when in readonly mode
 - **#1940** New attempt to preserve the focus of mathfields when a window loses,
@@ -82,10 +101,10 @@
 - At certain sizes, the `\left...\right` command did not display the visual
   indicator that the caret was inside the argument of the command.
 
-
 ## 0.92.1 (2023-04-19)
 
 ## Improvements
+
 - Replaced the `(x)` ASCIIMath inline shortcut with `(*)`
 - Correctly parse empty sub/superscripts, i.e. `x^{}`
 - Fixed serialization of macros (regression)
@@ -96,24 +115,23 @@
 
 - In LaTeX, `\not{\in}`, `\not{}\in` and `\not\in` all render differently.
   Previously they were all rendered as `\not\in`. They now render as in LaTeX.
-- Removed some unused keybindings, added Desmos Graphing Calculator inline 
+- Removed some unused keybindings, added Desmos Graphing Calculator inline
   shortcuts, added ASCIIMath inline shortcuts.
 - **#1920** Added a `"sandboxed"` `mathVirtualKeyboardPolicy` which causes the
-  iframe in which the mathfield is to be treated as a top-level browsing context,
-  i.e. to display a virtual keyboard instance in that iframe.
-- Added `mathVirtualKeycap.actionKeycap`, `mathVirtualKeycap.shiftKeycap`, 
-  `mathVirtualKeycap.tabKeycap`, `mathVirtualKeycap.backspaceKeycap` to 
-  customize the appearance of action keys without having to define new layouts. 
-  This can be used to change the "Return" glyph to "Continue" for example, 
-  or to use the word "Shift" for the shift key instead of the default shift glyph.
-- Added keyboard shortcuts (<kbd>alt/option</kbd>+<kbd>Tab</kbd> and 
-  <kbd>alt/option</kbd>+<kbd>Return</kbd>) for matrices/environments. 
-  Type `(` + <kbd>alt/option</kbd>+<kbd>Tab</kbd> to create 2x1 matrix. 
-  If at the root, type  <kbd>alt/option</kbd>+<kbd>Return</kbd> for a 
-  multi-line expression.
-- Improved LaTeX serialization. Use braces around arguments consistent with 
-  LaTeX conventions. Exception is made for single digits for 
-  fractions, square roots, superscript and subscript.
+  iframe in which the mathfield is to be treated as a top-level browsing
+  context, i.e. to display a virtual keyboard instance in that iframe.
+- Added `mathVirtualKeycap.actionKeycap`, `mathVirtualKeycap.shiftKeycap`,
+  `mathVirtualKeycap.tabKeycap`, `mathVirtualKeycap.backspaceKeycap` to
+  customize the appearance of action keys without having to define new layouts.
+  This can be used to change the "Return" glyph to "Continue" for example, or to
+  use the word "Shift" for the shift key instead of the default shift glyph.
+- Added keyboard shortcuts (<kbd>alt/option</kbd>+<kbd>Tab</kbd> and
+  <kbd>alt/option</kbd>+<kbd>Return</kbd>) for matrices/environments. Type `(` +
+  <kbd>alt/option</kbd>+<kbd>Tab</kbd> to create 2x1 matrix. If at the root,
+  type <kbd>alt/option</kbd>+<kbd>Return</kbd> for a multi-line expression.
+- Improved LaTeX serialization. Use braces around arguments consistent with
+  LaTeX conventions. Exception is made for single digits for fractions, square
+  roots, superscript and subscript.
 - Improved handling of arguments with and without braces. `x^\frac12` is now
   parsed correctly.
 - The `arraystretch` register is now supported to customize the vertical spacing
@@ -121,48 +139,54 @@
 
 ### Bug Fix
 
-- When a keybinding conflicts with a composition, cancel the composition. For 
- example, when typing <kbd>option</kbd>+<kbd>U</kbd>.
-- After changing the math keyboard layouts, if there is no layer matching
-  the previously active layer, pick the first available layer.
+- When a keybinding conflicts with a composition, cancel the composition. For
+  example, when typing <kbd>option</kbd>+<kbd>U</kbd>.
+- After changing the math keyboard layouts, if there is no layer matching the
+  previously active layer, pick the first available layer.
 - When scrolling the mathfield into view after activating the math keyboard
   correctly account for the position of the keyboard.
-- **#1914** When the `mathVirtualKeyboardPolicy` is set to `"manual"`, the keyboard is not hidden, even when losing focus.
+- **#1914** When the `mathVirtualKeyboardPolicy` is set to `"manual"`, the
+  keyboard is not hidden, even when losing focus.
 - If the last row of a matrix is empty, it is ignored (LaTeX behavior)
-- **#1929** The `\boldsymbol` command was serialized incorrectly after its content
-  was modified.
-- Ambient style is now applied to macros, so `\Huge\mathbb{R}` and `\Huge\R` render identically.
-- **#1851**: Correctly render `\not`. Fun fact: in LaTeX, `\not=` renders with a different spacing from `\not{=}`.
+- **#1929** The `\boldsymbol` command was serialized incorrectly after its
+  content was modified.
+- Ambient style is now applied to macros, so `\Huge\mathbb{R}` and `\Huge\R`
+  render identically.
+- **#1851**: Correctly render `\not`. Fun fact: in LaTeX, `\not=` renders with a
+  different spacing from `\not{=}`.
 - Correctly render and serialize text (e.g. in `\text{}` commands) containing
   non-applicable commands, for example `\text{\frac12}`.
-- When applying a style inside a `\left...\right`, the style of the closing 
+- When applying a style inside a `\left...\right`, the style of the closing
   delimiter should match the style of the last atom before the `\right` command.
   For example, with `a\left(b\color{red} c\right)d`, `c` and `)` should be red.
 - Correctly render `\middle` commands when preceded with a style-changing
   commands, for example: `a\left(b\color{red}\middle| \frac34\right)d`
 - Work around a Chrome rendering issue with thin lines (fractions, surds)
-- Correctly render the gap to the left of `\underline`, `\overline` 
-- **#1656** Incorrect `\left...\right` command after deleting part of the 
+- Correctly render the gap to the left of `\underline`, `\overline`
+- **#1656** Incorrect `\left...\right` command after deleting part of the
   formula.
-- **#1925** Navigation with the arrow keys could occasionally incorrectly
-  handle atoms that should be treated as a unit, for example `\dot{\vec{v}}`.
-  In general, various edge cases were not handled correctly.
-  
+- **#1925** Navigation with the arrow keys could occasionally incorrectly handle
+  atoms that should be treated as a unit, for example `\dot{\vec{v}}`. In
+  general, various edge cases were not handled correctly.
+
 ## 0.91.2 (2023-04-06)
 
 ### Bug Fixes
+
 - Update editing toolbar when virtual keyboard is made visible
-- **#1919** Correctly position the popover panel above or below the mathfield based on the space available. Allow for more suggestions to be displayed, and include a scrollbar when necessary.
+- **#1919** Correctly position the popover panel above or below the mathfield
+  based on the space available. Allow for more suggestions to be displayed, and
+  include a scrollbar when necessary.
 
 ## 0.91.1 (2023-04-05)
 
 ### Bug Fix
 
 - The context menu that appears on long press on ChromeOS has been disabled as
- it interfered with long press for variant keys
-- When showing the virtual keyboard if the virtual keyboard obscures the 
+  it interfered with long press for variant keys
+- When showing the virtual keyboard if the virtual keyboard obscures the
   mathfield, adjust the position of the mathfield to be visible
-  
+
 ## 0.91.0 (2023-04-04)
 
 In this release the UI of the virtual keyboards has been significantly updated.
@@ -172,22 +196,29 @@ virtual keyboards and support for shift key modifier for many keycaps.
 ### Breaking Changes
 
 - The CSS variable `--keycap-modifier-background`,
-  `--keycap-modifier-background-hover`, `--keycap-modifier-text`, `--keycap-modifier-border` and `--keycap-modifier-border-bottom` have been renamed `--keycap-secondary-background`, `-keycap-secondary-background-hover`, 
-  `--keycap-secondary-text`, `--keycap-secondary-border` and `--keycap-secondary-border-bottom`, respectively.
-- The custom class on a keycap to indicate a shift key has been renamed from `modifier` to `shift`
-- The undocument `data-shifted` and `data-shifted-command` attributes are no longer supported.
-- The `classes` property in the JSON description of custom layouts has been renamed to `labelClass`
-- The `styles` property in the JSON description of a custom layer has been renamed to `style`
+  `--keycap-modifier-background-hover`, `--keycap-modifier-text`,
+  `--keycap-modifier-border` and `--keycap-modifier-border-bottom` have been
+  renamed `--keycap-secondary-background`, `-keycap-secondary-background-hover`,
+  `--keycap-secondary-text`, `--keycap-secondary-border` and
+  `--keycap-secondary-border-bottom`, respectively.
+- The custom class on a keycap to indicate a shift key has been renamed from
+  `modifier` to `shift`
+- The undocument `data-shifted` and `data-shifted-command` attributes are no
+  longer supported.
+- The `classes` property in the JSON description of custom layouts has been
+  renamed to `labelClass`
+- The `styles` property in the JSON description of a custom layer has been
+  renamed to `style`
 
 ### New Features
 
-- The JSON description of custom virtual keyboard now support keycap
-  shortcuts. For example the `[left]` keycap shortcut represent the left arrow 
-  key. See the [documentation](https://cortexjs.io/mathlive/guides/virtual-keyboards/#defining-custom-layouts) 
+- The JSON description of custom virtual keyboard now support keycap shortcuts.
+  For example the `[left]` keycap shortcut represent the left arrow key. See the
+  [documentation](https://cortexjs.io/mathlive/guides/virtual-keyboards/#defining-custom-layouts)
   for more details.
-- Custom virtual keyboards can now include special keycaps for editing commands 
+- Custom virtual keyboards can now include special keycaps for editing commands
   (cut/copy/paste/undo).
-- The JSON description of custom virtual keyboard keycaps can now include a 
+- The JSON description of custom virtual keyboard keycaps can now include a
   `width` property
 - The variants panel can be invoked by right-clicking on a keycap.
 
@@ -196,38 +227,40 @@ virtual keyboards and support for shift key modifier for many keycaps.
 - The default virtual keyboards have been rewritten. They now use the JSON
   format for their internal description, instead of custom markup.
 - The "Functions" virtual keyboard has been merged with the "Symbols" virtual
-  keyboard. Fewer keyboards makes it easier to find the symbol or function 
+  keyboard. Fewer keyboards makes it easier to find the symbol or function
   you're looking for.
 - The "Numeric" and "Symbols" keyboard now feature a Shift key, doubling the
   number of symbols accessible from them.
 - The variants (accessible with a long press on a keycap) have been streamlined
   and extended.
-- The virtual keyboard now also support pressing the Shift and Caps Lock key
-  on the physical keyboard.
+- The virtual keyboard now also support pressing the Shift and Caps Lock key on
+  the physical keyboard.
 - Three new optional virtual keyboards have been added:
-  - `minimalist`: a small keyboard with only two rows of keycaps containing 
+  - `minimalist`: a small keyboard with only two rows of keycaps containing
     digits and basic operations.
   - `compact`: similar layout to `minimalist`, but the keycaps include variants
-  - `numeric-only`: a keyboard with only digits, the decimal marker and the 
-    minus sign.
-  To use them, use `mathVirtualKeyboard.layouts = "minimalist"`
-- Two new CSS variables have been added to control the layout of the virtual keyboard:
-  - `--keycap-max-width`: define the maximum with of a keycap, including its margin
+  - `numeric-only`: a keyboard with only digits, the decimal marker and the
+    minus sign. To use them, use `mathVirtualKeyboard.layouts = "minimalist"`
+- Two new CSS variables have been added to control the layout of the virtual
+  keyboard:
+  - `--keycap-max-width`: define the maximum with of a keycap, including its
+    margin
   - `--keycap-gap`: define the space between keycaps
-- The `mathVirtualKeyboard.show()` function now has an optional argument to 
-  animate or not the virtual keyboard. The default is to animate, as per previous behavior.
+- The `mathVirtualKeyboard.show()` function now has an optional argument to
+  animate or not the virtual keyboard. The default is to animate, as per
+  previous behavior.
 - When hiding then showing the virtual keyboard, the keyboard will restore the
   previously selected keyboard layout.
-- If loading a web page with a mathfield from a `file://` protocol, that is 
-  from a local file, the keyboard will now work, as long as the mathfields are
-  in the main document, and not in another browsing context such as an iframe.
-- Architectural improvements: the virtual keyboard is now more efficient, uses 
+- If loading a web page with a mathfield from a `file://` protocol, that is from
+  a local file, the keyboard will now work, as long as the mathfields are in the
+  main document, and not in another browsing context such as an iframe.
+- Architectural improvements: the virtual keyboard is now more efficient, uses
   fewer event handlers and a simplified and lighter weight DOM tree.
 
 ### Bugs Fixed
 
-- On ChromeOS devices with a touch screen, long pressing a keycap in the 
-  virtual keyboard no longer triggers the contextual menu.
+- On ChromeOS devices with a touch screen, long pressing a keycap in the virtual
+  keyboard no longer triggers the contextual menu.
 - The variants keycap work on iOS devices
 - The keyboard is correctly offset from the bottom on iOS devices
 
@@ -526,7 +559,7 @@ MathfieldElement.soundsDirectory = null;
 | `mf.setOptions({inlineShortcuts: ...})`             | `mf.inlineShortcuts = ...`                                                   |
 | `mf.setOptions({keybindings: ...})`                 | `mf.keybindings = ...`                                                       |
 | `mf.setOptions({virtualKeyboardMode: ...})`         | `mf.mathVirtualKeyboardPolicy = ...`                                         |
-| `mf.setOptions({customVirtualKeyboardLayers: ...})` | `mathVirtualKeyboard.layouts.layers = ...`                                           |
+| `mf.setOptions({customVirtualKeyboardLayers: ...})` | `mathVirtualKeyboard.layouts.layers = ...`                                   |
 | `mf.setOptions({customVirtualKeyboards: ...})`      | `mathVirtualKeyboard.layouts = ...`                                          |
 | `mf.setOptions({keypressSound: ...})`               | `mathVirtualKeyboard.keypressSound = ...`                                    |
 | `mf.setOptions({keypressVibration: ...})`           | `mathVirtualKeyboard.keypressVibration = ...`                                |
