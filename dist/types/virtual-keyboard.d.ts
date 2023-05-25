@@ -1,4 +1,4 @@
-/* 0.93.0 */import type { Selector } from './commands';
+/* 0.94.5 */import type { Selector } from './commands';
 import type { ParseMode, Style } from './core-types';
 import type { OriginValidator } from './options';
 export type AlphabeticKeyboardLayout = 'auto' | 'qwerty' | 'azerty' | 'qwertz' | 'dvorak' | 'colemak';
@@ -125,6 +125,7 @@ export interface NormalizedVirtualKeyboardLayer {
     id?: string;
 }
 export type EditToolbarOptions = 'none' | 'default';
+export type VirtualKeyboardName = 'default' | 'numeric' | 'symbols' | 'alphabetic' | 'greek';
 export interface VirtualKeyboardOptions {
     /**
      * A layout is made up of one or more layers (think of the main layer
@@ -140,7 +141,8 @@ export interface VirtualKeyboardOptions {
      *
      *
      */
-    set layouts(value: 'default' | VirtualKeyboardLayout | (string | VirtualKeyboardLayout)[]);
+    get layouts(): Readonly<(VirtualKeyboardName | VirtualKeyboardLayout)[]>;
+    set layouts(value: VirtualKeyboardName | VirtualKeyboardLayout | (VirtualKeyboardName | VirtualKeyboardLayout)[] | Readonly<(VirtualKeyboardName | VirtualKeyboardLayout)[]>);
     /**
      * Configuration of the action toolbar, displayed on the right-hand side.
      *
@@ -201,6 +203,7 @@ export interface VirtualKeyboardInterface extends VirtualKeyboardOptions {
         animate: boolean;
     }): void;
     visible: boolean;
+    readonly isShifted: boolean;
     readonly boundingRect: DOMRect;
     executeCommand(command: string | [string, ...any[]]): boolean;
     /** The content or selection of the mathfield has changed and the toolbar
@@ -237,18 +240,19 @@ export type VirtualKeyboardMessage = {
     boundingRect: DOMRect;
     alphabeticLayout?: AlphabeticKeyboardLayout;
     layers: Record<string, string | Partial<VirtualKeyboardLayer>>;
-    layouts: (string | VirtualKeyboardLayout)[];
+    layouts: Readonly<(string | VirtualKeyboardLayout)[]>;
     editToolbar?: EditToolbarOptions;
     actionKeycap: string | Partial<VirtualKeyboardKeycap>;
     shiftKeycap: string | Partial<VirtualKeyboardKeycap>;
     backspaceKeycap: string | Partial<VirtualKeyboardKeycap>;
     tabKeycap: string | Partial<VirtualKeyboardKeycap>;
+    isShifted: boolean;
 } | {
     type: 'mathlive#virtual-keyboard-message';
     action: 'update-setting';
     alphabeticLayout?: AlphabeticKeyboardLayout;
     layers: Record<string, string | Partial<VirtualKeyboardLayer>>;
-    layouts: (string | VirtualKeyboardLayout)[];
+    layouts: Readonly<(VirtualKeyboardName | VirtualKeyboardLayout)[]>;
     editToolbar?: EditToolbarOptions;
     actionKeycap: string | Partial<VirtualKeyboardKeycap>;
     shiftKeycap: string | Partial<VirtualKeyboardKeycap>;

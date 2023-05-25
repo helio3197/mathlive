@@ -1,4 +1,4 @@
-/* 0.93.0 */import type { Mathfield, Range } from './mathfield';
+/* 0.94.5 */import type { Mathfield, Range } from './mathfield';
 import type { Selector } from './commands';
 import type { ParseMode, MacroDictionary, Registers } from './core-types';
 /**

@@ -1,4 +1,4 @@
-/* 0.93.0 */import type { Selector } from './commands';
+/* 0.94.5 */import type { Selector } from './commands';
 import type { LatexSyntaxError, MacroDictionary, ParseMode, Registers, Style } from './core-types';
 import type { InsertOptions, OutputFormat, Offset, Range, Selection, Mathfield } from './mathfield';
 import type { InlineShortcutDefinitions, Keybinding, MathfieldOptions } from './options';
@@ -659,8 +659,6 @@ export declare class MathfieldElement extends HTMLElement implements Mathfield {
     static playSound(name: 'keypress' | 'spacebar' | 'delete' | 'plonk' | 'return'): Promise<void>;
     /** @internal */
     private _mathfield;
-    /** @internal */
-    private _slotValue;
     /** @internal
      * Supported by some browser: allows some (static) attributes to be set
      * without being reflected on the element instance.

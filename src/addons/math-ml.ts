@@ -360,6 +360,8 @@ function scanOperator(stream: MathMLStream, final: number, options) {
     '\\rfloor': '\u230B',
     '\\lceil': '\u2308',
     '\\rceil': '\u2309',
+    '\\hline': '&#x2500;',
+    '\\lcm': '',
   };
 
   if (SPECIAL_OPERATORS[atom.command]) {

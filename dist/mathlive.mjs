@@ -1,4 +1,4 @@
-/** MathLive 0.93.0 */
+/** MathLive 0.94.5 */
 var __defProp = Object.defineProperty;
 var __defProps = Object.defineProperties;
 var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
@@ -1677,2104 +1677,5302 @@ function highlight(color) {
   return rgbToHexstring(hslToRgb({ h, s, l }));
 }
 
+// src/core-definitions/unicode.ts
+var MATH_LETTER_EXCEPTIONS = {
+  119893: 8462,
+  119965: 8492,
+  119968: 8496,
+  119969: 8497,
+  119971: 8459,
+  119972: 8464,
+  119975: 8466,
+  119976: 8499,
+  119981: 8475,
+  119994: 8495,
+  119996: 8458,
+  120004: 8500,
+  120070: 8493,
+  120075: 8460,
+  120076: 8465,
+  120085: 8476,
+  120093: 8488,
+  120122: 8450,
+  120127: 8461,
+  120133: 8469,
+  120135: 8473,
+  120136: 8474,
+  120137: 8477,
+  120145: 8484
+};
+var MATH_UNICODE_BLOCKS = [
+  { start: 119808, len: 26, offset: 65, style: "bold" },
+  { start: 119834, len: 26, offset: 97, style: "bold" },
+  { start: 119860, len: 26, offset: 65, style: "italic" },
+  { start: 119886, len: 26, offset: 97, style: "italic" },
+  { start: 119912, len: 26, offset: 65, style: "bolditalic" },
+  { start: 119938, len: 26, offset: 97, style: "bolditalic" },
+  { start: 119964, len: 26, offset: 65, variant: "script" },
+  { start: 119990, len: 26, offset: 97, variant: "script" },
+  { start: 120016, len: 26, offset: 65, variant: "script", style: "bold" },
+  { start: 120042, len: 26, offset: 97, variant: "script", style: "bold" },
+  { start: 120068, len: 26, offset: 65, variant: "fraktur" },
+  { start: 120094, len: 26, offset: 97, variant: "fraktur" },
+  { start: 120172, len: 26, offset: 65, variant: "fraktur", style: "bold" },
+  { start: 120198, len: 26, offset: 97, variant: "fraktur", style: "bold" },
+  { start: 120120, len: 26, offset: 65, variant: "double-struck" },
+  { start: 120146, len: 26, offset: 97, variant: "double-struck" },
+  { start: 120224, len: 26, offset: 65, variant: "sans-serif" },
+  { start: 120250, len: 26, offset: 97, variant: "sans-serif" },
+  {
+    start: 120276,
+    len: 26,
+    offset: 65,
+    variant: "sans-serif",
+    style: "bold"
+  },
+  {
+    start: 120302,
+    len: 26,
+    offset: 97,
+    variant: "sans-serif",
+    style: "bold"
+  },
+  {
+    start: 120328,
+    len: 26,
+    offset: 65,
+    variant: "sans-serif",
+    style: "italic"
+  },
+  {
+    start: 120354,
+    len: 26,
+    offset: 97,
+    variant: "sans-serif",
+    style: "italic"
+  },
+  {
+    start: 120380,
+    len: 26,
+    offset: 65,
+    variant: "sans-serif",
+    style: "bolditalic"
+  },
+  {
+    start: 120406,
+    len: 26,
+    offset: 97,
+    variant: "sans-serif",
+    style: "bolditalic"
+  },
+  { start: 120432, len: 26, offset: 65, variant: "monospace" },
+  { start: 120458, len: 26, offset: 97, variant: "monospace" },
+  { start: 120488, len: 25, offset: 913, style: "bold" },
+  { start: 120514, len: 25, offset: 945, style: "bold" },
+  { start: 120546, len: 25, offset: 913, style: "italic" },
+  { start: 120572, len: 25, offset: 945, style: "italic" },
+  { start: 120604, len: 25, offset: 913, style: "bolditalic" },
+  { start: 120630, len: 25, offset: 945, style: "bolditalic" },
+  {
+    start: 120662,
+    len: 25,
+    offset: 913,
+    variant: "sans-serif",
+    style: "bold"
+  },
+  {
+    start: 120688,
+    len: 25,
+    offset: 945,
+    variant: "sans-serif",
+    style: "bold"
+  },
+  {
+    start: 120720,
+    len: 25,
+    offset: 913,
+    variant: "sans-serif",
+    style: "bolditalic"
+  },
+  {
+    start: 120746,
+    len: 25,
+    offset: 945,
+    variant: "sans-serif",
+    style: "bolditalic"
+  },
+  { start: 120782, len: 10, offset: 48, variant: "main", style: "bold" },
+  { start: 120792, len: 10, offset: 48, variant: "double-struck" },
+  { start: 120803, len: 10, offset: 48, variant: "sans-serif" },
+  {
+    start: 120812,
+    len: 10,
+    offset: 48,
+    variant: "sans-serif",
+    style: "bold"
+  },
+  { start: 120822, len: 10, offset: 48, variant: "monospace" }
+];
+function mathVariantToUnicode(char, variant, style) {
+  if (!/[A-Za-z\d]/.test(char))
+    return char;
+  if (!variant && !style)
+    return char;
+  const codepoint = char.codePointAt(0);
+  if (codepoint === void 0)
+    return char;
+  for (const MATH_UNICODE_BLOCK of MATH_UNICODE_BLOCKS) {
+    if (!variant || MATH_UNICODE_BLOCK.variant === variant) {
+      if (!style || MATH_UNICODE_BLOCK.style === style) {
+        if (codepoint >= MATH_UNICODE_BLOCK.offset && codepoint < MATH_UNICODE_BLOCK.offset + MATH_UNICODE_BLOCK.len) {
+          const result = MATH_UNICODE_BLOCK.start + codepoint - MATH_UNICODE_BLOCK.offset;
+          return String.fromCodePoint(MATH_LETTER_EXCEPTIONS[result] || result);
+        }
+      }
+    }
+  }
+  return char;
+}
+function unicodeToMathVariant(codepoint) {
+  var _a3;
+  if ((codepoint < 119808 || codepoint > 120831) && (codepoint < 8448 || codepoint > 8527))
+    return { char: String.fromCodePoint(codepoint) };
+  for (const c in MATH_LETTER_EXCEPTIONS) {
+    if (MATH_LETTER_EXCEPTIONS[c] === codepoint) {
+      codepoint = (_a3 = c.codePointAt(0)) != null ? _a3 : 0;
+      break;
+    }
+  }
+  for (const MATH_UNICODE_BLOCK of MATH_UNICODE_BLOCKS) {
+    if (codepoint >= MATH_UNICODE_BLOCK.start && codepoint < MATH_UNICODE_BLOCK.start + MATH_UNICODE_BLOCK.len) {
+      return {
+        char: String.fromCodePoint(
+          codepoint - MATH_UNICODE_BLOCK.start + MATH_UNICODE_BLOCK.offset
+        ),
+        variant: MATH_UNICODE_BLOCK.variant,
+        style: MATH_UNICODE_BLOCK.style
+      };
+    }
+  }
+  return { char: String.fromCodePoint(codepoint) };
+}
+
+// src/core-definitions/definitions-utils.ts
+function argAtoms(arg) {
+  if (!arg)
+    return [];
+  if (Array.isArray(arg))
+    return arg;
+  if (typeof arg === "object" && "group" in arg)
+    return arg.group;
+  return [];
+}
+var MATH_SYMBOLS = {};
+var REVERSE_MATH_SYMBOLS = {
+  60: "\\lt",
+  62: "\\gt",
+  111: "o",
+  // Also \omicron
+  38: "\\&",
+  // Also \And
+  123: "\\lbrace",
+  125: "\\rbrace",
+  91: "\\lbrack",
+  93: "\\rbrack",
+  58: "\\colon",
+  // Also :
+  160: "~",
+  // Also \space
+  172: "\\neg",
+  // Also \lnot
+  183: "\\cdot",
+  188: "\\frac{1}{4}",
+  189: "\\frac{1}{2}",
+  190: "\\frac{3}{4}",
+  8304: "^{0}",
+  8305: "^{i}",
+  185: "^{1}",
+  178: "^{2}",
+  179: "^{3}",
+  8224: "\\dagger",
+  // Also \dag
+  8225: "\\ddagger",
+  // Also \ddag
+  8230: "\\ldots",
+  // Also \mathellipsis
+  8308: "^{4}",
+  8309: "^{5}",
+  8310: "^{6}",
+  8311: "^{7}",
+  8312: "^{8}",
+  8313: "^{9}",
+  8314: "^{+}",
+  8315: "^{-}",
+  8316: "^{=}",
+  8319: "^{n}",
+  8320: "_{0}",
+  8321: "_{1}",
+  8322: "_{2}",
+  8323: "_{3}",
+  8324: "_{4}",
+  8325: "_{5}",
+  8326: "_{6}",
+  8327: "_{7}",
+  8328: "_{8}",
+  8329: "_{9}",
+  8330: "_{+}",
+  8331: "_{-}",
+  8332: "_{=}",
+  8336: "_{a}",
+  8337: "_{e}",
+  8338: "_{o}",
+  8339: "_{x}",
+  8242: "\\prime",
+  39: "\\prime",
+  8592: "\\gets",
+  // Also \leftarrow
+  8594: "\\to",
+  // Also \rightarrow
+  9651: "\\triangle",
+  // Also \bigtriangleup, \vartriangle
+  9661: "\\triangledown",
+  8715: "\\owns",
+  // Also \ni
+  8727: "\\ast",
+  // Also *
+  8739: "\\vert",
+  // Also |, \mvert, \lvert, \rvert
+  8741: "\\Vert",
+  // Also \parallel \shortparallel
+  8743: "\\land",
+  // Also \wedge
+  8744: "\\lor",
+  // Also \vee
+  8901: "\\cdot",
+  // Also \centerdot, \cdotp
+  8904: "\\bowtie",
+  // Also \Joint
+  8800: "\\ne",
+  // Also \neq
+  8804: "\\le",
+  // Also \leq
+  8805: "\\ge",
+  // Also \geq
+  8869: "\\bot",
+  // Also \perp
+  10231: "\\biconditional",
+  // Also \longleftrightarrow
+  10232: "\\impliedby",
+  // Also \Longleftarrow
+  10233: "\\implies",
+  // Also \Longrightarrow
+  10234: "\\iff",
+  8450: "\\mathbb{C}",
+  8469: "\\mathbb{N}",
+  8473: "\\mathbb{P}",
+  8474: "\\mathbb{Q}",
+  8477: "\\mathbb{R}",
+  8484: "\\mathbb{Z}",
+  8461: "\\mathbb{H}",
+  8476: "\\Re",
+  8465: "\\Im",
+  42: "\\ast",
+  11036: "\\square",
+  9633: "\\square",
+  8720: "\\coprod",
+  8716: "\\not\\ni",
+  9671: "\\diamond",
+  8846: "\\uplus",
+  8851: "\\sqcap",
+  8852: "\\sqcup",
+  8768: "\\wr",
+  8750: "\\oint",
+  8226: "\\textbullet",
+  8722: "-",
+  978: "\\Upsilon"
+};
+var LATEX_COMMANDS = {};
+var ENVIRONMENTS = {};
+var TEXVC_MACROS = {
+  //////////////////////////////////////////////////////////////////////
+  // texvc.sty
+  // The texvc package contains macros available in mediawiki pages.
+  // We omit the functions deprecated at
+  // https://en.wikipedia.org/wiki/Help:Displaying_a_formula#Deprecated_syntax
+  // We also omit texvc's \O, which conflicts with \text{\O}
+  darr: "\\downarrow",
+  dArr: "\\Downarrow",
+  Darr: "\\Downarrow",
+  lang: "\\langle",
+  rang: "\\rangle",
+  uarr: "\\uparrow",
+  uArr: "\\Uparrow",
+  Uarr: "\\Uparrow",
+  N: "\\mathbb{N}",
+  R: "\\mathbb{R}",
+  Z: "\\mathbb{Z}",
+  alef: "\\aleph",
+  alefsym: "\\aleph",
+  Alpha: "\\mathrm{A}",
+  Beta: "\\mathrm{B}",
+  bull: "\\bullet",
+  Chi: "\\mathrm{X}",
+  clubs: "\\clubsuit",
+  cnums: "\\mathbb{C}",
+  Complex: "\\mathbb{C}",
+  Dagger: "\\ddagger",
+  diamonds: "\\diamondsuit",
+  empty: "\\emptyset",
+  Epsilon: "\\mathrm{E}",
+  Eta: "\\mathrm{H}",
+  exist: "\\exists",
+  harr: "\\leftrightarrow",
+  hArr: "\\Leftrightarrow",
+  Harr: "\\Leftrightarrow",
+  hearts: "\\heartsuit",
+  image: "\\Im",
+  infin: "\\infty",
+  Iota: "\\mathrm{I}",
+  isin: "\\in",
+  Kappa: "\\mathrm{K}",
+  larr: "\\leftarrow",
+  lArr: "\\Leftarrow",
+  Larr: "\\Leftarrow",
+  lrarr: "\\leftrightarrow",
+  lrArr: "\\Leftrightarrow",
+  Lrarr: "\\Leftrightarrow",
+  Mu: "\\mathrm{M}",
+  natnums: "\\mathbb{N}",
+  Nu: "\\mathrm{N}",
+  Omicron: "\\mathrm{O}",
+  plusmn: "\\pm",
+  rarr: "\\rightarrow",
+  rArr: "\\Rightarrow",
+  Rarr: "\\Rightarrow",
+  real: "\\Re",
+  reals: "\\mathbb{R}",
+  Reals: "\\mathbb{R}",
+  Rho: "\\mathrm{P}",
+  sdot: "\\cdot",
+  sect: "\\S",
+  spades: "\\spadesuit",
+  sub: "\\subset",
+  sube: "\\subseteq",
+  supe: "\\supseteq",
+  Tau: "\\mathrm{T}",
+  thetasym: "\\vartheta",
+  // TODO: varcoppa: { def: "\\\mbox{\\coppa}", expand: false },
+  weierp: "\\wp",
+  Zeta: "\\mathrm{Z}"
+};
+var AMSMATH_MACROS = {
+  // amsmath.sty
+  // http://mirrors.concertpass.com/tex-archive/macros/latex/required/amsmath/amsmath.pdf
+  // Italic Greek capital letters.  AMS defines these with \DeclareMathSymbol,
+  // but they are equivalent to \mathit{\Letter}.
+  varGamma: "\\mathit{\\Gamma}",
+  varDelta: "\\mathit{\\Delta}",
+  varTheta: "\\mathit{\\Theta}",
+  varLambda: "\\mathit{\\Lambda}",
+  varXi: "\\mathit{\\Xi}",
+  varPi: "\\mathit{\\Pi}",
+  varSigma: "\\mathit{\\Sigma}",
+  varUpsilon: "\\mathit{\\Upsilon}",
+  varPhi: "\\mathit{\\Phi}",
+  varPsi: "\\mathit{\\Psi}",
+  varOmega: "\\mathit{\\Omega}",
+  // From http://tug.ctan.org/macros/latex/required/amsmath/amsmath.dtx
+  // > \newcommand{\pod}[1]{
+  // >    \allowbreak
+  // >    \if@display
+  // >      \mkern18mu
+  // >    \else
+  // >      \mkern8mu
+  // >    \fi
+  // >    (#1)
+  // > }
+  // 18mu = \quad
+  // > \renewcommand{\pmod}[1]{
+  // >  \pod{{\operator@font mod}\mkern6mu#1}
+  // > }
+  pmod: {
+    def: "\\quad(\\operatorname{mod}\\ #1)",
+    args: 1,
+    expand: false
+  },
+  // > \newcommand{\mod}[1]{
+  // >    \allowbreak
+  // >    \if@display
+  // >      \mkern18mu
+  // >    \else
+  // >      \mkern12mu
+  // >    \fi
+  //>     {\operator@font mod}\,\,#1}
+  mod: {
+    def: "\\quad\\operatorname{mod}\\,\\,#1",
+    args: 1,
+    expand: false
+  },
+  // > \renewcommand{\bmod}{
+  // >  \nonscript\mskip-\medmuskip\mkern5mu
+  // >  \mathbin{\operator@font mod}
+  // >  \penalty900 \mkern5mu
+  // >  \nonscript\mskip-\medmuskip
+  // > }
+  // 5mu = \;
+  bmod: {
+    def: "\\;\\mathbin{\\operatorname{mod }}",
+    expand: false
+  }
+};
+var BRAKET_MACROS = {
+  bra: "\\mathinner{\\langle{#1}|}",
+  ket: "\\mathinner{|{#1}\\rangle}",
+  braket: "\\mathinner{\\langle{#1}\\rangle}",
+  set: "\\mathinner{\\lbrace #1 \\rbrace}",
+  Bra: "\\left\\langle #1\\right|",
+  Ket: "\\left|#1\\right\\rangle",
+  Braket: "\\left\\langle{#1}\\right\\rangle",
+  Set: "\\left\\lbrace #1 \\right\\rbrace"
+};
+var DEFAULT_MACROS = {
+  "iff": "\\;\u27FA\\;",
+  // >2,000 Note: additional spaces around the arrows
+  "nicefrac": "^{#1}\\!\\!/\\!_{#2}",
+  // Proof Wiki
+  "rd": "\\mathrm{d}",
+  "rD": "\\mathrm{D}",
+  // From Wolfram Alpha
+  "doubleStruckCapitalN": "\\mathbb{N}",
+  "doubleStruckCapitalR": "\\mathbb{R}",
+  "doubleStruckCapitalQ": "\\mathbb{Q}",
+  "doubleStruckCapitalZ": "\\mathbb{Z}",
+  "doubleStruckCapitalP": "\\mathbb{P}",
+  "scriptCapitalE": "\\mathscr{E}",
+  "scriptCapitalH": "\\mathscr{H}",
+  "scriptCapitalL": "\\mathscr{L}",
+  "gothicCapitalC": "\\mathfrak{C}",
+  "gothicCapitalH": "\\mathfrak{H}",
+  "gothicCapitalI": "\\mathfrak{I}",
+  "gothicCapitalR": "\\mathfrak{R}",
+  "imaginaryI": "\\mathrm{i}",
+  // NOTE: set in main (upright) as per ISO 80000-2:2009.
+  "imaginaryJ": "\\mathrm{j}",
+  // NOTE: set in main (upright) as per ISO 80000-2:2009.
+  "exponentialE": "\\mathrm{e}",
+  // NOTE: set in main (upright) as per ISO 80000-2:2009.
+  "differentialD": "\\mathrm{d}",
+  // NOTE: set in main (upright) as per ISO 80000-2:2009.
+  "capitalDifferentialD": "\\mathrm{D}",
+  // NOTE: set in main (upright) as per ISO 80000-2:2009.
+  "mathstrut": { def: "\\vphantom{(}", primitive: true },
+  // mhchem
+  "tripledash": {
+    def: "\\vphantom{-}\\raise{4mu}{\\mkern1.5mu\\rule{2mu}{1.5mu}\\mkern{2.25mu}\\rule{2mu}{1.5mu}\\mkern{2.25mu}\\rule{2mu}{1.5mu}\\mkern{2mu}}",
+    expand: true
+  },
+  "braket.sty": { package: BRAKET_MACROS },
+  "amsmath.sty": {
+    package: AMSMATH_MACROS,
+    primitive: true
+  },
+  "texvc.sty": {
+    package: TEXVC_MACROS,
+    primitive: false
+  }
+};
+var TEXT_SYMBOLS = {
+  " ": 32,
+  // want that in Text mode.
+  "\\#": 35,
+  "\\&": 38,
+  "\\$": 36,
+  "\\%": 37,
+  "-": 45,
+  // In Math mode, '-' is substituted to U+2212, but we don't
+  "\\_": 95,
+  "\\euro": 8364,
+  "\\maltese": 10016,
+  "\\{": 123,
+  "\\}": 125,
+  "\\nobreakspace": 160,
+  "\\ldots": 8230,
+  "\\textellipsis": 8230,
+  "\\backslash": 92,
+  "`": 8216,
+  "'": 8217,
+  "``": 8220,
+  "''": 8221,
+  "\\degree": 176,
+  "\\textasciicircum": 94,
+  "\\textasciitilde": 126,
+  "\\textasteriskcentered": 42,
+  "\\textbackslash": 92,
+  "\\textbraceleft": 123,
+  "\\textbraceright": 125,
+  "\\textbullet": 8226,
+  "\\textdollar": 36,
+  "\\textsterling": 163,
+  "\\textdagger": 8224,
+  "\\textdaggerdbl": 8225,
+  "\u2013": 8211,
+  // EN DASH
+  "\u2014": 8212,
+  // EM DASH
+  "\u2018": 8216,
+  // LEFT SINGLE QUOTATION MARK
+  "\u2019": 8217,
+  // RIGHT SINGLE QUOTATION MARK
+  "\u201C": 8220,
+  // LEFT DOUBLE QUOTATION MARK
+  "\u201D": 8221,
+  // RIGHT DOUBLE QUOTATION MARK
+  '"': 8221,
+  // DOUBLE PRIME
+  "\\ss": 223,
+  // LATIN SMALL LETTER SHARP S
+  "\\ae": 230,
+  // LATIN SMALL LETTER AE
+  "\\oe": 339,
+  // LATIN SMALL LIGATURE OE
+  "\\AE": 198,
+  // LATIN CAPITAL LETTER AE
+  "\\OE": 338,
+  // LATIN CAPITAL LIGATURE OE
+  "\\O": 216,
+  // LATIN CAPITAL LETTER O WITH STROKE
+  "\\i": 305,
+  // LATIN SMALL LETTER DOTLESS I
+  "\\j": 567,
+  // LATIN SMALL LETTER DOTLESS J
+  "\\aa": 229,
+  // LATIN SMALL LETTER A WITH RING ABOVE
+  "\\AA": 197
+  // LATIN CAPITAL LETTER A WITH RING ABOVE
+};
+var COMMAND_MODE_CHARACTERS = /[\w!@*()-=+{}[\]\\';:?/.,~<>`|$%#&^" ]/;
+var LETTER;
+var LETTER_AND_DIGITS;
+if (supportRegexPropertyEscape()) {
+  LETTER = new RegExp("\\p{Letter}", "u");
+  LETTER_AND_DIGITS = new RegExp("[0-9\\p{Letter}]", "u");
+} else {
+  LETTER = /[a-zA-ZаАбБвВгГдДеЕёЁжЖзЗиИйЙкКлЛмМнНоОпПрРсСтТуУфФхХцЦчЧшШщЩъЪыЫьЬэЭюЮяĄąĆćĘęŁłŃńÓóŚśŹźŻżàâäôéèëêïîçùûüÿæœÀÂÄÔÉÈËÊÏÎŸÇÙÛÜÆŒößÖẞìíòúÌÍÒÚáñÁÑ]/;
+  LETTER_AND_DIGITS = /[\da-zA-ZаАбБвВгГдДеЕёЁжЖзЗиИйЙкКлЛмМнНоОпПрРсСтТуУфФхХцЦчЧшШщЩъЪыЫьЬэЭюЮяĄąĆćĘęŁłŃńÓóŚśŹźŻżàâäôéèëêïîçùûüÿæœÀÂÄÔÉÈËÊÏÎŸÇÙÛÜÆŒößÖẞìíòúÌÍÒÚáñÁÑ]/;
+}
+function newSymbol(symbol, value, type = "mord", variant) {
+  if (value === void 0)
+    return;
+  MATH_SYMBOLS[symbol] = {
+    definitionType: "symbol",
+    type,
+    variant,
+    codepoint: value
+  };
+  if (!REVERSE_MATH_SYMBOLS[value])
+    REVERSE_MATH_SYMBOLS[value] = symbol;
+  if (!TEXT_SYMBOLS[symbol])
+    TEXT_SYMBOLS[symbol] = value;
+}
+function newSymbols(value, inType, inVariant) {
+  if (typeof value === "string") {
+    for (let i = 0; i < value.length; i++) {
+      const ch = value.charAt(i);
+      newSymbol(ch, ch.codePointAt(0));
+    }
+    return;
+  }
+  for (const [symbol, val, type, variant] of value)
+    newSymbol(symbol, val, type != null ? type : inType, variant != null ? variant : inVariant);
+}
+function newSymbolRange(from, to) {
+  for (let i = from; i <= to; i++)
+    newSymbol(String.fromCodePoint(i), i);
+}
+function getEnvironmentDefinition(name) {
+  var _a3;
+  return (_a3 = ENVIRONMENTS[name]) != null ? _a3 : null;
+}
+function suggest(mf, s) {
+  var _a3, _b3;
+  if (s.length === 0 || s === "\\" || !s.startsWith("\\"))
+    return [];
+  const result = [];
+  for (const p in LATEX_COMMANDS) {
+    if (p.startsWith(s) && !LATEX_COMMANDS[p].infix)
+      result.push({ match: p, frequency: (_a3 = LATEX_COMMANDS[p].frequency) != null ? _a3 : 0 });
+  }
+  for (const p in MATH_SYMBOLS) {
+    if (p.startsWith(s))
+      result.push({ match: p, frequency: (_b3 = MATH_SYMBOLS[p].frequency) != null ? _b3 : 0 });
+  }
+  const command = s.substring(1);
+  for (const p of Object.keys(mf.options.macros))
+    if (p.startsWith(command))
+      result.push({ match: "\\" + p, frequency: 0 });
+  result.sort((a, b) => {
+    var _a4, _b4;
+    if (a.frequency === b.frequency) {
+      if (a.match.length === b.match.length)
+        return a.match < b.match ? -1 : 1;
+      return a.match.length - b.match.length;
+    }
+    return ((_a4 = b.frequency) != null ? _a4 : 0) - ((_b4 = a.frequency) != null ? _b4 : 0);
+  });
+  return result.map((x) => x.match);
+}
+function parseParameterTemplateArgument(argTemplate) {
+  let type = "auto";
+  const r = argTemplate.match(/:([^=]+)/);
+  if (r)
+    type = r[1].trim();
+  return type;
+}
+function parseParameterTemplate(parameterTemplate) {
+  if (!parameterTemplate)
+    return [];
+  const result = [];
+  let parameters = parameterTemplate.split("]");
+  if (parameters[0].startsWith("[")) {
+    result.push({
+      isOptional: true,
+      type: parseParameterTemplateArgument(parameters[0].slice(1))
+    });
+    for (let i = 1; i <= parameters.length; i++)
+      result.push(...parseParameterTemplate(parameters[i]));
+  } else {
+    parameters = parameterTemplate.split("}");
+    if (parameters[0].startsWith("{")) {
+      result.push({
+        isOptional: false,
+        type: parseParameterTemplateArgument(parameters[0].slice(1))
+      });
+      for (let i = 1; i <= parameters.length; i++)
+        result.push(...parseParameterTemplate(parameters[i]));
+    }
+  }
+  return result;
+}
+function parseArgAsString(atoms) {
+  if (!atoms)
+    return "";
+  let result = "";
+  let success = true;
+  for (const atom of atoms) {
+    if (typeof atom.value === "string")
+      result += atom.value;
+    else
+      success = false;
+  }
+  return success ? result : "";
+}
+function defineEnvironment(names, createAtom) {
+  if (typeof names === "string")
+    names = [names];
+  const def = {
+    tabular: false,
+    params: [],
+    createAtom
+  };
+  for (const name of names)
+    ENVIRONMENTS[name] = def;
+}
+function defineTabularEnvironment(names, parameters, createAtom) {
+  if (typeof names === "string")
+    names = [names];
+  const parsedParameters = parseParameterTemplate(parameters);
+  const data = {
+    tabular: true,
+    params: parsedParameters,
+    createAtom
+  };
+  for (const name of names)
+    ENVIRONMENTS[name] = data;
+}
+function defineFunction(names, parameters, options) {
+  var _a3, _b3;
+  if (!options)
+    options = {};
+  const data = {
+    definitionType: "function",
+    // The parameters for this function, an array of
+    // {optional, type}
+    params: parseParameterTemplate(parameters),
+    ifMode: options.ifMode,
+    isFunction: (_a3 = options.isFunction) != null ? _a3 : false,
+    applyMode: options.applyMode,
+    infix: (_b3 = options.infix) != null ? _b3 : false,
+    createAtom: options.createAtom,
+    applyStyle: options.applyStyle,
+    serialize: options.serialize,
+    render: options.render
+  };
+  if (typeof names === "string")
+    LATEX_COMMANDS["\\" + names] = data;
+  else
+    for (const name of names)
+      LATEX_COMMANDS["\\" + name] = data;
+}
+var _DEFAULT_MACROS;
+function getMacros(otherMacros) {
+  if (!_DEFAULT_MACROS)
+    _DEFAULT_MACROS = normalizeMacroDictionary(DEFAULT_MACROS);
+  if (!otherMacros)
+    return _DEFAULT_MACROS;
+  return normalizeMacroDictionary(__spreadValues(__spreadValues({}, _DEFAULT_MACROS), otherMacros));
+}
+function normalizeMacroDefinition(def, options) {
+  var _a3, _b3, _c2, _d2;
+  if (typeof def === "string") {
+    let argCount = 0;
+    const defString = def;
+    if (/(^|[^\\])#1/.test(defString))
+      argCount = 1;
+    if (/(^|[^\\])#2/.test(defString))
+      argCount = 2;
+    if (/(^|[^\\])#3/.test(defString))
+      argCount = 3;
+    if (/(^|[^\\])#4/.test(defString))
+      argCount = 4;
+    if (/(^|[^\\])#5/.test(defString))
+      argCount = 5;
+    if (/(^|[^\\])#6/.test(defString))
+      argCount = 6;
+    if (/(^|[^\\])#7/.test(defString))
+      argCount = 7;
+    if (/(^|[^\\])#8/.test(defString))
+      argCount = 8;
+    if (/(^|[^\\])#9/.test(defString))
+      argCount = 9;
+    return {
+      expand: (_a3 = options == null ? void 0 : options.expand) != null ? _a3 : true,
+      captureSelection: (_b3 = options == null ? void 0 : options.captureSelection) != null ? _b3 : true,
+      args: argCount,
+      def: defString
+    };
+  }
+  return __spreadValues({
+    expand: (_c2 = options == null ? void 0 : options.expand) != null ? _c2 : true,
+    captureSelection: (_d2 = options == null ? void 0 : options.captureSelection) != null ? _d2 : true,
+    args: 0
+  }, def);
+}
+function normalizeMacroDictionary(macros) {
+  if (!macros)
+    return {};
+  const result = {};
+  for (const macro of Object.keys(macros)) {
+    const macroDef = macros[macro];
+    if (macroDef === void 0 || macroDef === null)
+      delete result[macro];
+    else if (typeof macroDef === "object" && "package" in macroDef) {
+      for (const packageMacro of Object.keys(macroDef.package)) {
+        result[packageMacro] = normalizeMacroDefinition(
+          macroDef.package[packageMacro],
+          {
+            expand: !macroDef.primitive,
+            captureSelection: macroDef.captureSelection
+          }
+        );
+      }
+    } else
+      result[macro] = normalizeMacroDefinition(macroDef);
+  }
+  return result;
+}
+function getDefinition(token, parseMode = "math") {
+  if (!token || token.length === 0)
+    return null;
+  let info = null;
+  if (token.startsWith("\\")) {
+    info = LATEX_COMMANDS[token];
+    if (info) {
+      if (!info.ifMode || info.ifMode === parseMode)
+        return info;
+      return null;
+    }
+    if (parseMode === "math")
+      info = MATH_SYMBOLS[token];
+    else if (TEXT_SYMBOLS[token]) {
+      info = {
+        definitionType: "symbol",
+        type: "mord",
+        codepoint: TEXT_SYMBOLS[token]
+      };
+    }
+  } else if (parseMode === "math") {
+    info = MATH_SYMBOLS[token];
+    if (!info && token.length === 1) {
+      const command = charToLatex("math", token.codePointAt(0));
+      if (command.startsWith("\\"))
+        return __spreadProps(__spreadValues({}, getDefinition(command, "math")), { command });
+      return null;
+    }
+  } else if (TEXT_SYMBOLS[token]) {
+    info = {
+      definitionType: "symbol",
+      type: "mord",
+      codepoint: TEXT_SYMBOLS[token]
+    };
+  } else if (parseMode === "text") {
+    info = {
+      definitionType: "symbol",
+      type: "mord",
+      codepoint: token.codePointAt(0)
+    };
+  }
+  if (info && info.definitionType === "symbol" && info.type === "mord" && (info.codepoint === 102 || info.codepoint === 103 || info.codepoint === 104))
+    info.isFunction = true;
+  return info != null ? info : null;
+}
+function getMacroDefinition(token, macros) {
+  if (!token.startsWith("\\"))
+    return null;
+  const command = token.slice(1);
+  return macros[command];
+}
+function unicodeCharToLatex(parseMode, char) {
+  var _a3;
+  if (parseMode === "text")
+    return (_a3 = charToLatex(parseMode, char.codePointAt(0))) != null ? _a3 : char;
+  let result;
+  result = charToLatex(parseMode, char.codePointAt(0));
+  if (result)
+    return result;
+  const cp = char.codePointAt(0);
+  const v = unicodeToMathVariant(cp);
+  if (!v.style && !v.variant)
+    return "";
+  result = v.char;
+  if (v.variant)
+    result = "\\" + v.variant + "{" + result + "}";
+  if (v.style === "bold")
+    result = "\\mathbf{" + result + "}";
+  else if (v.style === "italic")
+    result = "\\mathit{" + result + "}";
+  else if (v.style === "bolditalic")
+    result = "\\mathbfit{" + result + "}";
+  return "\\mathord{" + result + "}";
+}
+function charToLatex(parseMode, codepoint) {
+  if (codepoint === void 0)
+    return "";
+  if (parseMode === "math" && REVERSE_MATH_SYMBOLS[codepoint])
+    return REVERSE_MATH_SYMBOLS[codepoint];
+  if (parseMode === "text") {
+    let textSymbol = Object.keys(TEXT_SYMBOLS).find(
+      (x) => TEXT_SYMBOLS[x] === codepoint
+    );
+    if (!textSymbol) {
+      const hex = codepoint.toString(16);
+      textSymbol = "^".repeat(hex.length) + hex;
+    }
+    return textSymbol;
+  }
+  return String.fromCodePoint(codepoint);
+}
+
 // src/core/font-metrics-data.ts
-var M6 = [0, 0.69444, 0, 0];
-var M11 = [0, 0.61111, 0, 0];
-var M15 = [0.25, 0.75, 0, 0];
-var M7 = [0, 0.44444, 0, 0];
-var M4 = [0, 0.68611, 0, 0];
-var M16 = [0.19444, 0.69444, 0, 0];
-var M9 = [0, 0.68333, 0, 0];
-var M1 = [0, 0.68889, 0, 0];
-var M21 = [0, 0.69141, 0, 0];
-var M0 = [0, 0, 0, 0];
-var M5 = [0, 0.64444, 0, 0];
-var M3 = [0, 0.69224, 0, 0];
-var M8 = [0.19444, 0.44444, 0, 0];
-var M19 = [0.65002, 1.15, 0, 0];
-var M20 = [0, 0.55556, 0, 0];
-var M10 = [0.35001, 0.85, 0, 0];
-var M12 = [1.25003, 1.75, 0, 0];
-var M13 = [0.95003, 1.45, 0, 0];
-var M14 = [0, 0.75, 0, 0];
-var M22 = [0, 0.47534, 0, 0];
-var M17 = [0.25001, 0.75, 0, 0];
-var M18 = [0.55001, 1.05, 0, 0];
-var M2 = [0.16667, 0.68889, 0, 0];
-var M23 = [0.08167, 0.58167, 0, 0];
+var M1 = [0, 0.68889, 0, 0, 0.72222];
+var M2 = [0, 0.68889, 0, 0, 0.66667];
+var M3 = [0, 0.68889, 0, 0, 0.77778];
+var M4 = [0, 0.68889, 0, 0, 0.61111];
+var M5 = [0.16667, 0.68889, 0, 0, 0.77778];
+var M6 = [0, 0.68889, 0, 0, 0.55556];
+var M7 = [0, 0, 0, 0, 0.25];
+var M8 = [0, 0.825, 0, 0, 2.33334];
+var M9 = [0, 0.9, 0, 0, 2.33334];
+var M10 = [0, 0.68889, 0, 0, 0.54028];
+var M11 = [-0.03598, 0.46402, 0, 0, 0.5];
+var M12 = [-0.13313, 0.36687, 0, 0, 1];
+var M13 = [0.01354, 0.52239, 0, 0, 1];
+var M14 = [0.01354, 0.52239, 0, 0, 1.11111];
+var M15 = [0, 0.54986, 0, 0, 1];
+var M16 = [0, 0.69224, 0, 0, 0.5];
+var M17 = [0, 0.43056, 0, 0, 1];
+var M18 = [0.08198, 0.58198, 0, 0, 0.77778];
+var M19 = [0.19444, 0.69224, 0, 0, 0.41667];
+var M20 = [0.1808, 0.675, 0, 0, 1];
+var M21 = [0.19444, 0.69224, 0, 0, 0.83334];
+var M22 = [0.13667, 0.63667, 0, 0, 1];
+var M23 = [-0.064, 0.437, 0, 0, 1.334];
+var M24 = [0.08167, 0.58167, 0, 0, 0.77778];
+var M25 = [0, 0.69224, 0, 0, 0.72222];
+var M26 = [0, 0.69224, 0, 0, 0.66667];
+var M27 = [-0.13313, 0.36687, 0, 0, 0.77778];
+var M28 = [0.06062, 0.54986, 0, 0, 0.77778];
+var M29 = [0, 0.69224, 0, 0, 0.77778];
+var M30 = [0.25583, 0.75583, 0, 0, 0.77778];
+var M31 = [0.25142, 0.75726, 0, 0, 0.77778];
+var M32 = [0.20576, 0.70576, 0, 0, 0.77778];
+var M33 = [0.30274, 0.79383, 0, 0, 0.77778];
+var M34 = [0.22958, 0.72958, 0, 0, 0.77778];
+var M35 = [0.1808, 0.675, 0, 0, 0.77778];
+var M36 = [0.13667, 0.63667, 0, 0, 0.77778];
+var M37 = [0.13597, 0.63597, 0, 0, 0.77778];
+var M38 = [0.03517, 0.54986, 0, 0, 0.77778];
+var M39 = [0, 0.675, 0, 0, 0.77778];
+var M40 = [0.19444, 0.69224, 0, 0, 0.61111];
+var M41 = [0, 0.54986, 0, 0, 0.76042];
+var M42 = [0, 0.54986, 0, 0, 0.66667];
+var M43 = [0.0391, 0.5391, 0, 0, 0.77778];
+var M44 = [0.03517, 0.54986, 0, 0, 1.33334];
+var M45 = [0.38569, 0.88569, 0, 0, 0.77778];
+var M46 = [0.23222, 0.74111, 0, 0, 0.77778];
+var M47 = [0.19444, 0.69224, 0, 0, 0.77778];
+var M48 = [0, 0.37788, 0, 0, 0.5];
+var M49 = [0, 0.54986, 0, 0, 0.72222];
+var M50 = [0, 0.69224, 0, 0, 0.83334];
+var M51 = [0.11111, 0.69224, 0, 0, 0.66667];
+var M52 = [0.26167, 0.75726, 0, 0, 0.77778];
+var M53 = [0.48256, 0.98256, 0, 0, 0.77778];
+var M54 = [0.28481, 0.79383, 0, 0, 0.77778];
+var M55 = [0.08167, 0.58167, 0, 0, 0.22222];
+var M56 = [0.08167, 0.58167, 0, 0, 0.38889];
+var M57 = [0, 0.43056, 0.04028, 0, 0.66667];
+var M58 = [0.41951, 0.91951, 0, 0, 0.77778];
+var M59 = [0.24982, 0.74947, 0, 0, 0.38865];
+var M60 = [0.08319, 0.58283, 0, 0, 0.75623];
+var M61 = [0, 0.10803, 0, 0, 0.27764];
+var M62 = [0, 0.47534, 0, 0, 0.50181];
+var M63 = [0.18906, 0.47534, 0, 0, 0.50181];
+var M64 = [0, 0.69141, 0, 0, 0.50181];
+var M65 = [0.24982, 0.74947, 0, 0, 0.27764];
+var M66 = [0, 0.69141, 0, 0, 0.21471];
+var M67 = [0.25, 0.75, 0, 0, 0.44722];
+var M68 = [0, 0.64444, 0, 0, 0.575];
+var M69 = [0.08556, 0.58556, 0, 0, 0.89444];
+var M70 = [0, 0.69444, 0, 0, 0.89444];
+var M71 = [0, 0.68611, 0, 0, 0.9];
+var M72 = [0, 0.68611, 0, 0, 0.86944];
+var M73 = [0.25, 0.75, 0, 0, 0.575];
+var M74 = [0.25, 0.75, 0, 0, 0.31944];
+var M75 = [0, 0.69444, 0, 0, 0.63889];
+var M76 = [0, 0.69444, 0, 0, 0.31944];
+var M77 = [0, 0.44444, 0, 0, 0.63889];
+var M78 = [0, 0.44444, 0, 0, 0.51111];
+var M79 = [0, 0.69444, 0, 0, 0.575];
+var M80 = [0.13333, 0.63333, 0, 0, 0.89444];
+var M81 = [0, 0.44444, 0, 0, 0.31944];
+var M82 = [0, 0.69444, 0, 0, 0.86944];
+var M83 = [0, 0.68611, 0, 0, 0.69166];
+var M84 = [0, 0.68611, 0, 0, 0.83055];
+var M85 = [0, 0.68611, 0, 0, 0.89444];
+var M86 = [0, 0.69444, 0, 0, 0.60278];
+var M87 = [0.19444, 0.69444, 0, 0, 0.51111];
+var M88 = [0, 0.69444, 0, 0, 0.83055];
+var M89 = [-0.10889, 0.39111, 0, 0, 1.14999];
+var M90 = [0.19444, 0.69444, 0, 0, 0.575];
+var M91 = [0.19444, 0.69444, 0, 0, 1.14999];
+var M92 = [0.19444, 0.69444, 0, 0, 0.70277];
+var M93 = [0.05556, 0.75, 0, 0, 0.575];
+var M94 = [0, 0.68611, 0, 0, 0.95833];
+var M95 = [0.08556, 0.58556, 0, 0, 0.76666];
+var M96 = [-0.02639, 0.47361, 0, 0, 0.575];
+var M97 = [0, 0.44444, 0, 0, 0.89444];
+var M98 = [0, 0.55556, 0, 0, 0.76666];
+var M99 = [-0.10889, 0.39111, 0, 0, 0.89444];
+var M100 = [222e-5, 0.50222, 0, 0, 0.89444];
+var M101 = [0.19667, 0.69667, 0, 0, 0.89444];
+var M102 = [0.08556, 0.58556, 0, 0, 1.14999];
+var M103 = [0, 0.69444, 0, 0, 0.70277];
+var M104 = [-0.02778, 0.47222, 0, 0, 0.575];
+var M105 = [0.25, 0.75, 0, 0, 0.51111];
+var M106 = [-0.13889, 0.36111, 0, 0, 1.14999];
+var M107 = [0.19444, 0.69444, 0, 0, 1.02222];
+var M108 = [0.12963, 0.69444, 0, 0, 0.89444];
+var M109 = [0.19444, 0.69444, 0, 0, 0.44722];
+var M110 = [0, 0.64444, 0.13167, 0, 0.59111];
+var M111 = [0.19444, 0.64444, 0.13167, 0, 0.59111];
+var M112 = [0, 0.68611, 0.17208, 0, 0.8961];
+var M113 = [0.19444, 0.44444, 0.105, 0, 0.53222];
+var M114 = [0, 0.44444, 0.085, 0, 0.82666];
+var M115 = [0, 0.69444, 0.06709, 0, 0.59111];
+var M116 = [0, 0.69444, 0.12945, 0, 0.35555];
+var M117 = [0, 0.69444, 0, 0, 0.94888];
+var M118 = [0, 0.69444, 0.11472, 0, 0.59111];
+var M119 = [0, 0.68611, 0.10778, 0, 0.88555];
+var M120 = [0, 0.69444, 0.07939, 0, 0.62055];
+var M121 = [0, 0.69444, 0.12417, 0, 0.30667];
+var M122 = [0, 0.64444, 0.13556, 0, 0.51111];
+var M123 = [0.19444, 0.64444, 0.13556, 0, 0.51111];
+var M124 = [0, 0.68333, 0.16389, 0, 0.74333];
+var M125 = [0.19444, 0.43056, 0.08847, 0, 0.46];
+var M126 = [0, 0.43056, 0.07514, 0, 0.71555];
+var M127 = [0, 0.69444, 0.06646, 0, 0.51111];
+var M128 = [0, 0.69444, 0, 0, 0.83129];
+var M129 = [0, 0.69444, 0.1225, 0, 0.51111];
+var M130 = [0, 0.68333, 0.09403, 0, 0.76666];
+var M131 = [0, 0.68333, 0.11111, 0, 0.76666];
+var M132 = [0, 0.69444, 0.06961, 0, 0.51444];
+var M133 = [0, 0.69444, 0, 0, 0.27778];
+var M134 = [0.25, 0.75, 0, 0, 0.38889];
+var M135 = [0, 0.64444, 0, 0, 0.5];
+var M136 = [0, 0.69444, 0, 0, 0.77778];
+var M137 = [0, 0.68333, 0, 0, 0.75];
+var M138 = [0, 0.68333, 0, 0, 0.77778];
+var M139 = [0, 0.68333, 0, 0, 0.68056];
+var M140 = [0, 0.68333, 0, 0, 0.72222];
+var M141 = [0.25, 0.75, 0, 0, 0.5];
+var M142 = [0.25, 0.75, 0, 0, 0.27778];
+var M143 = [0, 0.69444, 0, 0, 0.5];
+var M144 = [0, 0.69444, 0, 0, 0.55556];
+var M145 = [0, 0.43056, 0, 0, 0.44445];
+var M146 = [0, 0.43056, 0, 0, 0.5];
+var M147 = [0.19444, 0.43056, 0, 0, 0.55556];
+var M148 = [0, 0.43056, 0, 0, 0.55556];
+var M149 = [0.08333, 0.58333, 0, 0, 0.77778];
+var M150 = [0, 0.43056, 0, 0, 0.27778];
+var M151 = [0, 0.66786, 0, 0, 0.27778];
+var M152 = [0, 0.69444, 0, 0, 0.75];
+var M153 = [0, 0.66786, 0, 0, 0.5];
+var M154 = [0, 0.68333, 0, 0, 0.625];
+var M155 = [0.19444, 0.69444, 0, 0, 0.44445];
+var M156 = [0, 0.69444, 0, 0, 0.72222];
+var M157 = [0.19444, 0.69444, 0, 0, 0.5];
+var M158 = [0.19444, 0.69444, 0, 0, 1];
+var M159 = [0.011, 0.511, 0, 0, 1.126];
+var M160 = [0.19444, 0.69444, 0, 0, 0.61111];
+var M161 = [0.05556, 0.75, 0, 0, 0.5];
+var M162 = [0, 0.68333, 0, 0, 0.83334];
+var M163 = [0.0391, 0.5391, 0, 0, 0.66667];
+var M164 = [-0.05555, 0.44445, 0, 0, 0.5];
+var M165 = [0, 0.43056, 0, 0, 0.77778];
+var M166 = [0, 0.55556, 0, 0, 0.66667];
+var M167 = [-0.03625, 0.46375, 0, 0, 0.77778];
+var M168 = [-0.01688, 0.48312, 0, 0, 0.77778];
+var M169 = [0.0391, 0.5391, 0, 0, 1];
+var M170 = [0, 0.69444, 0, 0, 0.61111];
+var M171 = [-0.03472, 0.46528, 0, 0, 0.5];
+var M172 = [0.25, 0.75, 0, 0, 0.44445];
+var M173 = [-0.14236, 0.35764, 0, 0, 1];
+var M174 = [0.244, 0.744, 0, 0, 0.412];
+var M175 = [0.19444, 0.69444, 0, 0, 0.88889];
+var M176 = [0.12963, 0.69444, 0, 0, 0.77778];
+var M177 = [0.19444, 0.69444, 0, 0, 0.38889];
+var M178 = [0.011, 0.511, 0, 0, 1.638];
+var M179 = [0.19444, 0.69444, 0, 0, 0];
+var M180 = [0, 0.44444, 0, 0, 0.575];
+var M181 = [0.19444, 0.44444, 0, 0, 0.575];
+var M182 = [0, 0.68611, 0, 0, 0.75555];
+var M183 = [0, 0.69444, 0, 0, 0.66759];
+var M184 = [0, 0.68611, 0, 0, 0.80555];
+var M185 = [0, 0.68611, 0.08229, 0, 0.98229];
+var M186 = [0, 0.68611, 0, 0, 0.76666];
+var M187 = [0, 0.44444, 0, 0, 0.58472];
+var M188 = [0.19444, 0.44444, 0, 0, 0.6118];
+var M189 = [0.19444, 0.43056, 0, 0, 0.5];
+var M190 = [0, 0.68333, 0.02778, 0.08334, 0.76278];
+var M191 = [0, 0.68333, 0.08125, 0.05556, 0.83125];
+var M192 = [0, 0.43056, 0, 0.05556, 0.48472];
+var M193 = [0.19444, 0.43056, 0, 0.08334, 0.51702];
+var M194 = [0.25, 0.75, 0, 0, 0.42778];
+var M195 = [0, 0.69444, 0, 0, 0.55];
+var M196 = [0, 0.69444, 0, 0, 0.73334];
+var M197 = [0, 0.69444, 0, 0, 0.79445];
+var M198 = [0, 0.69444, 0, 0, 0.51945];
+var M199 = [0, 0.69444, 0, 0, 0.70278];
+var M200 = [0, 0.69444, 0, 0, 0.76389];
+var M201 = [0.25, 0.75, 0, 0, 0.34306];
+var M202 = [0, 0.69444, 0, 0, 0.56111];
+var M203 = [0, 0.69444, 0, 0, 0.25556];
+var M204 = [0.19444, 0.45833, 0, 0, 0.56111];
+var M205 = [0, 0.45833, 0, 0, 0.56111];
+var M206 = [0, 0.69444, 0, 0, 0.30556];
+var M207 = [0, 0.69444, 0, 0, 0.58056];
+var M208 = [0, 0.69444, 0, 0, 0.67223];
+var M209 = [0, 0.69444, 0, 0, 0.85556];
+var M210 = [0, 0.69444, 0, 0, 0.55834];
+var M211 = [0, 0.65556, 0.11156, 0, 0.5];
+var M212 = [0, 0.69444, 0.08094, 0, 0.70834];
+var M213 = [0.17014, 0, 0, 0, 0.44445];
+var M214 = [0, 0.69444, 0.0799, 0, 0.5];
+var M215 = [0, 0.69444, 0, 0, 0.73752];
+var M216 = [0, 0.69444, 0.09205, 0, 0.5];
+var M217 = [0, 0.69444, 0.09031, 0, 0.77778];
+var M218 = [0, 0.69444, 0.07816, 0, 0.27778];
+var M219 = [0, 0.69444, 316e-5, 0, 0.5];
+var M220 = [0.19444, 0.69444, 0, 0, 0.83334];
+var M221 = [0.05556, 0.75, 0, 0, 0.83334];
+var M222 = [0, 0.75, 0, 0, 0.5];
+var M223 = [0.125, 0.08333, 0, 0, 0.27778];
+var M224 = [0, 0.08333, 0, 0, 0.27778];
+var M225 = [0, 0.65556, 0, 0, 0.5];
+var M226 = [0, 0.69444, 0, 0, 0.47222];
+var M227 = [0, 0.69444, 0, 0, 0.66667];
+var M228 = [0, 0.69444, 0, 0, 0.59722];
+var M229 = [0, 0.69444, 0, 0, 0.54167];
+var M230 = [0, 0.69444, 0, 0, 0.70834];
+var M231 = [0.25, 0.75, 0, 0, 0.28889];
+var M232 = [0, 0.69444, 0, 0, 0.51667];
+var M233 = [0, 0.44444, 0, 0, 0.44445];
+var M234 = [0.19444, 0.44444, 0, 0, 0.51667];
+var M235 = [0, 0.44444, 0, 0, 0.38333];
+var M236 = [0, 0.44444, 0, 0, 0.51667];
+var M237 = [0, 0.69444, 0, 0, 0.83334];
+var M238 = [0.35001, 0.85, 0, 0, 0.45834];
+var M239 = [0.35001, 0.85, 0, 0, 0.57778];
+var M240 = [0.35001, 0.85, 0, 0, 0.41667];
+var M241 = [0.35001, 0.85, 0, 0, 0.58334];
+var M242 = [0, 0.72222, 0, 0, 0.55556];
+var M243 = [1e-5, 0.6, 0, 0, 0.66667];
+var M244 = [1e-5, 0.6, 0, 0, 0.77778];
+var M245 = [0.25001, 0.75, 0, 0, 0.94445];
+var M246 = [0.306, 0.805, 0.19445, 0, 0.47222];
+var M247 = [0.30612, 0.805, 0.19445, 0, 0.47222];
+var M248 = [0.25001, 0.75, 0, 0, 0.83334];
+var M249 = [0.35001, 0.85, 0, 0, 0.47222];
+var M250 = [0.25001, 0.75, 0, 0, 1.11111];
+var M251 = [0.65002, 1.15, 0, 0, 0.59722];
+var M252 = [0.65002, 1.15, 0, 0, 0.81111];
+var M253 = [0.65002, 1.15, 0, 0, 0.47222];
+var M254 = [0.65002, 1.15, 0, 0, 0.66667];
+var M255 = [0, 0.75, 0, 0, 1];
+var M256 = [0.55001, 1.05, 0, 0, 1.27778];
+var M257 = [0.862, 1.36, 0.44445, 0, 0.55556];
+var M258 = [0.86225, 1.36, 0.44445, 0, 0.55556];
+var M259 = [0.55001, 1.05, 0, 0, 1.11111];
+var M260 = [0.65002, 1.15, 0, 0, 0.52778];
+var M261 = [0.65002, 1.15, 0, 0, 0.61111];
+var M262 = [0.55001, 1.05, 0, 0, 1.51112];
+var M263 = [0.95003, 1.45, 0, 0, 0.73611];
+var M264 = [0.95003, 1.45, 0, 0, 1.04445];
+var M265 = [0.95003, 1.45, 0, 0, 0.52778];
+var M266 = [0.95003, 1.45, 0, 0, 0.75];
+var M267 = [0, 0.75, 0, 0, 1.44445];
+var M268 = [0.95003, 1.45, 0, 0, 0.58334];
+var M269 = [1.25003, 1.75, 0, 0, 0.79167];
+var M270 = [1.25003, 1.75, 0, 0, 1.27778];
+var M271 = [1.25003, 1.75, 0, 0, 0.58334];
+var M272 = [1.25003, 1.75, 0, 0, 0.80556];
+var M273 = [0, 0.825, 0, 0, 1.8889];
+var M274 = [1.25003, 1.75, 0, 0, 0.63889];
+var M275 = [0.64502, 1.155, 0, 0, 0.875];
+var M276 = [1e-5, 0.6, 0, 0, 0.875];
+var M277 = [-99e-5, 0.601, 0, 0, 0.66667];
+var M278 = [0.64502, 1.155, 0, 0, 0.66667];
+var M279 = [1e-5, 0.9, 0, 0, 0.88889];
+var M280 = [0.65002, 1.15, 0, 0, 0.88889];
+var M281 = [0.90001, 0, 0, 0, 0.88889];
+var M282 = [-499e-5, 0.605, 0, 0, 1.05556];
+var M283 = [0, 0.12, 0, 0, 0.45];
+var M284 = [0, 0.61111, 0, 0, 0.525];
+var M285 = [0.08333, 0.69444, 0, 0, 0.525];
+var M286 = [-0.08056, 0.53055, 0, 0, 0.525];
+var M287 = [-0.05556, 0.55556, 0, 0, 0.525];
+var M288 = [0, 0.43056, 0, 0, 0.525];
+var M289 = [0.22222, 0.43056, 0, 0, 0.525];
+var M290 = [0, 0, 0, 0, 0.525];
 var font_metrics_data_default = {
   "AMS-Regular": {
-    "32": M0,
-    "65": M1,
-    "66": M1,
-    "67": M1,
-    "68": M1,
-    "69": M1,
-    "70": M1,
-    "71": M1,
-    "72": M1,
-    "73": M1,
-    "74": M2,
-    "75": M1,
-    "76": M1,
-    "77": M1,
-    "78": M1,
-    "79": M2,
-    "80": M1,
-    "81": M2,
-    "82": M1,
-    "83": M1,
-    "84": M1,
-    "85": M1,
-    "86": M1,
-    "87": M1,
-    "88": M1,
-    "89": M1,
-    "90": M1,
-    "107": M1,
-    "160": M0,
-    "165": [0, 0.675, 0.025, 0],
-    "174": [0.15559, 0.69224, 0, 0],
-    "240": M1,
-    "295": M1,
-    "710": [0, 0.825, 0, 0],
-    "732": [0, 0.9, 0, 0],
-    "770": [0, 0.825, 0, 0],
-    "771": [0, 0.9, 0, 0],
-    "989": M23,
-    "1008": [0, 0.43056, 0.04028, 0],
-    "8245": [0, 0.54986, 0, 0],
-    "8463": M1,
-    "8487": M1,
-    "8498": M1,
-    "8502": M1,
-    "8503": M1,
-    "8504": M1,
-    "8513": M1,
-    "8592": [-0.03598, 0.46402, 0, 0],
-    "8594": [-0.03598, 0.46402, 0, 0],
-    "8602": [-0.13313, 0.36687, 0, 0],
-    "8603": [-0.13313, 0.36687, 0, 0],
-    "8606": [0.01354, 0.52239, 0, 0],
-    "8608": [0.01354, 0.52239, 0, 0],
-    "8610": [0.01354, 0.52239, 0, 0],
-    "8611": [0.01354, 0.52239, 0, 0],
-    "8619": [0, 0.54986, 0, 0],
-    "8620": [0, 0.54986, 0, 0],
-    "8621": [-0.13313, 0.37788, 0, 0],
-    "8622": [-0.13313, 0.36687, 0, 0],
-    "8624": M3,
-    "8625": M3,
-    "8630": [0, 0.43056, 0, 0],
-    "8631": [0, 0.43056, 0, 0],
-    "8634": [0.08198, 0.58198, 0, 0],
-    "8635": [0.08198, 0.58198, 0, 0],
-    "8638": [0.19444, 0.69224, 0, 0],
-    "8639": [0.19444, 0.69224, 0, 0],
-    "8642": [0.19444, 0.69224, 0, 0],
-    "8643": [0.19444, 0.69224, 0, 0],
-    "8644": [0.1808, 0.675, 0, 0],
-    "8646": [0.1808, 0.675, 0, 0],
-    "8647": [0.1808, 0.675, 0, 0],
-    "8648": [0.19444, 0.69224, 0, 0],
-    "8649": [0.1808, 0.675, 0, 0],
-    "8650": [0.19444, 0.69224, 0, 0],
-    "8651": [0.01354, 0.52239, 0, 0],
-    "8652": [0.01354, 0.52239, 0, 0],
-    "8653": [-0.13313, 0.36687, 0, 0],
-    "8654": [-0.13313, 0.36687, 0, 0],
-    "8655": [-0.13313, 0.36687, 0, 0],
-    "8666": [0.13667, 0.63667, 0, 0],
-    "8667": [0.13667, 0.63667, 0, 0],
-    "8669": [-0.13313, 0.37788, 0, 0],
-    "8672": [-0.064, 0.437, 0, 0],
-    "8674": [-0.064, 0.437, 0, 0],
-    "8705": [0, 0.825, 0, 0],
-    "8708": M1,
-    "8709": M23,
-    "8717": [0, 0.43056, 0, 0],
-    "8722": [-0.03598, 0.46402, 0, 0],
-    "8724": [0.08198, 0.69224, 0, 0],
-    "8726": M23,
-    "8733": M3,
-    "8736": M3,
-    "8737": M3,
-    "8738": [0.03517, 0.52239, 0, 0],
-    "8739": M23,
-    "8740": [0.25142, 0.74111, 0, 0],
-    "8741": M23,
-    "8742": [0.25142, 0.74111, 0, 0],
-    "8756": M3,
-    "8757": M3,
-    "8764": [-0.13313, 0.36687, 0, 0],
-    "8765": [-0.13313, 0.37788, 0, 0],
-    "8769": [-0.13313, 0.36687, 0, 0],
-    "8770": [-0.03625, 0.46375, 0, 0],
-    "8774": [0.30274, 0.79383, 0, 0],
-    "8776": [-0.01688, 0.48312, 0, 0],
-    "8778": M23,
-    "8782": [0.06062, 0.54986, 0, 0],
-    "8783": [0.06062, 0.54986, 0, 0],
-    "8785": [0.08198, 0.58198, 0, 0],
-    "8786": [0.08198, 0.58198, 0, 0],
-    "8787": [0.08198, 0.58198, 0, 0],
-    "8790": M3,
-    "8791": [0.22958, 0.72958, 0, 0],
-    "8796": [0.08198, 0.91667, 0, 0],
-    "8806": [0.25583, 0.75583, 0, 0],
-    "8807": [0.25583, 0.75583, 0, 0],
-    "8808": [0.25142, 0.75726, 0, 0],
-    "8809": [0.25142, 0.75726, 0, 0],
-    "8812": [0.25583, 0.75583, 0, 0],
-    "8814": [0.20576, 0.70576, 0, 0],
-    "8815": [0.20576, 0.70576, 0, 0],
-    "8816": [0.30274, 0.79383, 0, 0],
-    "8817": [0.30274, 0.79383, 0, 0],
-    "8818": [0.22958, 0.72958, 0, 0],
-    "8819": [0.22958, 0.72958, 0, 0],
-    "8822": [0.1808, 0.675, 0, 0],
-    "8823": [0.1808, 0.675, 0, 0],
-    "8828": [0.13667, 0.63667, 0, 0],
-    "8829": [0.13667, 0.63667, 0, 0],
-    "8830": [0.22958, 0.72958, 0, 0],
-    "8831": [0.22958, 0.72958, 0, 0],
-    "8832": [0.20576, 0.70576, 0, 0],
-    "8833": [0.20576, 0.70576, 0, 0],
-    "8840": [0.30274, 0.79383, 0, 0],
-    "8841": [0.30274, 0.79383, 0, 0],
-    "8842": [0.13597, 0.63597, 0, 0],
-    "8843": [0.13597, 0.63597, 0, 0],
-    "8847": [0.03517, 0.54986, 0, 0],
-    "8848": [0.03517, 0.54986, 0, 0],
-    "8858": [0.08198, 0.58198, 0, 0],
-    "8859": [0.08198, 0.58198, 0, 0],
-    "8861": [0.08198, 0.58198, 0, 0],
-    "8862": [0, 0.675, 0, 0],
-    "8863": [0, 0.675, 0, 0],
-    "8864": [0, 0.675, 0, 0],
-    "8865": [0, 0.675, 0, 0],
-    "8872": M3,
-    "8873": M3,
-    "8874": M3,
-    "8876": M1,
-    "8877": M1,
-    "8878": M1,
-    "8879": M1,
-    "8882": [0.03517, 0.54986, 0, 0],
-    "8883": [0.03517, 0.54986, 0, 0],
-    "8884": [0.13667, 0.63667, 0, 0],
-    "8885": [0.13667, 0.63667, 0, 0],
-    "8888": [0, 0.54986, 0, 0],
-    "8890": [0.19444, 0.43056, 0, 0],
-    "8891": [0.19444, 0.69224, 0, 0],
-    "8892": [0.19444, 0.69224, 0, 0],
-    "8901": [0, 0.54986, 0, 0],
-    "8903": M23,
-    "8905": M23,
-    "8906": M23,
-    "8907": M3,
-    "8908": M3,
-    "8909": [-0.03598, 0.46402, 0, 0],
-    "8910": [0, 0.54986, 0, 0],
-    "8911": [0, 0.54986, 0, 0],
-    "8912": [0.03517, 0.54986, 0, 0],
-    "8913": [0.03517, 0.54986, 0, 0],
-    "8914": [0, 0.54986, 0, 0],
-    "8915": [0, 0.54986, 0, 0],
-    "8916": M3,
-    "8918": [0.0391, 0.5391, 0, 0],
-    "8919": [0.0391, 0.5391, 0, 0],
-    "8920": [0.03517, 0.54986, 0, 0],
-    "8921": [0.03517, 0.54986, 0, 0],
-    "8922": [0.38569, 0.88569, 0, 0],
-    "8923": [0.38569, 0.88569, 0, 0],
-    "8926": [0.13667, 0.63667, 0, 0],
-    "8927": [0.13667, 0.63667, 0, 0],
-    "8928": [0.30274, 0.79383, 0, 0],
-    "8929": [0.30274, 0.79383, 0, 0],
-    "8934": [0.23222, 0.74111, 0, 0],
-    "8935": [0.23222, 0.74111, 0, 0],
-    "8936": [0.23222, 0.74111, 0, 0],
-    "8937": [0.23222, 0.74111, 0, 0],
-    "8938": [0.20576, 0.70576, 0, 0],
-    "8939": [0.20576, 0.70576, 0, 0],
-    "8940": [0.30274, 0.79383, 0, 0],
-    "8941": [0.30274, 0.79383, 0, 0],
-    "8994": [0.19444, 0.69224, 0, 0],
-    "8995": [0.19444, 0.69224, 0, 0],
-    "9416": [0.15559, 0.69224, 0, 0],
-    "9484": M3,
-    "9488": M3,
-    "9492": [0, 0.37788, 0, 0],
-    "9496": [0, 0.37788, 0, 0],
-    "9585": [0.19444, 0.68889, 0, 0],
-    "9586": [0.19444, 0.74111, 0, 0],
-    "9632": [0, 0.675, 0, 0],
-    "9633": [0, 0.675, 0, 0],
-    "9650": [0, 0.54986, 0, 0],
-    "9651": [0, 0.54986, 0, 0],
-    "9654": [0.03517, 0.54986, 0, 0],
-    "9660": [0, 0.54986, 0, 0],
-    "9661": [0, 0.54986, 0, 0],
-    "9664": [0.03517, 0.54986, 0, 0],
-    "9674": [0.11111, 0.69224, 0, 0],
-    "9733": [0.19444, 0.69224, 0, 0],
-    "10003": M3,
-    "10016": M3,
-    "10731": [0.11111, 0.69224, 0, 0],
-    "10846": [0.19444, 0.75583, 0, 0],
-    "10877": [0.13667, 0.63667, 0, 0],
-    "10878": [0.13667, 0.63667, 0, 0],
-    "10885": [0.25583, 0.75583, 0, 0],
-    "10886": [0.25583, 0.75583, 0, 0],
-    "10887": [0.13597, 0.63597, 0, 0],
-    "10888": [0.13597, 0.63597, 0, 0],
-    "10889": [0.26167, 0.75726, 0, 0],
-    "10890": [0.26167, 0.75726, 0, 0],
-    "10891": [0.48256, 0.98256, 0, 0],
-    "10892": [0.48256, 0.98256, 0, 0],
-    "10901": [0.13667, 0.63667, 0, 0],
-    "10902": [0.13667, 0.63667, 0, 0],
-    "10933": [0.25142, 0.75726, 0, 0],
-    "10934": [0.25142, 0.75726, 0, 0],
-    "10935": [0.26167, 0.75726, 0, 0],
-    "10936": [0.26167, 0.75726, 0, 0],
-    "10937": [0.26167, 0.75726, 0, 0],
-    "10938": [0.26167, 0.75726, 0, 0],
-    "10949": [0.25583, 0.75583, 0, 0],
-    "10950": [0.25583, 0.75583, 0, 0],
-    "10955": [0.28481, 0.79383, 0, 0],
-    "10956": [0.28481, 0.79383, 0, 0],
-    "57350": M23,
-    "57351": M23,
-    "57352": M23,
-    "57353": [0, 0.43056, 0.04028, 0],
-    "57356": [0.25142, 0.75726, 0, 0],
-    "57357": [0.25142, 0.75726, 0, 0],
-    "57358": [0.41951, 0.91951, 0, 0],
-    "57359": [0.30274, 0.79383, 0, 0],
-    "57360": [0.30274, 0.79383, 0, 0],
-    "57361": [0.41951, 0.91951, 0, 0],
-    "57366": [0.25142, 0.75726, 0, 0],
-    "57367": [0.25142, 0.75726, 0, 0],
-    "57368": [0.25142, 0.75726, 0, 0],
-    "57369": [0.25142, 0.75726, 0, 0],
-    "57370": [0.13597, 0.63597, 0, 0],
-    "57371": [0.13597, 0.63597, 0, 0]
+    32: M7,
+    // U+0020
+    65: M1,
+    // U+0041 A
+    66: M2,
+    // U+0042 B
+    67: M1,
+    // U+0043 C
+    68: M1,
+    // U+0044 D
+    69: M2,
+    // U+0045 E
+    70: M4,
+    // U+0046 F
+    71: M3,
+    // U+0047 G
+    72: M3,
+    // U+0048 H
+    73: [0, 0.68889, 0, 0, 0.38889],
+    // U+0049 I
+    74: [0.16667, 0.68889, 0, 0, 0.5],
+    // U+004a J
+    75: M3,
+    // U+004b K
+    76: M2,
+    // U+004c L
+    77: [0, 0.68889, 0, 0, 0.94445],
+    // U+004d M
+    78: M1,
+    // U+004e N
+    79: M5,
+    // U+004f O
+    80: M4,
+    // U+0050 P
+    81: M5,
+    // U+0051 Q
+    82: M1,
+    // U+0052 R
+    83: M6,
+    // U+0053 S
+    84: M2,
+    // U+0054 T
+    85: M1,
+    // U+0055 U
+    86: M1,
+    // U+0056 V
+    87: [0, 0.68889, 0, 0, 1],
+    // U+0057 W
+    88: M1,
+    // U+0058 X
+    89: M1,
+    // U+0059 Y
+    90: M2,
+    // U+005a Z
+    107: M6,
+    // U+006b k
+    160: M7,
+    // U+00a0
+    165: [0, 0.675, 0.025, 0, 0.75],
+    // U+00a5 ¥
+    174: [0.15559, 0.69224, 0, 0, 0.94666],
+    // U+00ae ®
+    240: M6,
+    // U+00f0 ð
+    295: M10,
+    // U+0127 ħ
+    710: M8,
+    // U+02c6 ˆ
+    732: M9,
+    // U+02dc ˜
+    770: M8,
+    // U+0302 ̂
+    771: M9,
+    // U+0303 ̃
+    989: M24,
+    // U+03dd ϝ
+    1008: M57,
+    // U+03f0 ϰ
+    8245: [0, 0.54986, 0, 0, 0.275],
+    // U+2035 ‵
+    8463: M10,
+    // U+210f ℏ
+    8487: M1,
+    // U+2127 ℧
+    8498: M6,
+    // U+2132 Ⅎ
+    8502: M2,
+    // U+2136 ℶ
+    8503: [0, 0.68889, 0, 0, 0.44445],
+    // U+2137 ℷ
+    8504: M2,
+    // U+2138 ℸ
+    8513: [0, 0.68889, 0, 0, 0.63889],
+    // U+2141 ⅁
+    8592: M11,
+    // U+2190 ←
+    8594: M11,
+    // U+2192 →
+    8602: M12,
+    // U+219a ↚
+    8603: M12,
+    // U+219b ↛
+    8606: M13,
+    // U+219e ↞
+    8608: M13,
+    // U+21a0 ↠
+    8610: M14,
+    // U+21a2 ↢
+    8611: M14,
+    // U+21a3 ↣
+    8619: M15,
+    // U+21ab ↫
+    8620: M15,
+    // U+21ac ↬
+    8621: [-0.13313, 0.37788, 0, 0, 1.38889],
+    // U+21ad ↭
+    8622: M12,
+    // U+21ae ↮
+    8624: M16,
+    // U+21b0 ↰
+    8625: M16,
+    // U+21b1 ↱
+    8630: M17,
+    // U+21b6 ↶
+    8631: M17,
+    // U+21b7 ↷
+    8634: M18,
+    // U+21ba ↺
+    8635: M18,
+    // U+21bb ↻
+    8638: M19,
+    // U+21be ↾
+    8639: M19,
+    // U+21bf ↿
+    8642: M19,
+    // U+21c2 ⇂
+    8643: M19,
+    // U+21c3 ⇃
+    8644: M20,
+    // U+21c4 ⇄
+    8646: M20,
+    // U+21c6 ⇆
+    8647: M20,
+    // U+21c7 ⇇
+    8648: M21,
+    // U+21c8 ⇈
+    8649: M20,
+    // U+21c9 ⇉
+    8650: M21,
+    // U+21ca ⇊
+    8651: M13,
+    // U+21cb ⇋
+    8652: M13,
+    // U+21cc ⇌
+    8653: M12,
+    // U+21cd ⇍
+    8654: M12,
+    // U+21ce ⇎
+    8655: M12,
+    // U+21cf ⇏
+    8666: M22,
+    // U+21da ⇚
+    8667: M22,
+    // U+21db ⇛
+    8669: [-0.13313, 0.37788, 0, 0, 1],
+    // U+21dd ⇝
+    8672: M23,
+    // U+21e0 ⇠
+    8674: M23,
+    // U+21e2 ⇢
+    8705: [0, 0.825, 0, 0, 0.5],
+    // U+2201 ∁
+    8708: M6,
+    // U+2204 ∄
+    8709: M24,
+    // U+2205 ∅
+    8717: [0, 0.43056, 0, 0, 0.42917],
+    // U+220d ∍
+    8722: M11,
+    // U+2212 −
+    8724: [0.08198, 0.69224, 0, 0, 0.77778],
+    // U+2214 ∔
+    8726: M24,
+    // U+2216 ∖
+    8733: M29,
+    // U+221d ∝
+    8736: M25,
+    // U+2220 ∠
+    8737: M25,
+    // U+2221 ∡
+    8738: [0.03517, 0.52239, 0, 0, 0.72222],
+    // U+2222 ∢
+    8739: M55,
+    // U+2223 ∣
+    8740: [0.25142, 0.74111, 0, 0, 0.27778],
+    // U+2224 ∤
+    8741: M56,
+    // U+2225 ∥
+    8742: [0.25142, 0.74111, 0, 0, 0.5],
+    // U+2226 ∦
+    8756: M26,
+    // U+2234 ∴
+    8757: M26,
+    // U+2235 ∵
+    8764: M27,
+    // U+223c ∼
+    8765: [-0.13313, 0.37788, 0, 0, 0.77778],
+    // U+223d ∽
+    8769: M27,
+    // U+2241 ≁
+    8770: M167,
+    // U+2242 ≂
+    8774: M33,
+    // U+2246 ≆
+    8776: M168,
+    // U+2248 ≈
+    8778: M24,
+    // U+224a ≊
+    8782: M28,
+    // U+224e ≎
+    8783: M28,
+    // U+224f ≏
+    8785: M18,
+    // U+2251 ≑
+    8786: M18,
+    // U+2252 ≒
+    8787: M18,
+    // U+2253 ≓
+    8790: M29,
+    // U+2256 ≖
+    8791: M34,
+    // U+2257 ≗
+    8796: [0.08198, 0.91667, 0, 0, 0.77778],
+    // U+225c ≜
+    8806: M30,
+    // U+2266 ≦
+    8807: M30,
+    // U+2267 ≧
+    8808: M31,
+    // U+2268 ≨
+    8809: M31,
+    // U+2269 ≩
+    8812: [0.25583, 0.75583, 0, 0, 0.5],
+    // U+226c ≬
+    8814: M32,
+    // U+226e ≮
+    8815: M32,
+    // U+226f ≯
+    8816: M33,
+    // U+2270 ≰
+    8817: M33,
+    // U+2271 ≱
+    8818: M34,
+    // U+2272 ≲
+    8819: M34,
+    // U+2273 ≳
+    8822: M35,
+    // U+2276 ≶
+    8823: M35,
+    // U+2277 ≷
+    8828: M36,
+    // U+227c ≼
+    8829: M36,
+    // U+227d ≽
+    8830: M34,
+    // U+227e ≾
+    8831: M34,
+    // U+227f ≿
+    8832: M32,
+    // U+2280 ⊀
+    8833: M32,
+    // U+2281 ⊁
+    8840: M33,
+    // U+2288 ⊈
+    8841: M33,
+    // U+2289 ⊉
+    8842: M37,
+    // U+228a ⊊
+    8843: M37,
+    // U+228b ⊋
+    8847: M38,
+    // U+228f ⊏
+    8848: M38,
+    // U+2290 ⊐
+    8858: M18,
+    // U+229a ⊚
+    8859: M18,
+    // U+229b ⊛
+    8861: M18,
+    // U+229d ⊝
+    8862: M39,
+    // U+229e ⊞
+    8863: M39,
+    // U+229f ⊟
+    8864: M39,
+    // U+22a0 ⊠
+    8865: M39,
+    // U+22a1 ⊡
+    8872: [0, 0.69224, 0, 0, 0.61111],
+    // U+22a8 ⊨
+    8873: M25,
+    // U+22a9 ⊩
+    8874: [0, 0.69224, 0, 0, 0.88889],
+    // U+22aa ⊪
+    8876: M4,
+    // U+22ac ⊬
+    8877: M4,
+    // U+22ad ⊭
+    8878: M1,
+    // U+22ae ⊮
+    8879: M1,
+    // U+22af ⊯
+    8882: M38,
+    // U+22b2 ⊲
+    8883: M38,
+    // U+22b3 ⊳
+    8884: M36,
+    // U+22b4 ⊴
+    8885: M36,
+    // U+22b5 ⊵
+    8888: [0, 0.54986, 0, 0, 1.11111],
+    // U+22b8 ⊸
+    8890: M147,
+    // U+22ba ⊺
+    8891: M40,
+    // U+22bb ⊻
+    8892: M40,
+    // U+22bc ⊼
+    8901: [0, 0.54986, 0, 0, 0.27778],
+    // U+22c5 ⋅
+    8903: M24,
+    // U+22c7 ⋇
+    8905: M24,
+    // U+22c9 ⋉
+    8906: M24,
+    // U+22ca ⋊
+    8907: M29,
+    // U+22cb ⋋
+    8908: M29,
+    // U+22cc ⋌
+    8909: [-0.03598, 0.46402, 0, 0, 0.77778],
+    // U+22cd ⋍
+    8910: M41,
+    // U+22ce ⋎
+    8911: M41,
+    // U+22cf ⋏
+    8912: M38,
+    // U+22d0 ⋐
+    8913: M38,
+    // U+22d1 ⋑
+    8914: M42,
+    // U+22d2 ⋒
+    8915: M42,
+    // U+22d3 ⋓
+    8916: M26,
+    // U+22d4 ⋔
+    8918: M43,
+    // U+22d6 ⋖
+    8919: M43,
+    // U+22d7 ⋗
+    8920: M44,
+    // U+22d8 ⋘
+    8921: M44,
+    // U+22d9 ⋙
+    8922: M45,
+    // U+22da ⋚
+    8923: M45,
+    // U+22db ⋛
+    8926: M36,
+    // U+22de ⋞
+    8927: M36,
+    // U+22df ⋟
+    8928: M33,
+    // U+22e0 ⋠
+    8929: M33,
+    // U+22e1 ⋡
+    8934: M46,
+    // U+22e6 ⋦
+    8935: M46,
+    // U+22e7 ⋧
+    8936: M46,
+    // U+22e8 ⋨
+    8937: M46,
+    // U+22e9 ⋩
+    8938: M32,
+    // U+22ea ⋪
+    8939: M32,
+    // U+22eb ⋫
+    8940: M33,
+    // U+22ec ⋬
+    8941: M33,
+    // U+22ed ⋭
+    8994: M47,
+    // U+2322 ⌢
+    8995: M47,
+    // U+2323 ⌣
+    9416: [0.15559, 0.69224, 0, 0, 0.90222],
+    // U+24c8 Ⓢ
+    9484: M16,
+    // U+250c ┌
+    9488: M16,
+    // U+2510 ┐
+    9492: M48,
+    // U+2514 └
+    9496: M48,
+    // U+2518 ┘
+    9585: [0.19444, 0.68889, 0, 0, 0.88889],
+    // U+2571 ╱
+    9586: [0.19444, 0.74111, 0, 0, 0.88889],
+    // U+2572 ╲
+    9632: M39,
+    // U+25a0 ■
+    9633: M39,
+    // U+25a1 □
+    9650: M49,
+    // U+25b2 ▲
+    9651: M49,
+    // U+25b3 △
+    9654: M38,
+    // U+25b6 ▶
+    9660: M49,
+    // U+25bc ▼
+    9661: M49,
+    // U+25bd ▽
+    9664: M38,
+    // U+25c0 ◀
+    9674: M51,
+    // U+25ca ◊
+    9733: [0.19444, 0.69224, 0, 0, 0.94445],
+    // U+2605 ★
+    10003: M50,
+    // U+2713 ✓
+    10016: M50,
+    // U+2720 ✠
+    10731: M51,
+    // U+29eb ⧫
+    10846: [0.19444, 0.75583, 0, 0, 0.61111],
+    // U+2a5e ⩞
+    10877: M36,
+    // U+2a7d ⩽
+    10878: M36,
+    // U+2a7e ⩾
+    10885: M30,
+    // U+2a85 ⪅
+    10886: M30,
+    // U+2a86 ⪆
+    10887: M37,
+    // U+2a87 ⪇
+    10888: M37,
+    // U+2a88 ⪈
+    10889: M52,
+    // U+2a89 ⪉
+    10890: M52,
+    // U+2a8a ⪊
+    10891: M53,
+    // U+2a8b ⪋
+    10892: M53,
+    // U+2a8c ⪌
+    10901: M36,
+    // U+2a95 ⪕
+    10902: M36,
+    // U+2a96 ⪖
+    10933: M31,
+    // U+2ab5 ⪵
+    10934: M31,
+    // U+2ab6 ⪶
+    10935: M52,
+    // U+2ab7 ⪷
+    10936: M52,
+    // U+2ab8 ⪸
+    10937: M52,
+    // U+2ab9 ⪹
+    10938: M52,
+    // U+2aba ⪺
+    10949: M30,
+    // U+2ac5 ⫅
+    10950: M30,
+    // U+2ac6 ⫆
+    10955: M54,
+    // U+2acb ⫋
+    10956: M54,
+    // U+2acc ⫌
+    57350: M55,
+    // U+e006 
+    57351: M56,
+    // U+e007 
+    57352: M24,
+    // U+e008 
+    57353: M57,
+    // U+e009 
+    57356: M31,
+    // U+e00c 
+    57357: M31,
+    // U+e00d 
+    57358: M58,
+    // U+e00e 
+    57359: M33,
+    // U+e00f 
+    57360: M33,
+    // U+e010 
+    57361: M58,
+    // U+e011 
+    57366: M31,
+    // U+e016 
+    57367: M31,
+    // U+e017 
+    57368: M31,
+    // U+e018 
+    57369: M31,
+    // U+e019 
+    57370: M37,
+    // U+e01a 
+    57371: M37
+    // U+e01b 
   },
   "Caligraphic-Regular": {
-    "32": M0,
-    "65": [0, 0.68333, 0, 0.19445],
-    "66": [0, 0.68333, 0.03041, 0.13889],
-    "67": [0, 0.68333, 0.05834, 0.13889],
-    "68": [0, 0.68333, 0.02778, 0.08334],
-    "69": [0, 0.68333, 0.08944, 0.11111],
-    "70": [0, 0.68333, 0.09931, 0.11111],
-    "71": [0.09722, 0.68333, 0.0593, 0.11111],
-    "72": [0, 0.68333, 965e-5, 0.11111],
-    "73": [0, 0.68333, 0.07382, 0],
-    "74": [0.09722, 0.68333, 0.18472, 0.16667],
-    "75": [0, 0.68333, 0.01445, 0.05556],
-    "76": [0, 0.68333, 0, 0.13889],
-    "77": [0, 0.68333, 0, 0.13889],
-    "78": [0, 0.68333, 0.14736, 0.08334],
-    "79": [0, 0.68333, 0.02778, 0.11111],
-    "80": [0, 0.68333, 0.08222, 0.08334],
-    "81": [0.09722, 0.68333, 0, 0.11111],
-    "82": [0, 0.68333, 0, 0.08334],
-    "83": [0, 0.68333, 0.075, 0.13889],
-    "84": [0, 0.68333, 0.25417, 0],
-    "85": [0, 0.68333, 0.09931, 0.08334],
-    "86": [0, 0.68333, 0.08222, 0],
-    "87": [0, 0.68333, 0.08222, 0.08334],
-    "88": [0, 0.68333, 0.14643, 0.13889],
-    "89": [0.09722, 0.68333, 0.08222, 0.08334],
-    "90": [0, 0.68333, 0.07944, 0.13889],
-    "160": M0
+    32: M7,
+    // U+0020
+    65: [0, 0.68333, 0, 0.19445, 0.79847],
+    // U+0041 A
+    66: [0, 0.68333, 0.03041, 0.13889, 0.65681],
+    // U+0042 B
+    67: [0, 0.68333, 0.05834, 0.13889, 0.52653],
+    // U+0043 C
+    68: [0, 0.68333, 0.02778, 0.08334, 0.77139],
+    // U+0044 D
+    69: [0, 0.68333, 0.08944, 0.11111, 0.52778],
+    // U+0045 E
+    70: [0, 0.68333, 0.09931, 0.11111, 0.71875],
+    // U+0046 F
+    71: [0.09722, 0.68333, 0.0593, 0.11111, 0.59487],
+    // U+0047 G
+    72: [0, 0.68333, 965e-5, 0.11111, 0.84452],
+    // U+0048 H
+    73: [0, 0.68333, 0.07382, 0, 0.54452],
+    // U+0049 I
+    74: [0.09722, 0.68333, 0.18472, 0.16667, 0.67778],
+    // U+004a J
+    75: [0, 0.68333, 0.01445, 0.05556, 0.76195],
+    // U+004b K
+    76: [0, 0.68333, 0, 0.13889, 0.68972],
+    // U+004c L
+    77: [0, 0.68333, 0, 0.13889, 1.2009],
+    // U+004d M
+    78: [0, 0.68333, 0.14736, 0.08334, 0.82049],
+    // U+004e N
+    79: [0, 0.68333, 0.02778, 0.11111, 0.79611],
+    // U+004f O
+    80: [0, 0.68333, 0.08222, 0.08334, 0.69556],
+    // U+0050 P
+    81: [0.09722, 0.68333, 0, 0.11111, 0.81667],
+    // U+0051 Q
+    82: [0, 0.68333, 0, 0.08334, 0.8475],
+    // U+0052 R
+    83: [0, 0.68333, 0.075, 0.13889, 0.60556],
+    // U+0053 S
+    84: [0, 0.68333, 0.25417, 0, 0.54464],
+    // U+0054 T
+    85: [0, 0.68333, 0.09931, 0.08334, 0.62583],
+    // U+0055 U
+    86: [0, 0.68333, 0.08222, 0, 0.61278],
+    // U+0056 V
+    87: [0, 0.68333, 0.08222, 0.08334, 0.98778],
+    // U+0057 W
+    88: [0, 0.68333, 0.14643, 0.13889, 0.7133],
+    // U+0058 X
+    89: [0.09722, 0.68333, 0.08222, 0.08334, 0.66834],
+    // U+0059 Y
+    90: [0, 0.68333, 0.07944, 0.13889, 0.72473],
+    // U+005a Z
+    160: M7
+    // U+00a0
   },
   "Fraktur-Regular": {
-    "32": M0,
-    "33": M21,
-    "34": M21,
-    "38": M21,
-    "39": M21,
-    "40": [0.24982, 0.74947, 0, 0],
-    "41": [0.24982, 0.74947, 0, 0],
-    "42": [0, 0.62119, 0, 0],
-    "43": [0.08319, 0.58283, 0, 0],
-    "44": [0, 0.10803, 0, 0],
-    "45": [0.08319, 0.58283, 0, 0],
-    "46": [0, 0.10803, 0, 0],
-    "47": [0.24982, 0.74947, 0, 0],
-    "48": M22,
-    "49": M22,
-    "50": M22,
-    "51": [0.18906, 0.47534, 0, 0],
-    "52": [0.18906, 0.47534, 0, 0],
-    "53": [0.18906, 0.47534, 0, 0],
-    "54": M21,
-    "55": [0.18906, 0.47534, 0, 0],
-    "56": M21,
-    "57": [0.18906, 0.47534, 0, 0],
-    "58": M22,
-    "59": [0.12604, 0.47534, 0, 0],
-    "61": [-0.13099, 0.36866, 0, 0],
-    "63": M21,
-    "65": M21,
-    "66": M21,
-    "67": M21,
-    "68": M21,
-    "69": M21,
-    "70": [0.12604, 0.69141, 0, 0],
-    "71": M21,
-    "72": [0.06302, 0.69141, 0, 0],
-    "73": M21,
-    "74": [0.12604, 0.69141, 0, 0],
-    "75": M21,
-    "76": M21,
-    "77": M21,
-    "78": M21,
-    "79": M21,
-    "80": [0.18906, 0.69141, 0, 0],
-    "81": [0.03781, 0.69141, 0, 0],
-    "82": M21,
-    "83": M21,
-    "84": M21,
-    "85": M21,
-    "86": M21,
-    "87": M21,
-    "88": M21,
-    "89": [0.18906, 0.69141, 0, 0],
-    "90": [0.12604, 0.69141, 0, 0],
-    "91": [0.24982, 0.74947, 0, 0],
-    "93": [0.24982, 0.74947, 0, 0],
-    "94": M21,
-    "97": M22,
-    "98": M21,
-    "99": M22,
-    "100": [0, 0.62119, 0, 0],
-    "101": M22,
-    "102": [0.18906, 0.69141, 0, 0],
-    "103": [0.18906, 0.47534, 0, 0],
-    "104": [0.18906, 0.69141, 0, 0],
-    "105": M21,
-    "106": M21,
-    "107": M21,
-    "108": M21,
-    "109": M22,
-    "110": M22,
-    "111": M22,
-    "112": [0.18906, 0.52396, 0, 0],
-    "113": [0.18906, 0.47534, 0, 0],
-    "114": M22,
-    "115": M22,
-    "116": [0, 0.62119, 0, 0],
-    "117": M22,
-    "118": [0, 0.52396, 0, 0],
-    "119": [0, 0.52396, 0, 0],
-    "120": [0.18906, 0.47534, 0, 0],
-    "121": [0.18906, 0.47534, 0, 0],
-    "122": [0.18906, 0.47534, 0, 0],
-    "160": M0,
-    "8216": M21,
-    "8217": M21,
-    "58112": [0, 0.62119, 0, 0],
-    "58113": [0, 0.62119, 0, 0],
-    "58114": [0.18906, 0.69141, 0, 0],
-    "58115": [0.18906, 0.69141, 0, 0],
-    "58116": [0.18906, 0.47534, 0, 0],
-    "58117": M21,
-    "58118": [0, 0.62119, 0, 0],
-    "58119": M22
+    32: M7,
+    // U+0020
+    33: [0, 0.69141, 0, 0, 0.29574],
+    // U+0021 !
+    34: M66,
+    // U+0022 "
+    38: [0, 0.69141, 0, 0, 0.73786],
+    // U+0026 &
+    39: [0, 0.69141, 0, 0, 0.21201],
+    // U+0027 '
+    40: M59,
+    // U+0028 (
+    41: M59,
+    // U+0029 )
+    42: [0, 0.62119, 0, 0, 0.27764],
+    // U+002a *
+    43: M60,
+    // U+002b +
+    44: M61,
+    // U+002c ,
+    45: M60,
+    // U+002d -
+    46: M61,
+    // U+002e .
+    47: [0.24982, 0.74947, 0, 0, 0.50181],
+    // U+002f /
+    48: M62,
+    // U+0030 0
+    49: M62,
+    // U+0031 1
+    50: M62,
+    // U+0032 2
+    51: M63,
+    // U+0033 3
+    52: M63,
+    // U+0034 4
+    53: M63,
+    // U+0035 5
+    54: M64,
+    // U+0036 6
+    55: M63,
+    // U+0037 7
+    56: M64,
+    // U+0038 8
+    57: M63,
+    // U+0039 9
+    58: [0, 0.47534, 0, 0, 0.21606],
+    // U+003a :
+    59: [0.12604, 0.47534, 0, 0, 0.21606],
+    // U+003b ;
+    61: [-0.13099, 0.36866, 0, 0, 0.75623],
+    // U+003d =
+    63: [0, 0.69141, 0, 0, 0.36245],
+    // U+003f ?
+    65: [0, 0.69141, 0, 0, 0.7176],
+    // U+0041 A
+    66: [0, 0.69141, 0, 0, 0.88397],
+    // U+0042 B
+    67: [0, 0.69141, 0, 0, 0.61254],
+    // U+0043 C
+    68: [0, 0.69141, 0, 0, 0.83158],
+    // U+0044 D
+    69: [0, 0.69141, 0, 0, 0.66278],
+    // U+0045 E
+    70: [0.12604, 0.69141, 0, 0, 0.61119],
+    // U+0046 F
+    71: [0, 0.69141, 0, 0, 0.78539],
+    // U+0047 G
+    72: [0.06302, 0.69141, 0, 0, 0.7203],
+    // U+0048 H
+    73: [0, 0.69141, 0, 0, 0.55448],
+    // U+0049 I
+    74: [0.12604, 0.69141, 0, 0, 0.55231],
+    // U+004a J
+    75: [0, 0.69141, 0, 0, 0.66845],
+    // U+004b K
+    76: [0, 0.69141, 0, 0, 0.66602],
+    // U+004c L
+    77: [0, 0.69141, 0, 0, 1.04953],
+    // U+004d M
+    78: [0, 0.69141, 0, 0, 0.83212],
+    // U+004e N
+    79: [0, 0.69141, 0, 0, 0.82699],
+    // U+004f O
+    80: [0.18906, 0.69141, 0, 0, 0.82753],
+    // U+0050 P
+    81: [0.03781, 0.69141, 0, 0, 0.82699],
+    // U+0051 Q
+    82: [0, 0.69141, 0, 0, 0.82807],
+    // U+0052 R
+    83: [0, 0.69141, 0, 0, 0.82861],
+    // U+0053 S
+    84: [0, 0.69141, 0, 0, 0.66899],
+    // U+0054 T
+    85: [0, 0.69141, 0, 0, 0.64576],
+    // U+0055 U
+    86: [0, 0.69141, 0, 0, 0.83131],
+    // U+0056 V
+    87: [0, 0.69141, 0, 0, 1.04602],
+    // U+0057 W
+    88: [0, 0.69141, 0, 0, 0.71922],
+    // U+0058 X
+    89: [0.18906, 0.69141, 0, 0, 0.83293],
+    // U+0059 Y
+    90: [0.12604, 0.69141, 0, 0, 0.60201],
+    // U+005a Z
+    91: M65,
+    // U+005b [
+    93: M65,
+    // U+005d ]
+    94: [0, 0.69141, 0, 0, 0.49965],
+    // U+005e ^
+    97: [0, 0.47534, 0, 0, 0.50046],
+    // U+0061 a
+    98: [0, 0.69141, 0, 0, 0.51315],
+    // U+0062 b
+    99: [0, 0.47534, 0, 0, 0.38946],
+    // U+0063 c
+    100: [0, 0.62119, 0, 0, 0.49857],
+    // U+0064 d
+    101: [0, 0.47534, 0, 0, 0.40053],
+    // U+0065 e
+    102: [0.18906, 0.69141, 0, 0, 0.32626],
+    // U+0066 f
+    103: [0.18906, 0.47534, 0, 0, 0.5037],
+    // U+0067 g
+    104: [0.18906, 0.69141, 0, 0, 0.52126],
+    // U+0068 h
+    105: [0, 0.69141, 0, 0, 0.27899],
+    // U+0069 i
+    106: [0, 0.69141, 0, 0, 0.28088],
+    // U+006a j
+    107: [0, 0.69141, 0, 0, 0.38946],
+    // U+006b k
+    108: [0, 0.69141, 0, 0, 0.27953],
+    // U+006c l
+    109: [0, 0.47534, 0, 0, 0.76676],
+    // U+006d m
+    110: [0, 0.47534, 0, 0, 0.52666],
+    // U+006e n
+    111: [0, 0.47534, 0, 0, 0.48885],
+    // U+006f o
+    112: [0.18906, 0.52396, 0, 0, 0.50046],
+    // U+0070 p
+    113: [0.18906, 0.47534, 0, 0, 0.48912],
+    // U+0071 q
+    114: [0, 0.47534, 0, 0, 0.38919],
+    // U+0072 r
+    115: [0, 0.47534, 0, 0, 0.44266],
+    // U+0073 s
+    116: [0, 0.62119, 0, 0, 0.33301],
+    // U+0074 t
+    117: [0, 0.47534, 0, 0, 0.5172],
+    // U+0075 u
+    118: [0, 0.52396, 0, 0, 0.5118],
+    // U+0076 v
+    119: [0, 0.52396, 0, 0, 0.77351],
+    // U+0077 w
+    120: [0.18906, 0.47534, 0, 0, 0.38865],
+    // U+0078 x
+    121: [0.18906, 0.47534, 0, 0, 0.49884],
+    // U+0079 y
+    122: [0.18906, 0.47534, 0, 0, 0.39054],
+    // U+007a z
+    160: M7,
+    // U+00a0
+    8216: M66,
+    // U+2018 ‘
+    8217: M66,
+    // U+2019 ’
+    58112: [0, 0.62119, 0, 0, 0.49749],
+    // U+e300 
+    58113: [0, 0.62119, 0, 0, 0.4983],
+    // U+e301 
+    58114: [0.18906, 0.69141, 0, 0, 0.33328],
+    // U+e302 
+    58115: [0.18906, 0.69141, 0, 0, 0.32923],
+    // U+e303 
+    58116: [0.18906, 0.47534, 0, 0, 0.50343],
+    // U+e304 
+    58117: [0, 0.69141, 0, 0, 0.33301],
+    // U+e305 
+    58118: [0, 0.62119, 0, 0, 0.33409],
+    // U+e306 
+    58119: [0, 0.47534, 0, 0, 0.50073]
+    // U+e307 
   },
   "Main-Bold": {
-    "32": M0,
-    "33": M6,
-    "34": M6,
-    "35": M16,
-    "36": [0.05556, 0.75, 0, 0],
-    "37": [0.05556, 0.75, 0, 0],
-    "38": M6,
-    "39": M6,
-    "40": M15,
-    "41": M15,
-    "42": M14,
-    "43": [0.13333, 0.63333, 0, 0],
-    "44": [0.19444, 0.15556, 0, 0],
-    "45": M7,
-    "46": [0, 0.15556, 0, 0],
-    "47": M15,
-    "48": M5,
-    "49": M5,
-    "50": M5,
-    "51": M5,
-    "52": M5,
-    "53": M5,
-    "54": M5,
-    "55": M5,
-    "56": M5,
-    "57": M5,
-    "58": M7,
-    "59": M8,
-    "60": [0.08556, 0.58556, 0, 0],
-    "61": [-0.10889, 0.39111, 0, 0],
-    "62": [0.08556, 0.58556, 0, 0],
-    "63": M6,
-    "64": M6,
-    "65": M4,
-    "66": M4,
-    "67": M4,
-    "68": M4,
-    "69": M4,
-    "70": M4,
-    "71": M4,
-    "72": M4,
-    "73": M4,
-    "74": M4,
-    "75": M4,
-    "76": M4,
-    "77": M4,
-    "78": M4,
-    "79": M4,
-    "80": M4,
-    "81": [0.19444, 0.68611, 0, 0],
-    "82": M4,
-    "83": M4,
-    "84": M4,
-    "85": M4,
-    "86": [0, 0.68611, 0.01597, 0],
-    "87": [0, 0.68611, 0.01597, 0],
-    "88": M4,
-    "89": [0, 0.68611, 0.02875, 0],
-    "90": M4,
-    "91": M15,
-    "92": M15,
-    "93": M15,
-    "94": M6,
-    "95": [0.31, 0.13444, 0.03194, 0],
-    "97": M7,
-    "98": M6,
-    "99": M7,
-    "100": M6,
-    "101": M7,
-    "102": [0, 0.69444, 0.10903, 0],
-    "103": [0.19444, 0.44444, 0.01597, 0],
-    "104": M6,
-    "105": M6,
-    "106": M16,
-    "107": M6,
-    "108": M6,
-    "109": M7,
-    "110": M7,
-    "111": M7,
-    "112": M8,
-    "113": M8,
-    "114": M7,
-    "115": M7,
-    "116": [0, 0.63492, 0, 0],
-    "117": M7,
-    "118": [0, 0.44444, 0.01597, 0],
-    "119": [0, 0.44444, 0.01597, 0],
-    "120": M7,
-    "121": [0.19444, 0.44444, 0.01597, 0],
-    "122": M7,
-    "123": M15,
-    "124": M15,
-    "125": M15,
-    "126": [0.35, 0.34444, 0, 0],
-    "160": M0,
-    "163": M6,
-    "168": M6,
-    "172": M7,
-    "176": M6,
-    "177": [0.13333, 0.63333, 0, 0],
-    "184": [0.17014, 0, 0, 0],
-    "198": M4,
-    "215": [0.13333, 0.63333, 0, 0],
-    "216": [0.04861, 0.73472, 0, 0],
-    "223": M6,
-    "230": M7,
-    "247": [0.13333, 0.63333, 0, 0],
-    "248": [0.09722, 0.54167, 0, 0],
-    "305": M7,
-    "338": M4,
-    "339": M7,
-    "567": M8,
-    "710": M6,
-    "711": [0, 0.63194, 0, 0],
-    "713": [0, 0.59611, 0, 0],
-    "714": M6,
-    "715": M6,
-    "728": M6,
-    "729": M6,
-    "730": M6,
-    "732": M6,
-    "733": M6,
-    "915": M4,
-    "916": M4,
-    "920": M4,
-    "923": M4,
-    "926": M4,
-    "928": M4,
-    "931": M4,
-    "933": M4,
-    "934": M4,
-    "936": M4,
-    "937": M4,
-    "8211": [0, 0.44444, 0.03194, 0],
-    "8212": [0, 0.44444, 0.03194, 0],
-    "8216": M6,
-    "8217": M6,
-    "8220": M6,
-    "8221": M6,
-    "8224": M16,
-    "8225": M16,
-    "8242": M20,
-    "8407": [0, 0.72444, 0.15486, 0],
-    "8463": M6,
-    "8465": M6,
-    "8467": M6,
-    "8472": M8,
-    "8476": M6,
-    "8501": M6,
-    "8592": [-0.10889, 0.39111, 0, 0],
-    "8593": M16,
-    "8594": [-0.10889, 0.39111, 0, 0],
-    "8595": M16,
-    "8596": [-0.10889, 0.39111, 0, 0],
-    "8597": M15,
-    "8598": M16,
-    "8599": M16,
-    "8600": M16,
-    "8601": M16,
-    "8636": [-0.10889, 0.39111, 0, 0],
-    "8637": [-0.10889, 0.39111, 0, 0],
-    "8640": [-0.10889, 0.39111, 0, 0],
-    "8641": [-0.10889, 0.39111, 0, 0],
-    "8656": [-0.10889, 0.39111, 0, 0],
-    "8657": M16,
-    "8658": [-0.10889, 0.39111, 0, 0],
-    "8659": M16,
-    "8660": [-0.10889, 0.39111, 0, 0],
-    "8661": M15,
-    "8704": M6,
-    "8706": [0, 0.69444, 0.06389, 0],
-    "8707": M6,
-    "8709": [0.05556, 0.75, 0, 0],
-    "8711": M4,
-    "8712": [0.08556, 0.58556, 0, 0],
-    "8715": [0.08556, 0.58556, 0, 0],
-    "8722": [0.13333, 0.63333, 0, 0],
-    "8723": [0.13333, 0.63333, 0, 0],
-    "8725": M15,
-    "8726": M15,
-    "8727": [-0.02778, 0.47222, 0, 0],
-    "8728": [-0.02639, 0.47361, 0, 0],
-    "8729": [-0.02639, 0.47361, 0, 0],
-    "8730": [0.18, 0.82, 0, 0],
-    "8733": M7,
-    "8734": M7,
-    "8736": M3,
-    "8739": M15,
-    "8741": M15,
-    "8743": M20,
-    "8744": M20,
-    "8745": M20,
-    "8746": M20,
-    "8747": [0.19444, 0.69444, 0.12778, 0],
-    "8764": [-0.10889, 0.39111, 0, 0],
-    "8768": M16,
-    "8771": [222e-5, 0.50222, 0, 0],
-    "8776": [0.02444, 0.52444, 0, 0],
-    "8781": [222e-5, 0.50222, 0, 0],
-    "8801": [222e-5, 0.50222, 0, 0],
-    "8804": [0.19667, 0.69667, 0, 0],
-    "8805": [0.19667, 0.69667, 0, 0],
-    "8810": [0.08556, 0.58556, 0, 0],
-    "8811": [0.08556, 0.58556, 0, 0],
-    "8826": [0.08556, 0.58556, 0, 0],
-    "8827": [0.08556, 0.58556, 0, 0],
-    "8834": [0.08556, 0.58556, 0, 0],
-    "8835": [0.08556, 0.58556, 0, 0],
-    "8838": [0.19667, 0.69667, 0, 0],
-    "8839": [0.19667, 0.69667, 0, 0],
-    "8846": M20,
-    "8849": [0.19667, 0.69667, 0, 0],
-    "8850": [0.19667, 0.69667, 0, 0],
-    "8851": M20,
-    "8852": M20,
-    "8853": [0.13333, 0.63333, 0, 0],
-    "8854": [0.13333, 0.63333, 0, 0],
-    "8855": [0.13333, 0.63333, 0, 0],
-    "8856": [0.13333, 0.63333, 0, 0],
-    "8857": [0.13333, 0.63333, 0, 0],
-    "8866": M6,
-    "8867": M6,
-    "8868": M6,
-    "8869": M6,
-    "8900": [-0.02639, 0.47361, 0, 0],
-    "8901": [-0.02639, 0.47361, 0, 0],
-    "8902": [-0.02778, 0.47222, 0, 0],
-    "8968": M15,
-    "8969": M15,
-    "8970": M15,
-    "8971": M15,
-    "8994": [-0.13889, 0.36111, 0, 0],
-    "8995": [-0.13889, 0.36111, 0, 0],
-    "9651": M16,
-    "9657": [-0.02778, 0.47222, 0, 0],
-    "9661": M16,
-    "9667": [-0.02778, 0.47222, 0, 0],
-    "9711": M16,
-    "9824": [0.12963, 0.69444, 0, 0],
-    "9825": [0.12963, 0.69444, 0, 0],
-    "9826": [0.12963, 0.69444, 0, 0],
-    "9827": [0.12963, 0.69444, 0, 0],
-    "9837": M14,
-    "9838": M16,
-    "9839": M16,
-    "10216": M15,
-    "10217": M15,
-    "10815": M4,
-    "10927": [0.19667, 0.69667, 0, 0],
-    "10928": [0.19667, 0.69667, 0, 0],
-    "57376": M16
+    32: M7,
+    // U+0020
+    33: [0, 0.69444, 0, 0, 0.35],
+    // U+0021 !
+    34: M86,
+    // U+0022 "
+    35: [0.19444, 0.69444, 0, 0, 0.95833],
+    // U+0023 #
+    36: M93,
+    // U+0024 $
+    37: [0.05556, 0.75, 0, 0, 0.95833],
+    // U+0025 %
+    38: M70,
+    // U+0026 &
+    39: M76,
+    // U+0027 '
+    40: M67,
+    // U+0028 (
+    41: M67,
+    // U+0029 )
+    42: [0, 0.75, 0, 0, 0.575],
+    // U+002a *
+    43: M80,
+    // U+002b +
+    44: [0.19444, 0.15556, 0, 0, 0.31944],
+    // U+002c ,
+    45: M235,
+    // U+002d -
+    46: [0, 0.15556, 0, 0, 0.31944],
+    // U+002e .
+    47: M73,
+    // U+002f /
+    48: M68,
+    // U+0030 0
+    49: M68,
+    // U+0031 1
+    50: M68,
+    // U+0032 2
+    51: M68,
+    // U+0033 3
+    52: M68,
+    // U+0034 4
+    53: M68,
+    // U+0035 5
+    54: M68,
+    // U+0036 6
+    55: M68,
+    // U+0037 7
+    56: M68,
+    // U+0038 8
+    57: M68,
+    // U+0039 9
+    58: M81,
+    // U+003a :
+    59: [0.19444, 0.44444, 0, 0, 0.31944],
+    // U+003b ;
+    60: M69,
+    // U+003c <
+    61: M99,
+    // U+003d =
+    62: M69,
+    // U+003e >
+    63: [0, 0.69444, 0, 0, 0.54305],
+    // U+003f ?
+    64: M70,
+    // U+0040 @
+    65: M72,
+    // U+0041 A
+    66: [0, 0.68611, 0, 0, 0.81805],
+    // U+0042 B
+    67: M84,
+    // U+0043 C
+    68: [0, 0.68611, 0, 0, 0.88194],
+    // U+0044 D
+    69: M182,
+    // U+0045 E
+    70: [0, 0.68611, 0, 0, 0.72361],
+    // U+0046 F
+    71: [0, 0.68611, 0, 0, 0.90416],
+    // U+0047 G
+    72: M71,
+    // U+0048 H
+    73: [0, 0.68611, 0, 0, 0.43611],
+    // U+0049 I
+    74: [0, 0.68611, 0, 0, 0.59444],
+    // U+004a J
+    75: [0, 0.68611, 0, 0, 0.90138],
+    // U+004b K
+    76: M83,
+    // U+004c L
+    77: [0, 0.68611, 0, 0, 1.09166],
+    // U+004d M
+    78: M71,
+    // U+004e N
+    79: [0, 0.68611, 0, 0, 0.86388],
+    // U+004f O
+    80: [0, 0.68611, 0, 0, 0.78611],
+    // U+0050 P
+    81: [0.19444, 0.68611, 0, 0, 0.86388],
+    // U+0051 Q
+    82: [0, 0.68611, 0, 0, 0.8625],
+    // U+0052 R
+    83: [0, 0.68611, 0, 0, 0.63889],
+    // U+0053 S
+    84: [0, 0.68611, 0, 0, 0.8],
+    // U+0054 T
+    85: [0, 0.68611, 0, 0, 0.88472],
+    // U+0055 U
+    86: [0, 0.68611, 0.01597, 0, 0.86944],
+    // U+0056 V
+    87: [0, 0.68611, 0.01597, 0, 1.18888],
+    // U+0057 W
+    88: M72,
+    // U+0058 X
+    89: [0, 0.68611, 0.02875, 0, 0.86944],
+    // U+0059 Y
+    90: [0, 0.68611, 0, 0, 0.70277],
+    // U+005a Z
+    91: M74,
+    // U+005b [
+    92: M73,
+    // U+005c \
+    93: M74,
+    // U+005d ]
+    94: M79,
+    // U+005e ^
+    95: [0.31, 0.13444, 0.03194, 0, 0.575],
+    // U+005f _
+    97: [0, 0.44444, 0, 0, 0.55902],
+    // U+0061 a
+    98: M75,
+    // U+0062 b
+    99: M78,
+    // U+0063 c
+    100: M75,
+    // U+0064 d
+    101: [0, 0.44444, 0, 0, 0.52708],
+    // U+0065 e
+    102: [0, 0.69444, 0.10903, 0, 0.35139],
+    // U+0066 f
+    103: [0.19444, 0.44444, 0.01597, 0, 0.575],
+    // U+0067 g
+    104: M75,
+    // U+0068 h
+    105: M76,
+    // U+0069 i
+    106: [0.19444, 0.69444, 0, 0, 0.35139],
+    // U+006a j
+    107: [0, 0.69444, 0, 0, 0.60694],
+    // U+006b k
+    108: M76,
+    // U+006c l
+    109: [0, 0.44444, 0, 0, 0.95833],
+    // U+006d m
+    110: M77,
+    // U+006e n
+    111: M180,
+    // U+006f o
+    112: [0.19444, 0.44444, 0, 0, 0.63889],
+    // U+0070 p
+    113: [0.19444, 0.44444, 0, 0, 0.60694],
+    // U+0071 q
+    114: [0, 0.44444, 0, 0, 0.47361],
+    // U+0072 r
+    115: [0, 0.44444, 0, 0, 0.45361],
+    // U+0073 s
+    116: [0, 0.63492, 0, 0, 0.44722],
+    // U+0074 t
+    117: M77,
+    // U+0075 u
+    118: [0, 0.44444, 0.01597, 0, 0.60694],
+    // U+0076 v
+    119: [0, 0.44444, 0.01597, 0, 0.83055],
+    // U+0077 w
+    120: [0, 0.44444, 0, 0, 0.60694],
+    // U+0078 x
+    121: [0.19444, 0.44444, 0.01597, 0, 0.60694],
+    // U+0079 y
+    122: M78,
+    // U+007a z
+    123: M73,
+    // U+007b {
+    124: M74,
+    // U+007c |
+    125: M73,
+    // U+007d }
+    126: [0.35, 0.34444, 0, 0, 0.575],
+    // U+007e ~
+    160: M7,
+    // U+00a0
+    163: [0, 0.69444, 0, 0, 0.86853],
+    // U+00a3 £
+    168: M79,
+    // U+00a8 ¨
+    172: [0, 0.44444, 0, 0, 0.76666],
+    // U+00ac ¬
+    176: M82,
+    // U+00b0 °
+    177: M80,
+    // U+00b1 ±
+    184: [0.17014, 0, 0, 0, 0.51111],
+    // U+00b8 ¸
+    198: [0, 0.68611, 0, 0, 1.04166],
+    // U+00c6 Æ
+    215: M80,
+    // U+00d7 ×
+    216: [0.04861, 0.73472, 0, 0, 0.89444],
+    // U+00d8 Ø
+    223: M228,
+    // U+00df ß
+    230: [0, 0.44444, 0, 0, 0.83055],
+    // U+00e6 æ
+    247: M80,
+    // U+00f7 ÷
+    248: [0.09722, 0.54167, 0, 0, 0.575],
+    // U+00f8 ø
+    305: M81,
+    // U+0131 ı
+    338: [0, 0.68611, 0, 0, 1.16944],
+    // U+0152 Œ
+    339: M97,
+    // U+0153 œ
+    567: [0.19444, 0.44444, 0, 0, 0.35139],
+    // U+0237 ȷ
+    710: M79,
+    // U+02c6 ˆ
+    711: [0, 0.63194, 0, 0, 0.575],
+    // U+02c7 ˇ
+    713: [0, 0.59611, 0, 0, 0.575],
+    // U+02c9 ˉ
+    714: M79,
+    // U+02ca ˊ
+    715: M79,
+    // U+02cb ˋ
+    728: M79,
+    // U+02d8 ˘
+    729: M76,
+    // U+02d9 ˙
+    730: M82,
+    // U+02da ˚
+    732: M79,
+    // U+02dc ˜
+    733: M79,
+    // U+02dd ˝
+    915: M83,
+    // U+0393 Γ
+    916: M94,
+    // U+0394 Δ
+    920: M85,
+    // U+0398 Θ
+    923: M184,
+    // U+039b Λ
+    926: M186,
+    // U+039e Ξ
+    928: M71,
+    // U+03a0 Π
+    931: M84,
+    // U+03a3 Σ
+    933: M85,
+    // U+03a5 Υ
+    934: M84,
+    // U+03a6 Φ
+    936: M85,
+    // U+03a8 Ψ
+    937: M84,
+    // U+03a9 Ω
+    8211: [0, 0.44444, 0.03194, 0, 0.575],
+    // U+2013 –
+    8212: [0, 0.44444, 0.03194, 0, 1.14999],
+    // U+2014 —
+    8216: M76,
+    // U+2018 ‘
+    8217: M76,
+    // U+2019 ’
+    8220: M86,
+    // U+201c “
+    8221: M86,
+    // U+201d ”
+    8224: M87,
+    // U+2020 †
+    8225: M87,
+    // U+2021 ‡
+    8242: [0, 0.55556, 0, 0, 0.34444],
+    // U+2032 ′
+    8407: [0, 0.72444, 0.15486, 0, 0.575],
+    // U+20d7 ⃗
+    8463: M183,
+    // U+210f ℏ
+    8465: M88,
+    // U+2111 ℑ
+    8467: [0, 0.69444, 0, 0, 0.47361],
+    // U+2113 ℓ
+    8472: [0.19444, 0.44444, 0, 0, 0.74027],
+    // U+2118 ℘
+    8476: M88,
+    // U+211c ℜ
+    8501: M103,
+    // U+2135 ℵ
+    8592: M89,
+    // U+2190 ←
+    8593: M90,
+    // U+2191 ↑
+    8594: M89,
+    // U+2192 →
+    8595: M90,
+    // U+2193 ↓
+    8596: M89,
+    // U+2194 ↔
+    8597: M73,
+    // U+2195 ↕
+    8598: M91,
+    // U+2196 ↖
+    8599: M91,
+    // U+2197 ↗
+    8600: M91,
+    // U+2198 ↘
+    8601: M91,
+    // U+2199 ↙
+    8636: M89,
+    // U+21bc ↼
+    8637: M89,
+    // U+21bd ↽
+    8640: M89,
+    // U+21c0 ⇀
+    8641: M89,
+    // U+21c1 ⇁
+    8656: M89,
+    // U+21d0 ⇐
+    8657: M92,
+    // U+21d1 ⇑
+    8658: M89,
+    // U+21d2 ⇒
+    8659: M92,
+    // U+21d3 ⇓
+    8660: M89,
+    // U+21d4 ⇔
+    8661: [0.25, 0.75, 0, 0, 0.70277],
+    // U+21d5 ⇕
+    8704: M75,
+    // U+2200 ∀
+    8706: [0, 0.69444, 0.06389, 0, 0.62847],
+    // U+2202 ∂
+    8707: M75,
+    // U+2203 ∃
+    8709: M93,
+    // U+2205 ∅
+    8711: M94,
+    // U+2207 ∇
+    8712: M95,
+    // U+2208 ∈
+    8715: M95,
+    // U+220b ∋
+    8722: M80,
+    // U+2212 −
+    8723: M80,
+    // U+2213 ∓
+    8725: M73,
+    // U+2215 ∕
+    8726: M73,
+    // U+2216 ∖
+    8727: M104,
+    // U+2217 ∗
+    8728: M96,
+    // U+2218 ∘
+    8729: M96,
+    // U+2219 ∙
+    8730: [0.18, 0.82, 0, 0, 0.95833],
+    // U+221a √
+    8733: M97,
+    // U+221d ∝
+    8734: [0, 0.44444, 0, 0, 1.14999],
+    // U+221e ∞
+    8736: M25,
+    // U+2220 ∠
+    8739: M74,
+    // U+2223 ∣
+    8741: M73,
+    // U+2225 ∥
+    8743: M98,
+    // U+2227 ∧
+    8744: M98,
+    // U+2228 ∨
+    8745: M98,
+    // U+2229 ∩
+    8746: M98,
+    // U+222a ∪
+    8747: [0.19444, 0.69444, 0.12778, 0, 0.56875],
+    // U+222b ∫
+    8764: M99,
+    // U+223c ∼
+    8768: [0.19444, 0.69444, 0, 0, 0.31944],
+    // U+2240 ≀
+    8771: M100,
+    // U+2243 ≃
+    8776: [0.02444, 0.52444, 0, 0, 0.89444],
+    // U+2248 ≈
+    8781: M100,
+    // U+224d ≍
+    8801: M100,
+    // U+2261 ≡
+    8804: M101,
+    // U+2264 ≤
+    8805: M101,
+    // U+2265 ≥
+    8810: M102,
+    // U+226a ≪
+    8811: M102,
+    // U+226b ≫
+    8826: M69,
+    // U+227a ≺
+    8827: M69,
+    // U+227b ≻
+    8834: M69,
+    // U+2282 ⊂
+    8835: M69,
+    // U+2283 ⊃
+    8838: M101,
+    // U+2286 ⊆
+    8839: M101,
+    // U+2287 ⊇
+    8846: M98,
+    // U+228e ⊎
+    8849: M101,
+    // U+2291 ⊑
+    8850: M101,
+    // U+2292 ⊒
+    8851: M98,
+    // U+2293 ⊓
+    8852: M98,
+    // U+2294 ⊔
+    8853: M80,
+    // U+2295 ⊕
+    8854: M80,
+    // U+2296 ⊖
+    8855: M80,
+    // U+2297 ⊗
+    8856: M80,
+    // U+2298 ⊘
+    8857: M80,
+    // U+2299 ⊙
+    8866: M103,
+    // U+22a2 ⊢
+    8867: M103,
+    // U+22a3 ⊣
+    8868: M70,
+    // U+22a4 ⊤
+    8869: M70,
+    // U+22a5 ⊥
+    8900: M96,
+    // U+22c4 ⋄
+    8901: [-0.02639, 0.47361, 0, 0, 0.31944],
+    // U+22c5 ⋅
+    8902: M104,
+    // U+22c6 ⋆
+    8968: M105,
+    // U+2308 ⌈
+    8969: M105,
+    // U+2309 ⌉
+    8970: M105,
+    // U+230a ⌊
+    8971: M105,
+    // U+230b ⌋
+    8994: M106,
+    // U+2322 ⌢
+    8995: M106,
+    // U+2323 ⌣
+    9651: M107,
+    // U+25b3 △
+    9657: M104,
+    // U+25b9 ▹
+    9661: M107,
+    // U+25bd ▽
+    9667: M104,
+    // U+25c3 ◃
+    9711: M91,
+    // U+25ef ◯
+    9824: M108,
+    // U+2660 ♠
+    9825: M108,
+    // U+2661 ♡
+    9826: M108,
+    // U+2662 ♢
+    9827: M108,
+    // U+2663 ♣
+    9837: [0, 0.75, 0, 0, 0.44722],
+    // U+266d ♭
+    9838: M109,
+    // U+266e ♮
+    9839: M109,
+    // U+266f ♯
+    10216: M67,
+    // U+27e8 ⟨
+    10217: M67,
+    // U+27e9 ⟩
+    10815: M71,
+    // U+2a3f ⨿
+    10927: M101,
+    // U+2aaf ⪯
+    10928: M101,
+    // U+2ab0 ⪰
+    57376: M179
+    // U+e020 
   },
   "Main-BoldItalic": {
-    "32": M0,
-    "33": [0, 0.69444, 0.11417, 0],
-    "34": [0, 0.69444, 0.07939, 0],
-    "35": [0.19444, 0.69444, 0.06833, 0],
-    "37": [0.05556, 0.75, 0.12861, 0],
-    "38": [0, 0.69444, 0.08528, 0],
-    "39": [0, 0.69444, 0.12945, 0],
-    "40": [0.25, 0.75, 0.15806, 0],
-    "41": [0.25, 0.75, 0.03306, 0],
-    "42": [0, 0.75, 0.14333, 0],
-    "43": [0.10333, 0.60333, 0.03306, 0],
-    "44": [0.19444, 0.14722, 0, 0],
-    "45": [0, 0.44444, 0.02611, 0],
-    "46": [0, 0.14722, 0, 0],
-    "47": [0.25, 0.75, 0.15806, 0],
-    "48": [0, 0.64444, 0.13167, 0],
-    "49": [0, 0.64444, 0.13167, 0],
-    "50": [0, 0.64444, 0.13167, 0],
-    "51": [0, 0.64444, 0.13167, 0],
-    "52": [0.19444, 0.64444, 0.13167, 0],
-    "53": [0, 0.64444, 0.13167, 0],
-    "54": [0, 0.64444, 0.13167, 0],
-    "55": [0.19444, 0.64444, 0.13167, 0],
-    "56": [0, 0.64444, 0.13167, 0],
-    "57": [0, 0.64444, 0.13167, 0],
-    "58": [0, 0.44444, 0.06695, 0],
-    "59": [0.19444, 0.44444, 0.06695, 0],
-    "61": [-0.10889, 0.39111, 0.06833, 0],
-    "63": [0, 0.69444, 0.11472, 0],
-    "64": [0, 0.69444, 0.09208, 0],
-    "65": M4,
-    "66": [0, 0.68611, 0.0992, 0],
-    "67": [0, 0.68611, 0.14208, 0],
-    "68": [0, 0.68611, 0.09062, 0],
-    "69": [0, 0.68611, 0.11431, 0],
-    "70": [0, 0.68611, 0.12903, 0],
-    "71": [0, 0.68611, 0.07347, 0],
-    "72": [0, 0.68611, 0.17208, 0],
-    "73": [0, 0.68611, 0.15681, 0],
-    "74": [0, 0.68611, 0.145, 0],
-    "75": [0, 0.68611, 0.14208, 0],
-    "76": M4,
-    "77": [0, 0.68611, 0.17208, 0],
-    "78": [0, 0.68611, 0.17208, 0],
-    "79": [0, 0.68611, 0.09062, 0],
-    "80": [0, 0.68611, 0.0992, 0],
-    "81": [0.19444, 0.68611, 0.09062, 0],
-    "82": [0, 0.68611, 0.02559, 0],
-    "83": [0, 0.68611, 0.11264, 0],
-    "84": [0, 0.68611, 0.12903, 0],
-    "85": [0, 0.68611, 0.17208, 0],
-    "86": [0, 0.68611, 0.18625, 0],
-    "87": [0, 0.68611, 0.18625, 0],
-    "88": [0, 0.68611, 0.15681, 0],
-    "89": [0, 0.68611, 0.19803, 0],
-    "90": [0, 0.68611, 0.14208, 0],
-    "91": [0.25, 0.75, 0.1875, 0],
-    "93": [0.25, 0.75, 0.09972, 0],
-    "94": [0, 0.69444, 0.06709, 0],
-    "95": [0.31, 0.13444, 0.09811, 0],
-    "97": [0, 0.44444, 0.09426, 0],
-    "98": [0, 0.69444, 0.07861, 0],
-    "99": [0, 0.44444, 0.05222, 0],
-    "100": [0, 0.69444, 0.10861, 0],
-    "101": [0, 0.44444, 0.085, 0],
-    "102": [0.19444, 0.69444, 0.21778, 0],
-    "103": [0.19444, 0.44444, 0.105, 0],
-    "104": [0, 0.69444, 0.09426, 0],
-    "105": [0, 0.69326, 0.11387, 0],
-    "106": [0.19444, 0.69326, 0.1672, 0],
-    "107": [0, 0.69444, 0.11111, 0],
-    "108": [0, 0.69444, 0.10861, 0],
-    "109": [0, 0.44444, 0.09426, 0],
-    "110": [0, 0.44444, 0.09426, 0],
-    "111": [0, 0.44444, 0.07861, 0],
-    "112": [0.19444, 0.44444, 0.07861, 0],
-    "113": [0.19444, 0.44444, 0.105, 0],
-    "114": [0, 0.44444, 0.11111, 0],
-    "115": [0, 0.44444, 0.08167, 0],
-    "116": [0, 0.63492, 0.09639, 0],
-    "117": [0, 0.44444, 0.09426, 0],
-    "118": [0, 0.44444, 0.11111, 0],
-    "119": [0, 0.44444, 0.11111, 0],
-    "120": [0, 0.44444, 0.12583, 0],
-    "121": [0.19444, 0.44444, 0.105, 0],
-    "122": [0, 0.44444, 0.13889, 0],
-    "126": [0.35, 0.34444, 0.11472, 0],
-    "160": M0,
-    "168": [0, 0.69444, 0.11473, 0],
-    "176": M6,
-    "184": [0.17014, 0, 0, 0],
-    "198": [0, 0.68611, 0.11431, 0],
-    "216": [0.04861, 0.73472, 0.09062, 0],
-    "223": [0.19444, 0.69444, 0.09736, 0],
-    "230": [0, 0.44444, 0.085, 0],
-    "248": [0.09722, 0.54167, 0.09458, 0],
-    "305": [0, 0.44444, 0.09426, 0],
-    "338": [0, 0.68611, 0.11431, 0],
-    "339": [0, 0.44444, 0.085, 0],
-    "567": [0.19444, 0.44444, 0.04611, 0],
-    "710": [0, 0.69444, 0.06709, 0],
-    "711": [0, 0.63194, 0.08271, 0],
-    "713": [0, 0.59444, 0.10444, 0],
-    "714": [0, 0.69444, 0.08528, 0],
-    "715": M6,
-    "728": [0, 0.69444, 0.10333, 0],
-    "729": [0, 0.69444, 0.12945, 0],
-    "730": M6,
-    "732": [0, 0.69444, 0.11472, 0],
-    "733": [0, 0.69444, 0.11472, 0],
-    "915": [0, 0.68611, 0.12903, 0],
-    "916": M4,
-    "920": [0, 0.68611, 0.09062, 0],
-    "923": M4,
-    "926": [0, 0.68611, 0.15092, 0],
-    "928": [0, 0.68611, 0.17208, 0],
-    "931": [0, 0.68611, 0.11431, 0],
-    "933": [0, 0.68611, 0.10778, 0],
-    "934": [0, 0.68611, 0.05632, 0],
-    "936": [0, 0.68611, 0.10778, 0],
-    "937": [0, 0.68611, 0.0992, 0],
-    "8211": [0, 0.44444, 0.09811, 0],
-    "8212": [0, 0.44444, 0.09811, 0],
-    "8216": [0, 0.69444, 0.12945, 0],
-    "8217": [0, 0.69444, 0.12945, 0],
-    "8220": [0, 0.69444, 0.16772, 0],
-    "8221": [0, 0.69444, 0.07939, 0]
+    32: M7,
+    // U+0020
+    33: [0, 0.69444, 0.11417, 0, 0.38611],
+    // U+0021 !
+    34: M120,
+    // U+0022 "
+    35: [0.19444, 0.69444, 0.06833, 0, 0.94444],
+    // U+0023 #
+    37: [0.05556, 0.75, 0.12861, 0, 0.94444],
+    // U+0025 %
+    38: [0, 0.69444, 0.08528, 0, 0.88555],
+    // U+0026 &
+    39: M116,
+    // U+0027 '
+    40: [0.25, 0.75, 0.15806, 0, 0.47333],
+    // U+0028 (
+    41: [0.25, 0.75, 0.03306, 0, 0.47333],
+    // U+0029 )
+    42: [0, 0.75, 0.14333, 0, 0.59111],
+    // U+002a *
+    43: [0.10333, 0.60333, 0.03306, 0, 0.88555],
+    // U+002b +
+    44: [0.19444, 0.14722, 0, 0, 0.35555],
+    // U+002c ,
+    45: [0, 0.44444, 0.02611, 0, 0.41444],
+    // U+002d -
+    46: [0, 0.14722, 0, 0, 0.35555],
+    // U+002e .
+    47: [0.25, 0.75, 0.15806, 0, 0.59111],
+    // U+002f /
+    48: M110,
+    // U+0030 0
+    49: M110,
+    // U+0031 1
+    50: M110,
+    // U+0032 2
+    51: M110,
+    // U+0033 3
+    52: M111,
+    // U+0034 4
+    53: M110,
+    // U+0035 5
+    54: M110,
+    // U+0036 6
+    55: M111,
+    // U+0037 7
+    56: M110,
+    // U+0038 8
+    57: M110,
+    // U+0039 9
+    58: [0, 0.44444, 0.06695, 0, 0.35555],
+    // U+003a :
+    59: [0.19444, 0.44444, 0.06695, 0, 0.35555],
+    // U+003b ;
+    61: [-0.10889, 0.39111, 0.06833, 0, 0.88555],
+    // U+003d =
+    63: M118,
+    // U+003f ?
+    64: [0, 0.69444, 0.09208, 0, 0.88555],
+    // U+0040 @
+    65: [0, 0.68611, 0, 0, 0.86555],
+    // U+0041 A
+    66: [0, 0.68611, 0.0992, 0, 0.81666],
+    // U+0042 B
+    67: [0, 0.68611, 0.14208, 0, 0.82666],
+    // U+0043 C
+    68: [0, 0.68611, 0.09062, 0, 0.87555],
+    // U+0044 D
+    69: [0, 0.68611, 0.11431, 0, 0.75666],
+    // U+0045 E
+    70: [0, 0.68611, 0.12903, 0, 0.72722],
+    // U+0046 F
+    71: [0, 0.68611, 0.07347, 0, 0.89527],
+    // U+0047 G
+    72: M112,
+    // U+0048 H
+    73: [0, 0.68611, 0.15681, 0, 0.47166],
+    // U+0049 I
+    74: [0, 0.68611, 0.145, 0, 0.61055],
+    // U+004a J
+    75: [0, 0.68611, 0.14208, 0, 0.89499],
+    // U+004b K
+    76: [0, 0.68611, 0, 0, 0.69777],
+    // U+004c L
+    77: [0, 0.68611, 0.17208, 0, 1.07277],
+    // U+004d M
+    78: M112,
+    // U+004e N
+    79: [0, 0.68611, 0.09062, 0, 0.85499],
+    // U+004f O
+    80: [0, 0.68611, 0.0992, 0, 0.78721],
+    // U+0050 P
+    81: [0.19444, 0.68611, 0.09062, 0, 0.85499],
+    // U+0051 Q
+    82: [0, 0.68611, 0.02559, 0, 0.85944],
+    // U+0052 R
+    83: [0, 0.68611, 0.11264, 0, 0.64999],
+    // U+0053 S
+    84: [0, 0.68611, 0.12903, 0, 0.7961],
+    // U+0054 T
+    85: [0, 0.68611, 0.17208, 0, 0.88083],
+    // U+0055 U
+    86: [0, 0.68611, 0.18625, 0, 0.86555],
+    // U+0056 V
+    87: [0, 0.68611, 0.18625, 0, 1.15999],
+    // U+0057 W
+    88: [0, 0.68611, 0.15681, 0, 0.86555],
+    // U+0058 X
+    89: [0, 0.68611, 0.19803, 0, 0.86555],
+    // U+0059 Y
+    90: [0, 0.68611, 0.14208, 0, 0.70888],
+    // U+005a Z
+    91: [0.25, 0.75, 0.1875, 0, 0.35611],
+    // U+005b [
+    93: [0.25, 0.75, 0.09972, 0, 0.35611],
+    // U+005d ]
+    94: M115,
+    // U+005e ^
+    95: [0.31, 0.13444, 0.09811, 0, 0.59111],
+    // U+005f _
+    97: [0, 0.44444, 0.09426, 0, 0.59111],
+    // U+0061 a
+    98: [0, 0.69444, 0.07861, 0, 0.53222],
+    // U+0062 b
+    99: [0, 0.44444, 0.05222, 0, 0.53222],
+    // U+0063 c
+    100: [0, 0.69444, 0.10861, 0, 0.59111],
+    // U+0064 d
+    101: [0, 0.44444, 0.085, 0, 0.53222],
+    // U+0065 e
+    102: [0.19444, 0.69444, 0.21778, 0, 0.4],
+    // U+0066 f
+    103: M113,
+    // U+0067 g
+    104: [0, 0.69444, 0.09426, 0, 0.59111],
+    // U+0068 h
+    105: [0, 0.69326, 0.11387, 0, 0.35555],
+    // U+0069 i
+    106: [0.19444, 0.69326, 0.1672, 0, 0.35555],
+    // U+006a j
+    107: [0, 0.69444, 0.11111, 0, 0.53222],
+    // U+006b k
+    108: [0, 0.69444, 0.10861, 0, 0.29666],
+    // U+006c l
+    109: [0, 0.44444, 0.09426, 0, 0.94444],
+    // U+006d m
+    110: [0, 0.44444, 0.09426, 0, 0.64999],
+    // U+006e n
+    111: [0, 0.44444, 0.07861, 0, 0.59111],
+    // U+006f o
+    112: [0.19444, 0.44444, 0.07861, 0, 0.59111],
+    // U+0070 p
+    113: M113,
+    // U+0071 q
+    114: [0, 0.44444, 0.11111, 0, 0.50167],
+    // U+0072 r
+    115: [0, 0.44444, 0.08167, 0, 0.48694],
+    // U+0073 s
+    116: [0, 0.63492, 0.09639, 0, 0.385],
+    // U+0074 t
+    117: [0, 0.44444, 0.09426, 0, 0.62055],
+    // U+0075 u
+    118: [0, 0.44444, 0.11111, 0, 0.53222],
+    // U+0076 v
+    119: [0, 0.44444, 0.11111, 0, 0.76777],
+    // U+0077 w
+    120: [0, 0.44444, 0.12583, 0, 0.56055],
+    // U+0078 x
+    121: [0.19444, 0.44444, 0.105, 0, 0.56166],
+    // U+0079 y
+    122: [0, 0.44444, 0.13889, 0, 0.49055],
+    // U+007a z
+    126: [0.35, 0.34444, 0.11472, 0, 0.59111],
+    // U+007e ~
+    160: M7,
+    // U+00a0
+    168: [0, 0.69444, 0.11473, 0, 0.59111],
+    // U+00a8 ¨
+    176: M117,
+    // U+00b0 °
+    184: [0.17014, 0, 0, 0, 0.53222],
+    // U+00b8 ¸
+    198: [0, 0.68611, 0.11431, 0, 1.02277],
+    // U+00c6 Æ
+    216: [0.04861, 0.73472, 0.09062, 0, 0.88555],
+    // U+00d8 Ø
+    223: [0.19444, 0.69444, 0.09736, 0, 0.665],
+    // U+00df ß
+    230: M114,
+    // U+00e6 æ
+    248: [0.09722, 0.54167, 0.09458, 0, 0.59111],
+    // U+00f8 ø
+    305: [0, 0.44444, 0.09426, 0, 0.35555],
+    // U+0131 ı
+    338: [0, 0.68611, 0.11431, 0, 1.14054],
+    // U+0152 Œ
+    339: M114,
+    // U+0153 œ
+    567: [0.19444, 0.44444, 0.04611, 0, 0.385],
+    // U+0237 ȷ
+    710: M115,
+    // U+02c6 ˆ
+    711: [0, 0.63194, 0.08271, 0, 0.59111],
+    // U+02c7 ˇ
+    713: [0, 0.59444, 0.10444, 0, 0.59111],
+    // U+02c9 ˉ
+    714: [0, 0.69444, 0.08528, 0, 0.59111],
+    // U+02ca ˊ
+    715: [0, 0.69444, 0, 0, 0.59111],
+    // U+02cb ˋ
+    728: [0, 0.69444, 0.10333, 0, 0.59111],
+    // U+02d8 ˘
+    729: M116,
+    // U+02d9 ˙
+    730: M117,
+    // U+02da ˚
+    732: M118,
+    // U+02dc ˜
+    733: M118,
+    // U+02dd ˝
+    915: [0, 0.68611, 0.12903, 0, 0.69777],
+    // U+0393 Γ
+    916: [0, 0.68611, 0, 0, 0.94444],
+    // U+0394 Δ
+    920: [0, 0.68611, 0.09062, 0, 0.88555],
+    // U+0398 Θ
+    923: [0, 0.68611, 0, 0, 0.80666],
+    // U+039b Λ
+    926: [0, 0.68611, 0.15092, 0, 0.76777],
+    // U+039e Ξ
+    928: M112,
+    // U+03a0 Π
+    931: [0, 0.68611, 0.11431, 0, 0.82666],
+    // U+03a3 Σ
+    933: M119,
+    // U+03a5 Υ
+    934: [0, 0.68611, 0.05632, 0, 0.82666],
+    // U+03a6 Φ
+    936: M119,
+    // U+03a8 Ψ
+    937: [0, 0.68611, 0.0992, 0, 0.82666],
+    // U+03a9 Ω
+    8211: [0, 0.44444, 0.09811, 0, 0.59111],
+    // U+2013 –
+    8212: [0, 0.44444, 0.09811, 0, 1.18221],
+    // U+2014 —
+    8216: M116,
+    // U+2018 ‘
+    8217: M116,
+    // U+2019 ’
+    8220: [0, 0.69444, 0.16772, 0, 0.62055],
+    // U+201c “
+    8221: M120
+    // U+201d ”
   },
   "Main-Italic": {
-    "32": M0,
-    "33": [0, 0.69444, 0.12417, 0],
-    "34": [0, 0.69444, 0.06961, 0],
-    "35": [0.19444, 0.69444, 0.06616, 0],
-    "37": [0.05556, 0.75, 0.13639, 0],
-    "38": [0, 0.69444, 0.09694, 0],
-    "39": [0, 0.69444, 0.12417, 0],
-    "40": [0.25, 0.75, 0.16194, 0],
-    "41": [0.25, 0.75, 0.03694, 0],
-    "42": [0, 0.75, 0.14917, 0],
-    "43": [0.05667, 0.56167, 0.03694, 0],
-    "44": [0.19444, 0.10556, 0, 0],
-    "45": [0, 0.43056, 0.02826, 0],
-    "46": [0, 0.10556, 0, 0],
-    "47": [0.25, 0.75, 0.16194, 0],
-    "48": [0, 0.64444, 0.13556, 0],
-    "49": [0, 0.64444, 0.13556, 0],
-    "50": [0, 0.64444, 0.13556, 0],
-    "51": [0, 0.64444, 0.13556, 0],
-    "52": [0.19444, 0.64444, 0.13556, 0],
-    "53": [0, 0.64444, 0.13556, 0],
-    "54": [0, 0.64444, 0.13556, 0],
-    "55": [0.19444, 0.64444, 0.13556, 0],
-    "56": [0, 0.64444, 0.13556, 0],
-    "57": [0, 0.64444, 0.13556, 0],
-    "58": [0, 0.43056, 0.0582, 0],
-    "59": [0.19444, 0.43056, 0.0582, 0],
-    "61": [-0.13313, 0.36687, 0.06616, 0],
-    "63": [0, 0.69444, 0.1225, 0],
-    "64": [0, 0.69444, 0.09597, 0],
-    "65": M9,
-    "66": [0, 0.68333, 0.10257, 0],
-    "67": [0, 0.68333, 0.14528, 0],
-    "68": [0, 0.68333, 0.09403, 0],
-    "69": [0, 0.68333, 0.12028, 0],
-    "70": [0, 0.68333, 0.13305, 0],
-    "71": [0, 0.68333, 0.08722, 0],
-    "72": [0, 0.68333, 0.16389, 0],
-    "73": [0, 0.68333, 0.15806, 0],
-    "74": [0, 0.68333, 0.14028, 0],
-    "75": [0, 0.68333, 0.14528, 0],
-    "76": M9,
-    "77": [0, 0.68333, 0.16389, 0],
-    "78": [0, 0.68333, 0.16389, 0],
-    "79": [0, 0.68333, 0.09403, 0],
-    "80": [0, 0.68333, 0.10257, 0],
-    "81": [0.19444, 0.68333, 0.09403, 0],
-    "82": [0, 0.68333, 0.03868, 0],
-    "83": [0, 0.68333, 0.11972, 0],
-    "84": [0, 0.68333, 0.13305, 0],
-    "85": [0, 0.68333, 0.16389, 0],
-    "86": [0, 0.68333, 0.18361, 0],
-    "87": [0, 0.68333, 0.18361, 0],
-    "88": [0, 0.68333, 0.15806, 0],
-    "89": [0, 0.68333, 0.19383, 0],
-    "90": [0, 0.68333, 0.14528, 0],
-    "91": [0.25, 0.75, 0.1875, 0],
-    "93": [0.25, 0.75, 0.10528, 0],
-    "94": [0, 0.69444, 0.06646, 0],
-    "95": [0.31, 0.12056, 0.09208, 0],
-    "97": [0, 0.43056, 0.07671, 0],
-    "98": [0, 0.69444, 0.06312, 0],
-    "99": [0, 0.43056, 0.05653, 0],
-    "100": [0, 0.69444, 0.10333, 0],
-    "101": [0, 0.43056, 0.07514, 0],
-    "102": [0.19444, 0.69444, 0.21194, 0],
-    "103": [0.19444, 0.43056, 0.08847, 0],
-    "104": [0, 0.69444, 0.07671, 0],
-    "105": [0, 0.65536, 0.1019, 0],
-    "106": [0.19444, 0.65536, 0.14467, 0],
-    "107": [0, 0.69444, 0.10764, 0],
-    "108": [0, 0.69444, 0.10333, 0],
-    "109": [0, 0.43056, 0.07671, 0],
-    "110": [0, 0.43056, 0.07671, 0],
-    "111": [0, 0.43056, 0.06312, 0],
-    "112": [0.19444, 0.43056, 0.06312, 0],
-    "113": [0.19444, 0.43056, 0.08847, 0],
-    "114": [0, 0.43056, 0.10764, 0],
-    "115": [0, 0.43056, 0.08208, 0],
-    "116": [0, 0.61508, 0.09486, 0],
-    "117": [0, 0.43056, 0.07671, 0],
-    "118": [0, 0.43056, 0.10764, 0],
-    "119": [0, 0.43056, 0.10764, 0],
-    "120": [0, 0.43056, 0.12042, 0],
-    "121": [0.19444, 0.43056, 0.08847, 0],
-    "122": [0, 0.43056, 0.12292, 0],
-    "126": [0.35, 0.31786, 0.11585, 0],
-    "160": M0,
-    "168": [0, 0.66786, 0.10474, 0],
-    "176": M6,
-    "184": [0.17014, 0, 0, 0],
-    "198": [0, 0.68333, 0.12028, 0],
-    "216": [0.04861, 0.73194, 0.09403, 0],
-    "223": [0.19444, 0.69444, 0.10514, 0],
-    "230": [0, 0.43056, 0.07514, 0],
-    "248": [0.09722, 0.52778, 0.09194, 0],
-    "338": [0, 0.68333, 0.12028, 0],
-    "339": [0, 0.43056, 0.07514, 0],
-    "710": [0, 0.69444, 0.06646, 0],
-    "711": [0, 0.62847, 0.08295, 0],
-    "713": [0, 0.56167, 0.10333, 0],
-    "714": [0, 0.69444, 0.09694, 0],
-    "715": M6,
-    "728": [0, 0.69444, 0.10806, 0],
-    "729": [0, 0.66786, 0.11752, 0],
-    "730": M6,
-    "732": [0, 0.66786, 0.11585, 0],
-    "733": [0, 0.69444, 0.1225, 0],
-    "915": [0, 0.68333, 0.13305, 0],
-    "916": M9,
-    "920": [0, 0.68333, 0.09403, 0],
-    "923": M9,
-    "926": [0, 0.68333, 0.15294, 0],
-    "928": [0, 0.68333, 0.16389, 0],
-    "931": [0, 0.68333, 0.12028, 0],
-    "933": [0, 0.68333, 0.11111, 0],
-    "934": [0, 0.68333, 0.05986, 0],
-    "936": [0, 0.68333, 0.11111, 0],
-    "937": [0, 0.68333, 0.10257, 0],
-    "8211": [0, 0.43056, 0.09208, 0],
-    "8212": [0, 0.43056, 0.09208, 0],
-    "8216": [0, 0.69444, 0.12417, 0],
-    "8217": [0, 0.69444, 0.12417, 0],
-    "8220": [0, 0.69444, 0.1685, 0],
-    "8221": [0, 0.69444, 0.06961, 0],
-    "8463": M1
+    32: M7,
+    // U+0020
+    33: M121,
+    // U+0021 !
+    34: M132,
+    // U+0022 "
+    35: [0.19444, 0.69444, 0.06616, 0, 0.81777],
+    // U+0023 #
+    37: [0.05556, 0.75, 0.13639, 0, 0.81777],
+    // U+0025 %
+    38: [0, 0.69444, 0.09694, 0, 0.76666],
+    // U+0026 &
+    39: M121,
+    // U+0027 '
+    40: [0.25, 0.75, 0.16194, 0, 0.40889],
+    // U+0028 (
+    41: [0.25, 0.75, 0.03694, 0, 0.40889],
+    // U+0029 )
+    42: [0, 0.75, 0.14917, 0, 0.51111],
+    // U+002a *
+    43: [0.05667, 0.56167, 0.03694, 0, 0.76666],
+    // U+002b +
+    44: [0.19444, 0.10556, 0, 0, 0.30667],
+    // U+002c ,
+    45: [0, 0.43056, 0.02826, 0, 0.35778],
+    // U+002d -
+    46: [0, 0.10556, 0, 0, 0.30667],
+    // U+002e .
+    47: [0.25, 0.75, 0.16194, 0, 0.51111],
+    // U+002f /
+    48: M122,
+    // U+0030 0
+    49: M122,
+    // U+0031 1
+    50: M122,
+    // U+0032 2
+    51: M122,
+    // U+0033 3
+    52: M123,
+    // U+0034 4
+    53: M122,
+    // U+0035 5
+    54: M122,
+    // U+0036 6
+    55: M123,
+    // U+0037 7
+    56: M122,
+    // U+0038 8
+    57: M122,
+    // U+0039 9
+    58: [0, 0.43056, 0.0582, 0, 0.30667],
+    // U+003a :
+    59: [0.19444, 0.43056, 0.0582, 0, 0.30667],
+    // U+003b ;
+    61: [-0.13313, 0.36687, 0.06616, 0, 0.76666],
+    // U+003d =
+    63: M129,
+    // U+003f ?
+    64: [0, 0.69444, 0.09597, 0, 0.76666],
+    // U+0040 @
+    65: [0, 0.68333, 0, 0, 0.74333],
+    // U+0041 A
+    66: [0, 0.68333, 0.10257, 0, 0.70389],
+    // U+0042 B
+    67: [0, 0.68333, 0.14528, 0, 0.71555],
+    // U+0043 C
+    68: [0, 0.68333, 0.09403, 0, 0.755],
+    // U+0044 D
+    69: [0, 0.68333, 0.12028, 0, 0.67833],
+    // U+0045 E
+    70: [0, 0.68333, 0.13305, 0, 0.65277],
+    // U+0046 F
+    71: [0, 0.68333, 0.08722, 0, 0.77361],
+    // U+0047 G
+    72: M124,
+    // U+0048 H
+    73: [0, 0.68333, 0.15806, 0, 0.38555],
+    // U+0049 I
+    74: [0, 0.68333, 0.14028, 0, 0.525],
+    // U+004a J
+    75: [0, 0.68333, 0.14528, 0, 0.76888],
+    // U+004b K
+    76: [0, 0.68333, 0, 0, 0.62722],
+    // U+004c L
+    77: [0, 0.68333, 0.16389, 0, 0.89666],
+    // U+004d M
+    78: M124,
+    // U+004e N
+    79: M130,
+    // U+004f O
+    80: [0, 0.68333, 0.10257, 0, 0.67833],
+    // U+0050 P
+    81: [0.19444, 0.68333, 0.09403, 0, 0.76666],
+    // U+0051 Q
+    82: [0, 0.68333, 0.03868, 0, 0.72944],
+    // U+0052 R
+    83: [0, 0.68333, 0.11972, 0, 0.56222],
+    // U+0053 S
+    84: [0, 0.68333, 0.13305, 0, 0.71555],
+    // U+0054 T
+    85: M124,
+    // U+0055 U
+    86: [0, 0.68333, 0.18361, 0, 0.74333],
+    // U+0056 V
+    87: [0, 0.68333, 0.18361, 0, 0.99888],
+    // U+0057 W
+    88: [0, 0.68333, 0.15806, 0, 0.74333],
+    // U+0058 X
+    89: [0, 0.68333, 0.19383, 0, 0.74333],
+    // U+0059 Y
+    90: [0, 0.68333, 0.14528, 0, 0.61333],
+    // U+005a Z
+    91: [0.25, 0.75, 0.1875, 0, 0.30667],
+    // U+005b [
+    93: [0.25, 0.75, 0.10528, 0, 0.30667],
+    // U+005d ]
+    94: M127,
+    // U+005e ^
+    95: [0.31, 0.12056, 0.09208, 0, 0.51111],
+    // U+005f _
+    97: [0, 0.43056, 0.07671, 0, 0.51111],
+    // U+0061 a
+    98: [0, 0.69444, 0.06312, 0, 0.46],
+    // U+0062 b
+    99: [0, 0.43056, 0.05653, 0, 0.46],
+    // U+0063 c
+    100: [0, 0.69444, 0.10333, 0, 0.51111],
+    // U+0064 d
+    101: [0, 0.43056, 0.07514, 0, 0.46],
+    // U+0065 e
+    102: [0.19444, 0.69444, 0.21194, 0, 0.30667],
+    // U+0066 f
+    103: M125,
+    // U+0067 g
+    104: [0, 0.69444, 0.07671, 0, 0.51111],
+    // U+0068 h
+    105: [0, 0.65536, 0.1019, 0, 0.30667],
+    // U+0069 i
+    106: [0.19444, 0.65536, 0.14467, 0, 0.30667],
+    // U+006a j
+    107: [0, 0.69444, 0.10764, 0, 0.46],
+    // U+006b k
+    108: [0, 0.69444, 0.10333, 0, 0.25555],
+    // U+006c l
+    109: [0, 0.43056, 0.07671, 0, 0.81777],
+    // U+006d m
+    110: [0, 0.43056, 0.07671, 0, 0.56222],
+    // U+006e n
+    111: [0, 0.43056, 0.06312, 0, 0.51111],
+    // U+006f o
+    112: [0.19444, 0.43056, 0.06312, 0, 0.51111],
+    // U+0070 p
+    113: M125,
+    // U+0071 q
+    114: [0, 0.43056, 0.10764, 0, 0.42166],
+    // U+0072 r
+    115: [0, 0.43056, 0.08208, 0, 0.40889],
+    // U+0073 s
+    116: [0, 0.61508, 0.09486, 0, 0.33222],
+    // U+0074 t
+    117: [0, 0.43056, 0.07671, 0, 0.53666],
+    // U+0075 u
+    118: [0, 0.43056, 0.10764, 0, 0.46],
+    // U+0076 v
+    119: [0, 0.43056, 0.10764, 0, 0.66444],
+    // U+0077 w
+    120: [0, 0.43056, 0.12042, 0, 0.46389],
+    // U+0078 x
+    121: [0.19444, 0.43056, 0.08847, 0, 0.48555],
+    // U+0079 y
+    122: [0, 0.43056, 0.12292, 0, 0.40889],
+    // U+007a z
+    126: [0.35, 0.31786, 0.11585, 0, 0.51111],
+    // U+007e ~
+    160: M7,
+    // U+00a0
+    168: [0, 0.66786, 0.10474, 0, 0.51111],
+    // U+00a8 ¨
+    176: M128,
+    // U+00b0 °
+    184: [0.17014, 0, 0, 0, 0.46],
+    // U+00b8 ¸
+    198: [0, 0.68333, 0.12028, 0, 0.88277],
+    // U+00c6 Æ
+    216: [0.04861, 0.73194, 0.09403, 0, 0.76666],
+    // U+00d8 Ø
+    223: [0.19444, 0.69444, 0.10514, 0, 0.53666],
+    // U+00df ß
+    230: M126,
+    // U+00e6 æ
+    248: [0.09722, 0.52778, 0.09194, 0, 0.51111],
+    // U+00f8 ø
+    338: [0, 0.68333, 0.12028, 0, 0.98499],
+    // U+0152 Œ
+    339: M126,
+    // U+0153 œ
+    710: M127,
+    // U+02c6 ˆ
+    711: [0, 0.62847, 0.08295, 0, 0.51111],
+    // U+02c7 ˇ
+    713: [0, 0.56167, 0.10333, 0, 0.51111],
+    // U+02c9 ˉ
+    714: [0, 0.69444, 0.09694, 0, 0.51111],
+    // U+02ca ˊ
+    715: [0, 0.69444, 0, 0, 0.51111],
+    // U+02cb ˋ
+    728: [0, 0.69444, 0.10806, 0, 0.51111],
+    // U+02d8 ˘
+    729: [0, 0.66786, 0.11752, 0, 0.30667],
+    // U+02d9 ˙
+    730: M128,
+    // U+02da ˚
+    732: [0, 0.66786, 0.11585, 0, 0.51111],
+    // U+02dc ˜
+    733: M129,
+    // U+02dd ˝
+    915: [0, 0.68333, 0.13305, 0, 0.62722],
+    // U+0393 Γ
+    916: [0, 0.68333, 0, 0, 0.81777],
+    // U+0394 Δ
+    920: M130,
+    // U+0398 Θ
+    923: [0, 0.68333, 0, 0, 0.69222],
+    // U+039b Λ
+    926: [0, 0.68333, 0.15294, 0, 0.66444],
+    // U+039e Ξ
+    928: M124,
+    // U+03a0 Π
+    931: [0, 0.68333, 0.12028, 0, 0.71555],
+    // U+03a3 Σ
+    933: M131,
+    // U+03a5 Υ
+    934: [0, 0.68333, 0.05986, 0, 0.71555],
+    // U+03a6 Φ
+    936: M131,
+    // U+03a8 Ψ
+    937: [0, 0.68333, 0.10257, 0, 0.71555],
+    // U+03a9 Ω
+    8211: [0, 0.43056, 0.09208, 0, 0.51111],
+    // U+2013 –
+    8212: [0, 0.43056, 0.09208, 0, 1.02222],
+    // U+2014 —
+    8216: M121,
+    // U+2018 ‘
+    8217: M121,
+    // U+2019 ’
+    8220: [0, 0.69444, 0.1685, 0, 0.51444],
+    // U+201c “
+    8221: M132,
+    // U+201d ”
+    8463: M10
+    // U+210f ℏ
   },
   "Main-Regular": {
-    "32": M0,
-    "33": M6,
-    "34": M6,
-    "35": M16,
-    "36": [0.05556, 0.75, 0, 0],
-    "37": [0.05556, 0.75, 0, 0],
-    "38": M6,
-    "39": M6,
-    "40": M15,
-    "41": M15,
-    "42": M14,
-    "43": [0.08333, 0.58333, 0, 0],
-    "44": [0.19444, 0.10556, 0, 0],
-    "45": [0, 0.43056, 0, 0],
-    "46": [0, 0.10556, 0, 0],
-    "47": M15,
-    "48": M5,
-    "49": M5,
-    "50": M5,
-    "51": M5,
-    "52": M5,
-    "53": M5,
-    "54": M5,
-    "55": M5,
-    "56": M5,
-    "57": M5,
-    "58": [0, 0.43056, 0, 0],
-    "59": [0.19444, 0.43056, 0, 0],
-    "60": [0.0391, 0.5391, 0, 0],
-    "61": [-0.13313, 0.36687, 0, 0],
-    "62": [0.0391, 0.5391, 0, 0],
-    "63": M6,
-    "64": M6,
-    "65": M9,
-    "66": M9,
-    "67": M9,
-    "68": M9,
-    "69": M9,
-    "70": M9,
-    "71": M9,
-    "72": M9,
-    "73": M9,
-    "74": M9,
-    "75": M9,
-    "76": M9,
-    "77": M9,
-    "78": M9,
-    "79": M9,
-    "80": M9,
-    "81": [0.19444, 0.68333, 0, 0],
-    "82": M9,
-    "83": M9,
-    "84": M9,
-    "85": M9,
-    "86": [0, 0.68333, 0.01389, 0],
-    "87": [0, 0.68333, 0.01389, 0],
-    "88": M9,
-    "89": [0, 0.68333, 0.025, 0],
-    "90": M9,
-    "91": M15,
-    "92": M15,
-    "93": M15,
-    "94": M6,
-    "95": [0.31, 0.12056, 0.02778, 0],
-    "97": [0, 0.43056, 0, 0],
-    "98": M6,
-    "99": [0, 0.43056, 0, 0],
-    "100": M6,
-    "101": [0, 0.43056, 0, 0],
-    "102": [0, 0.69444, 0.07778, 0],
-    "103": [0.19444, 0.43056, 0.01389, 0],
-    "104": M6,
-    "105": [0, 0.66786, 0, 0],
-    "106": [0.19444, 0.66786, 0, 0],
-    "107": M6,
-    "108": M6,
-    "109": [0, 0.43056, 0, 0],
-    "110": [0, 0.43056, 0, 0],
-    "111": [0, 0.43056, 0, 0],
-    "112": [0.19444, 0.43056, 0, 0],
-    "113": [0.19444, 0.43056, 0, 0],
-    "114": [0, 0.43056, 0, 0],
-    "115": [0, 0.43056, 0, 0],
-    "116": [0, 0.61508, 0, 0],
-    "117": [0, 0.43056, 0, 0],
-    "118": [0, 0.43056, 0.01389, 0],
-    "119": [0, 0.43056, 0.01389, 0],
-    "120": [0, 0.43056, 0, 0],
-    "121": [0.19444, 0.43056, 0.01389, 0],
-    "122": [0, 0.43056, 0, 0],
-    "123": M15,
-    "124": M15,
-    "125": M15,
-    "126": [0.35, 0.31786, 0, 0],
-    "160": M0,
-    "163": M6,
-    "167": M16,
-    "168": [0, 0.66786, 0, 0],
-    "172": [0, 0.43056, 0, 0],
-    "176": M6,
-    "177": [0.08333, 0.58333, 0, 0],
-    "182": M16,
-    "184": [0.17014, 0, 0, 0],
-    "198": M9,
-    "215": [0.08333, 0.58333, 0, 0],
-    "216": [0.04861, 0.73194, 0, 0],
-    "223": M6,
-    "230": [0, 0.43056, 0, 0],
-    "247": [0.08333, 0.58333, 0, 0],
-    "248": [0.09722, 0.52778, 0, 0],
-    "305": [0, 0.43056, 0, 0],
-    "338": M9,
-    "339": [0, 0.43056, 0, 0],
-    "567": [0.19444, 0.43056, 0, 0],
-    "710": M6,
-    "711": [0, 0.62847, 0, 0],
-    "713": [0, 0.56778, 0, 0],
-    "714": M6,
-    "715": M6,
-    "728": M6,
-    "729": [0, 0.66786, 0, 0],
-    "730": M6,
-    "732": [0, 0.66786, 0, 0],
-    "733": M6,
-    "915": M9,
-    "916": M9,
-    "920": M9,
-    "923": M9,
-    "926": M9,
-    "928": M9,
-    "931": M9,
-    "933": M9,
-    "934": M9,
-    "936": M9,
-    "937": M9,
-    "8211": [0, 0.43056, 0.02778, 0],
-    "8212": [0, 0.43056, 0.02778, 0],
-    "8216": M6,
-    "8217": M6,
-    "8220": M6,
-    "8221": M6,
-    "8224": M16,
-    "8225": M16,
-    "8230": [0, 0.12, 0, 0],
-    "8242": M20,
-    "8407": [0, 0.71444, 0.15382, 0],
-    "8463": M1,
-    "8465": M6,
-    "8467": [0, 0.69444, 0, 0.11111],
-    "8472": [0.19444, 0.43056, 0, 0.11111],
-    "8476": M6,
-    "8501": M6,
-    "8592": [-0.13313, 0.36687, 0, 0],
-    "8593": M16,
-    "8594": [-0.13313, 0.36687, 0, 0],
-    "8595": M16,
-    "8596": [-0.13313, 0.36687, 0, 0],
-    "8597": M15,
-    "8598": M16,
-    "8599": M16,
-    "8600": M16,
-    "8601": M16,
-    "8614": [0.011, 0.511, 0, 0],
-    "8617": [0.011, 0.511, 0, 0],
-    "8618": [0.011, 0.511, 0, 0],
-    "8636": [-0.13313, 0.36687, 0, 0],
-    "8637": [-0.13313, 0.36687, 0, 0],
-    "8640": [-0.13313, 0.36687, 0, 0],
-    "8641": [-0.13313, 0.36687, 0, 0],
-    "8652": [0.011, 0.671, 0, 0],
-    "8656": [-0.13313, 0.36687, 0, 0],
-    "8657": M16,
-    "8658": [-0.13313, 0.36687, 0, 0],
-    "8659": M16,
-    "8660": [-0.13313, 0.36687, 0, 0],
-    "8661": M15,
-    "8704": M6,
-    "8706": [0, 0.69444, 0.05556, 0.08334],
-    "8707": M6,
-    "8709": [0.05556, 0.75, 0, 0],
-    "8711": M9,
-    "8712": [0.0391, 0.5391, 0, 0],
-    "8715": [0.0391, 0.5391, 0, 0],
-    "8722": [0.08333, 0.58333, 0, 0],
-    "8723": [0.08333, 0.58333, 0, 0],
-    "8725": M15,
-    "8726": M15,
-    "8727": [-0.03472, 0.46528, 0, 0],
-    "8728": [-0.05555, 0.44445, 0, 0],
-    "8729": [-0.05555, 0.44445, 0, 0],
-    "8730": [0.2, 0.8, 0, 0],
-    "8733": [0, 0.43056, 0, 0],
-    "8734": [0, 0.43056, 0, 0],
-    "8736": M3,
-    "8739": M15,
-    "8741": M15,
-    "8743": M20,
-    "8744": M20,
-    "8745": M20,
-    "8746": M20,
-    "8747": [0.19444, 0.69444, 0.11111, 0],
-    "8764": [-0.13313, 0.36687, 0, 0],
-    "8768": M16,
-    "8771": [-0.03625, 0.46375, 0, 0],
-    "8773": [-0.022, 0.589, 0, 0],
-    "8776": [-0.01688, 0.48312, 0, 0],
-    "8781": [-0.03625, 0.46375, 0, 0],
-    "8784": [-0.133, 0.67, 0, 0],
-    "8801": [-0.03625, 0.46375, 0, 0],
-    "8804": [0.13597, 0.63597, 0, 0],
-    "8805": [0.13597, 0.63597, 0, 0],
-    "8810": [0.0391, 0.5391, 0, 0],
-    "8811": [0.0391, 0.5391, 0, 0],
-    "8826": [0.0391, 0.5391, 0, 0],
-    "8827": [0.0391, 0.5391, 0, 0],
-    "8834": [0.0391, 0.5391, 0, 0],
-    "8835": [0.0391, 0.5391, 0, 0],
-    "8838": [0.13597, 0.63597, 0, 0],
-    "8839": [0.13597, 0.63597, 0, 0],
-    "8846": M20,
-    "8849": [0.13597, 0.63597, 0, 0],
-    "8850": [0.13597, 0.63597, 0, 0],
-    "8851": M20,
-    "8852": M20,
-    "8853": [0.08333, 0.58333, 0, 0],
-    "8854": [0.08333, 0.58333, 0, 0],
-    "8855": [0.08333, 0.58333, 0, 0],
-    "8856": [0.08333, 0.58333, 0, 0],
-    "8857": [0.08333, 0.58333, 0, 0],
-    "8866": M6,
-    "8867": M6,
-    "8868": M6,
-    "8869": M6,
-    "8872": [0.249, 0.75, 0, 0],
-    "8900": [-0.05555, 0.44445, 0, 0],
-    "8901": [-0.05555, 0.44445, 0, 0],
-    "8902": [-0.03472, 0.46528, 0, 0],
-    "8904": [5e-3, 0.505, 0, 0],
-    "8942": [0.03, 0.9, 0, 0],
-    "8943": [-0.19, 0.31, 0, 0],
-    "8945": [-0.1, 0.82, 0, 0],
-    "8968": M15,
-    "8969": M15,
-    "8970": M15,
-    "8971": M15,
-    "8994": [-0.14236, 0.35764, 0, 0],
-    "8995": [-0.14236, 0.35764, 0, 0],
-    "9136": [0.244, 0.744, 0, 0],
-    "9137": [0.244, 0.744, 0, 0],
-    "9651": M16,
-    "9657": [-0.03472, 0.46528, 0, 0],
-    "9661": M16,
-    "9667": [-0.03472, 0.46528, 0, 0],
-    "9711": M16,
-    "9824": [0.12963, 0.69444, 0, 0],
-    "9825": [0.12963, 0.69444, 0, 0],
-    "9826": [0.12963, 0.69444, 0, 0],
-    "9827": [0.12963, 0.69444, 0, 0],
-    "9837": M14,
-    "9838": M16,
-    "9839": M16,
-    "10216": M15,
-    "10217": M15,
-    "10222": [0.244, 0.744, 0, 0],
-    "10223": [0.244, 0.744, 0, 0],
-    "10229": [0.011, 0.511, 0, 0],
-    "10230": [0.011, 0.511, 0, 0],
-    "10231": [0.011, 0.511, 0, 0],
-    "10232": [0.024, 0.525, 0, 0],
-    "10233": [0.024, 0.525, 0, 0],
-    "10234": [0.024, 0.525, 0, 0],
-    "10236": [0.011, 0.511, 0, 0],
-    "10815": M9,
-    "10927": [0.13597, 0.63597, 0, 0],
-    "10928": [0.13597, 0.63597, 0, 0],
-    "57376": M16
+    32: M7,
+    // U+0020
+    33: M133,
+    // U+0021 !
+    34: M143,
+    // U+0022 "
+    35: M220,
+    // U+0023 #
+    36: M161,
+    // U+0024 $
+    37: M221,
+    // U+0025 %
+    38: M136,
+    // U+0026 &
+    39: M133,
+    // U+0027 '
+    40: M134,
+    // U+0028 (
+    41: M134,
+    // U+0029 )
+    42: M222,
+    // U+002a *
+    43: M149,
+    // U+002b +
+    44: [0.19444, 0.10556, 0, 0, 0.27778],
+    // U+002c ,
+    45: [0, 0.43056, 0, 0, 0.33333],
+    // U+002d -
+    46: [0, 0.10556, 0, 0, 0.27778],
+    // U+002e .
+    47: M141,
+    // U+002f /
+    48: M135,
+    // U+0030 0
+    49: M135,
+    // U+0031 1
+    50: M135,
+    // U+0032 2
+    51: M135,
+    // U+0033 3
+    52: M135,
+    // U+0034 4
+    53: M135,
+    // U+0035 5
+    54: M135,
+    // U+0036 6
+    55: M135,
+    // U+0037 7
+    56: M135,
+    // U+0038 8
+    57: M135,
+    // U+0039 9
+    58: M150,
+    // U+003a :
+    59: [0.19444, 0.43056, 0, 0, 0.27778],
+    // U+003b ;
+    60: M43,
+    // U+003c <
+    61: M27,
+    // U+003d =
+    62: M43,
+    // U+003e >
+    63: M226,
+    // U+003f ?
+    64: M136,
+    // U+0040 @
+    65: M137,
+    // U+0041 A
+    66: [0, 0.68333, 0, 0, 0.70834],
+    // U+0042 B
+    67: M140,
+    // U+0043 C
+    68: [0, 0.68333, 0, 0, 0.76389],
+    // U+0044 D
+    69: M139,
+    // U+0045 E
+    70: [0, 0.68333, 0, 0, 0.65278],
+    // U+0046 F
+    71: [0, 0.68333, 0, 0, 0.78472],
+    // U+0047 G
+    72: M137,
+    // U+0048 H
+    73: [0, 0.68333, 0, 0, 0.36111],
+    // U+0049 I
+    74: [0, 0.68333, 0, 0, 0.51389],
+    // U+004a J
+    75: M138,
+    // U+004b K
+    76: M154,
+    // U+004c L
+    77: [0, 0.68333, 0, 0, 0.91667],
+    // U+004d M
+    78: M137,
+    // U+004e N
+    79: M138,
+    // U+004f O
+    80: M139,
+    // U+0050 P
+    81: [0.19444, 0.68333, 0, 0, 0.77778],
+    // U+0051 Q
+    82: [0, 0.68333, 0, 0, 0.73611],
+    // U+0052 R
+    83: [0, 0.68333, 0, 0, 0.55556],
+    // U+0053 S
+    84: M140,
+    // U+0054 T
+    85: M137,
+    // U+0055 U
+    86: [0, 0.68333, 0.01389, 0, 0.75],
+    // U+0056 V
+    87: [0, 0.68333, 0.01389, 0, 1.02778],
+    // U+0057 W
+    88: M137,
+    // U+0058 X
+    89: [0, 0.68333, 0.025, 0, 0.75],
+    // U+0059 Y
+    90: [0, 0.68333, 0, 0, 0.61111],
+    // U+005a Z
+    91: M142,
+    // U+005b [
+    92: M141,
+    // U+005c \
+    93: M142,
+    // U+005d ]
+    94: M143,
+    // U+005e ^
+    95: [0.31, 0.12056, 0.02778, 0, 0.5],
+    // U+005f _
+    97: M146,
+    // U+0061 a
+    98: M144,
+    // U+0062 b
+    99: M145,
+    // U+0063 c
+    100: M144,
+    // U+0064 d
+    101: M145,
+    // U+0065 e
+    102: [0, 0.69444, 0.07778, 0, 0.30556],
+    // U+0066 f
+    103: [0.19444, 0.43056, 0.01389, 0, 0.5],
+    // U+0067 g
+    104: M144,
+    // U+0068 h
+    105: M151,
+    // U+0069 i
+    106: [0.19444, 0.66786, 0, 0, 0.30556],
+    // U+006a j
+    107: [0, 0.69444, 0, 0, 0.52778],
+    // U+006b k
+    108: M133,
+    // U+006c l
+    109: [0, 0.43056, 0, 0, 0.83334],
+    // U+006d m
+    110: M148,
+    // U+006e n
+    111: M146,
+    // U+006f o
+    112: M147,
+    // U+0070 p
+    113: [0.19444, 0.43056, 0, 0, 0.52778],
+    // U+0071 q
+    114: [0, 0.43056, 0, 0, 0.39167],
+    // U+0072 r
+    115: [0, 0.43056, 0, 0, 0.39445],
+    // U+0073 s
+    116: [0, 0.61508, 0, 0, 0.38889],
+    // U+0074 t
+    117: M148,
+    // U+0075 u
+    118: [0, 0.43056, 0.01389, 0, 0.52778],
+    // U+0076 v
+    119: [0, 0.43056, 0.01389, 0, 0.72222],
+    // U+0077 w
+    120: [0, 0.43056, 0, 0, 0.52778],
+    // U+0078 x
+    121: [0.19444, 0.43056, 0.01389, 0, 0.52778],
+    // U+0079 y
+    122: M145,
+    // U+007a z
+    123: M141,
+    // U+007b {
+    124: M142,
+    // U+007c |
+    125: M141,
+    // U+007d }
+    126: [0.35, 0.31786, 0, 0, 0.5],
+    // U+007e ~
+    160: M7,
+    // U+00a0
+    163: [0, 0.69444, 0, 0, 0.76909],
+    // U+00a3 £
+    167: M155,
+    // U+00a7 §
+    168: M153,
+    // U+00a8 ¨
+    172: [0, 0.43056, 0, 0, 0.66667],
+    // U+00ac ¬
+    176: M152,
+    // U+00b0 °
+    177: M149,
+    // U+00b1 ±
+    182: M160,
+    // U+00b6 ¶
+    184: M213,
+    // U+00b8 ¸
+    198: [0, 0.68333, 0, 0, 0.90278],
+    // U+00c6 Æ
+    215: M149,
+    // U+00d7 ×
+    216: [0.04861, 0.73194, 0, 0, 0.77778],
+    // U+00d8 Ø
+    223: M143,
+    // U+00df ß
+    230: [0, 0.43056, 0, 0, 0.72222],
+    // U+00e6 æ
+    247: M149,
+    // U+00f7 ÷
+    248: [0.09722, 0.52778, 0, 0, 0.5],
+    // U+00f8 ø
+    305: M150,
+    // U+0131 ı
+    338: [0, 0.68333, 0, 0, 1.01389],
+    // U+0152 Œ
+    339: M165,
+    // U+0153 œ
+    567: [0.19444, 0.43056, 0, 0, 0.30556],
+    // U+0237 ȷ
+    710: M143,
+    // U+02c6 ˆ
+    711: [0, 0.62847, 0, 0, 0.5],
+    // U+02c7 ˇ
+    713: [0, 0.56778, 0, 0, 0.5],
+    // U+02c9 ˉ
+    714: M143,
+    // U+02ca ˊ
+    715: M143,
+    // U+02cb ˋ
+    728: M143,
+    // U+02d8 ˘
+    729: M151,
+    // U+02d9 ˙
+    730: M152,
+    // U+02da ˚
+    732: M153,
+    // U+02dc ˜
+    733: M143,
+    // U+02dd ˝
+    915: M154,
+    // U+0393 Γ
+    916: M162,
+    // U+0394 Δ
+    920: M138,
+    // U+0398 Θ
+    923: [0, 0.68333, 0, 0, 0.69445],
+    // U+039b Λ
+    926: [0, 0.68333, 0, 0, 0.66667],
+    // U+039e Ξ
+    928: M137,
+    // U+03a0 Π
+    931: M140,
+    // U+03a3 Σ
+    933: M138,
+    // U+03a5 Υ
+    934: M140,
+    // U+03a6 Φ
+    936: M138,
+    // U+03a8 Ψ
+    937: M140,
+    // U+03a9 Ω
+    8211: [0, 0.43056, 0.02778, 0, 0.5],
+    // U+2013 –
+    8212: [0, 0.43056, 0.02778, 0, 1],
+    // U+2014 —
+    8216: M133,
+    // U+2018 ‘
+    8217: M133,
+    // U+2019 ’
+    8220: M143,
+    // U+201c “
+    8221: M143,
+    // U+201d ”
+    8224: M155,
+    // U+2020 †
+    8225: M155,
+    // U+2021 ‡
+    8230: [0, 0.12, 0, 0, 1.172],
+    // U+2026 …
+    8242: [0, 0.55556, 0, 0, 0.275],
+    // U+2032 ′
+    8407: [0, 0.71444, 0.15382, 0, 0.5],
+    // U+20d7 ⃗
+    8463: M10,
+    // U+210f ℏ
+    8465: M156,
+    // U+2111 ℑ
+    8467: [0, 0.69444, 0, 0.11111, 0.41667],
+    // U+2113 ℓ
+    8472: [0.19444, 0.43056, 0, 0.11111, 0.63646],
+    // U+2118 ℘
+    8476: M156,
+    // U+211c ℜ
+    8501: M170,
+    // U+2135 ℵ
+    8592: M12,
+    // U+2190 ←
+    8593: M157,
+    // U+2191 ↑
+    8594: M12,
+    // U+2192 →
+    8595: M157,
+    // U+2193 ↓
+    8596: M12,
+    // U+2194 ↔
+    8597: M141,
+    // U+2195 ↕
+    8598: M158,
+    // U+2196 ↖
+    8599: M158,
+    // U+2197 ↗
+    8600: M158,
+    // U+2198 ↘
+    8601: M158,
+    // U+2199 ↙
+    8614: [0.011, 0.511, 0, 0, 1],
+    // U+21a6 ↦
+    8617: M159,
+    // U+21a9 ↩
+    8618: M159,
+    // U+21aa ↪
+    8636: M12,
+    // U+21bc ↼
+    8637: M12,
+    // U+21bd ↽
+    8640: M12,
+    // U+21c0 ⇀
+    8641: M12,
+    // U+21c1 ⇁
+    8652: [0.011, 0.671, 0, 0, 1],
+    // U+21cc ⇌
+    8656: M12,
+    // U+21d0 ⇐
+    8657: M160,
+    // U+21d1 ⇑
+    8658: M12,
+    // U+21d2 ⇒
+    8659: M160,
+    // U+21d3 ⇓
+    8660: M12,
+    // U+21d4 ⇔
+    8661: [0.25, 0.75, 0, 0, 0.61111],
+    // U+21d5 ⇕
+    8704: M144,
+    // U+2200 ∀
+    8706: [0, 0.69444, 0.05556, 0.08334, 0.5309],
+    // U+2202 ∂
+    8707: M144,
+    // U+2203 ∃
+    8709: M161,
+    // U+2205 ∅
+    8711: M162,
+    // U+2207 ∇
+    8712: M163,
+    // U+2208 ∈
+    8715: M163,
+    // U+220b ∋
+    8722: M149,
+    // U+2212 −
+    8723: M149,
+    // U+2213 ∓
+    8725: M141,
+    // U+2215 ∕
+    8726: M141,
+    // U+2216 ∖
+    8727: M171,
+    // U+2217 ∗
+    8728: M164,
+    // U+2218 ∘
+    8729: M164,
+    // U+2219 ∙
+    8730: [0.2, 0.8, 0, 0, 0.83334],
+    // U+221a √
+    8733: M165,
+    // U+221d ∝
+    8734: M17,
+    // U+221e ∞
+    8736: M25,
+    // U+2220 ∠
+    8739: M142,
+    // U+2223 ∣
+    8741: M141,
+    // U+2225 ∥
+    8743: M166,
+    // U+2227 ∧
+    8744: M166,
+    // U+2228 ∨
+    8745: M166,
+    // U+2229 ∩
+    8746: M166,
+    // U+222a ∪
+    8747: [0.19444, 0.69444, 0.11111, 0, 0.41667],
+    // U+222b ∫
+    8764: M27,
+    // U+223c ∼
+    8768: [0.19444, 0.69444, 0, 0, 0.27778],
+    // U+2240 ≀
+    8771: M167,
+    // U+2243 ≃
+    8773: [-0.022, 0.589, 0, 0, 1],
+    // U+2245 ≅
+    8776: M168,
+    // U+2248 ≈
+    8781: M167,
+    // U+224d ≍
+    8784: [-0.133, 0.67, 0, 0, 0.778],
+    // U+2250 ≐
+    8801: M167,
+    // U+2261 ≡
+    8804: M37,
+    // U+2264 ≤
+    8805: M37,
+    // U+2265 ≥
+    8810: M169,
+    // U+226a ≪
+    8811: M169,
+    // U+226b ≫
+    8826: M43,
+    // U+227a ≺
+    8827: M43,
+    // U+227b ≻
+    8834: M43,
+    // U+2282 ⊂
+    8835: M43,
+    // U+2283 ⊃
+    8838: M37,
+    // U+2286 ⊆
+    8839: M37,
+    // U+2287 ⊇
+    8846: M166,
+    // U+228e ⊎
+    8849: M37,
+    // U+2291 ⊑
+    8850: M37,
+    // U+2292 ⊒
+    8851: M166,
+    // U+2293 ⊓
+    8852: M166,
+    // U+2294 ⊔
+    8853: M149,
+    // U+2295 ⊕
+    8854: M149,
+    // U+2296 ⊖
+    8855: M149,
+    // U+2297 ⊗
+    8856: M149,
+    // U+2298 ⊘
+    8857: M149,
+    // U+2299 ⊙
+    8866: M170,
+    // U+22a2 ⊢
+    8867: M170,
+    // U+22a3 ⊣
+    8868: M136,
+    // U+22a4 ⊤
+    8869: M136,
+    // U+22a5 ⊥
+    8872: [0.249, 0.75, 0, 0, 0.867],
+    // U+22a8 ⊨
+    8900: M164,
+    // U+22c4 ⋄
+    8901: [-0.05555, 0.44445, 0, 0, 0.27778],
+    // U+22c5 ⋅
+    8902: M171,
+    // U+22c6 ⋆
+    8904: [5e-3, 0.505, 0, 0, 0.9],
+    // U+22c8 ⋈
+    8942: [0.03, 0.9, 0, 0, 0.278],
+    // U+22ee ⋮
+    8943: [-0.19, 0.31, 0, 0, 1.172],
+    // U+22ef ⋯
+    8945: [-0.1, 0.82, 0, 0, 1.282],
+    // U+22f1 ⋱
+    8968: M172,
+    // U+2308 ⌈
+    8969: M172,
+    // U+2309 ⌉
+    8970: M172,
+    // U+230a ⌊
+    8971: M172,
+    // U+230b ⌋
+    8994: M173,
+    // U+2322 ⌢
+    8995: M173,
+    // U+2323 ⌣
+    9136: M174,
+    // U+23b0 ⎰
+    9137: M174,
+    // U+23b1 ⎱
+    9651: M175,
+    // U+25b3 △
+    9657: M171,
+    // U+25b9 ▹
+    9661: M175,
+    // U+25bd ▽
+    9667: M171,
+    // U+25c3 ◃
+    9711: M158,
+    // U+25ef ◯
+    9824: M176,
+    // U+2660 ♠
+    9825: M176,
+    // U+2661 ♡
+    9826: M176,
+    // U+2662 ♢
+    9827: M176,
+    // U+2663 ♣
+    9837: [0, 0.75, 0, 0, 0.38889],
+    // U+266d ♭
+    9838: M177,
+    // U+266e ♮
+    9839: M177,
+    // U+266f ♯
+    10216: M134,
+    // U+27e8 ⟨
+    10217: M134,
+    // U+27e9 ⟩
+    10222: M174,
+    // U+27ee ⟮
+    10223: M174,
+    // U+27ef ⟯
+    10229: [0.011, 0.511, 0, 0, 1.609],
+    // U+27f5 ⟵
+    10230: M178,
+    // U+27f6 ⟶
+    10231: [0.011, 0.511, 0, 0, 1.859],
+    // U+27f7 ⟷
+    10232: [0.024, 0.525, 0, 0, 1.609],
+    // U+27f8 ⟸
+    10233: [0.024, 0.525, 0, 0, 1.638],
+    // U+27f9 ⟹
+    10234: [0.024, 0.525, 0, 0, 1.858],
+    // U+27fa ⟺
+    10236: M178,
+    // U+27fc ⟼
+    10815: M137,
+    // U+2a3f ⨿
+    10927: M37,
+    // U+2aaf ⪯
+    10928: M37,
+    // U+2ab0 ⪰
+    57376: M179
+    // U+e020 
   },
   "Math-BoldItalic": {
-    "32": M0,
-    "48": M7,
-    "49": M7,
-    "50": M7,
-    "51": M8,
-    "52": M8,
-    "53": M8,
-    "54": M5,
-    "55": M8,
-    "56": M5,
-    "57": M8,
-    "65": M4,
-    "66": [0, 0.68611, 0.04835, 0],
-    "67": [0, 0.68611, 0.06979, 0],
-    "68": [0, 0.68611, 0.03194, 0],
-    "69": [0, 0.68611, 0.05451, 0],
-    "70": [0, 0.68611, 0.15972, 0],
-    "71": M4,
-    "72": [0, 0.68611, 0.08229, 0],
-    "73": [0, 0.68611, 0.07778, 0],
-    "74": [0, 0.68611, 0.10069, 0],
-    "75": [0, 0.68611, 0.06979, 0],
-    "76": M4,
-    "77": [0, 0.68611, 0.11424, 0],
-    "78": [0, 0.68611, 0.11424, 0],
-    "79": [0, 0.68611, 0.03194, 0],
-    "80": [0, 0.68611, 0.15972, 0],
-    "81": [0.19444, 0.68611, 0, 0],
-    "82": [0, 0.68611, 421e-5, 0],
-    "83": [0, 0.68611, 0.05382, 0],
-    "84": [0, 0.68611, 0.15972, 0],
-    "85": [0, 0.68611, 0.11424, 0],
-    "86": [0, 0.68611, 0.25555, 0],
-    "87": [0, 0.68611, 0.15972, 0],
-    "88": [0, 0.68611, 0.07778, 0],
-    "89": [0, 0.68611, 0.25555, 0],
-    "90": [0, 0.68611, 0.06979, 0],
-    "97": M7,
-    "98": M6,
-    "99": M7,
-    "100": M6,
-    "101": M7,
-    "102": [0.19444, 0.69444, 0.11042, 0],
-    "103": [0.19444, 0.44444, 0.03704, 0],
-    "104": M6,
-    "105": [0, 0.69326, 0, 0],
-    "106": [0.19444, 0.69326, 0.0622, 0],
-    "107": [0, 0.69444, 0.01852, 0],
-    "108": [0, 0.69444, 88e-4, 0],
-    "109": M7,
-    "110": M7,
-    "111": M7,
-    "112": M8,
-    "113": [0.19444, 0.44444, 0.03704, 0],
-    "114": [0, 0.44444, 0.03194, 0],
-    "115": M7,
-    "116": [0, 0.63492, 0, 0],
-    "117": M7,
-    "118": [0, 0.44444, 0.03704, 0],
-    "119": [0, 0.44444, 0.02778, 0],
-    "120": M7,
-    "121": [0.19444, 0.44444, 0.03704, 0],
-    "122": [0, 0.44444, 0.04213, 0],
-    "160": M0,
-    "915": [0, 0.68611, 0.15972, 0],
-    "916": M4,
-    "920": [0, 0.68611, 0.03194, 0],
-    "923": M4,
-    "926": [0, 0.68611, 0.07458, 0],
-    "928": [0, 0.68611, 0.08229, 0],
-    "931": [0, 0.68611, 0.05451, 0],
-    "933": [0, 0.68611, 0.15972, 0],
-    "934": M4,
-    "936": [0, 0.68611, 0.11653, 0],
-    "937": [0, 0.68611, 0.04835, 0],
-    "945": M7,
-    "946": [0.19444, 0.69444, 0.03403, 0],
-    "947": [0.19444, 0.44444, 0.06389, 0],
-    "948": [0, 0.69444, 0.03819, 0],
-    "949": M7,
-    "950": [0.19444, 0.69444, 0.06215, 0],
-    "951": [0.19444, 0.44444, 0.03704, 0],
-    "952": [0, 0.69444, 0.03194, 0],
-    "953": M7,
-    "954": M7,
-    "955": M6,
-    "956": M8,
-    "957": [0, 0.44444, 0.06898, 0],
-    "958": [0.19444, 0.69444, 0.03021, 0],
-    "959": M7,
-    "960": [0, 0.44444, 0.03704, 0],
-    "961": M8,
-    "962": [0.09722, 0.44444, 0.07917, 0],
-    "963": [0, 0.44444, 0.03704, 0],
-    "964": [0, 0.44444, 0.13472, 0],
-    "965": [0, 0.44444, 0.03704, 0],
-    "966": M8,
-    "967": M8,
-    "968": [0.19444, 0.69444, 0.03704, 0],
-    "969": [0, 0.44444, 0.03704, 0],
-    "977": M6,
-    "981": M16,
-    "982": [0, 0.44444, 0.03194, 0],
-    "1009": M8,
-    "1013": M7,
-    "57649": M7,
-    "57911": M8
+    32: M7,
+    // U+0020
+    48: M180,
+    // U+0030 0
+    49: M180,
+    // U+0031 1
+    50: M180,
+    // U+0032 2
+    51: M181,
+    // U+0033 3
+    52: M181,
+    // U+0034 4
+    53: M181,
+    // U+0035 5
+    54: M68,
+    // U+0036 6
+    55: M181,
+    // U+0037 7
+    56: M68,
+    // U+0038 8
+    57: M181,
+    // U+0039 9
+    65: M72,
+    // U+0041 A
+    66: [0, 0.68611, 0.04835, 0, 0.8664],
+    // U+0042 B
+    67: [0, 0.68611, 0.06979, 0, 0.81694],
+    // U+0043 C
+    68: [0, 0.68611, 0.03194, 0, 0.93812],
+    // U+0044 D
+    69: [0, 0.68611, 0.05451, 0, 0.81007],
+    // U+0045 E
+    70: [0, 0.68611, 0.15972, 0, 0.68889],
+    // U+0046 F
+    71: [0, 0.68611, 0, 0, 0.88673],
+    // U+0047 G
+    72: M185,
+    // U+0048 H
+    73: [0, 0.68611, 0.07778, 0, 0.51111],
+    // U+0049 I
+    74: [0, 0.68611, 0.10069, 0, 0.63125],
+    // U+004a J
+    75: [0, 0.68611, 0.06979, 0, 0.97118],
+    // U+004b K
+    76: M182,
+    // U+004c L
+    77: [0, 0.68611, 0.11424, 0, 1.14201],
+    // U+004d M
+    78: [0, 0.68611, 0.11424, 0, 0.95034],
+    // U+004e N
+    79: [0, 0.68611, 0.03194, 0, 0.83666],
+    // U+004f O
+    80: [0, 0.68611, 0.15972, 0, 0.72309],
+    // U+0050 P
+    81: [0.19444, 0.68611, 0, 0, 0.86861],
+    // U+0051 Q
+    82: [0, 0.68611, 421e-5, 0, 0.87235],
+    // U+0052 R
+    83: [0, 0.68611, 0.05382, 0, 0.69271],
+    // U+0053 S
+    84: [0, 0.68611, 0.15972, 0, 0.63663],
+    // U+0054 T
+    85: [0, 0.68611, 0.11424, 0, 0.80027],
+    // U+0055 U
+    86: [0, 0.68611, 0.25555, 0, 0.67778],
+    // U+0056 V
+    87: [0, 0.68611, 0.15972, 0, 1.09305],
+    // U+0057 W
+    88: [0, 0.68611, 0.07778, 0, 0.94722],
+    // U+0058 X
+    89: [0, 0.68611, 0.25555, 0, 0.67458],
+    // U+0059 Y
+    90: [0, 0.68611, 0.06979, 0, 0.77257],
+    // U+005a Z
+    97: [0, 0.44444, 0, 0, 0.63287],
+    // U+0061 a
+    98: [0, 0.69444, 0, 0, 0.52083],
+    // U+0062 b
+    99: [0, 0.44444, 0, 0, 0.51342],
+    // U+0063 c
+    100: [0, 0.69444, 0, 0, 0.60972],
+    // U+0064 d
+    101: [0, 0.44444, 0, 0, 0.55361],
+    // U+0065 e
+    102: [0.19444, 0.69444, 0.11042, 0, 0.56806],
+    // U+0066 f
+    103: [0.19444, 0.44444, 0.03704, 0, 0.5449],
+    // U+0067 g
+    104: M183,
+    // U+0068 h
+    105: [0, 0.69326, 0, 0, 0.4048],
+    // U+0069 i
+    106: [0.19444, 0.69326, 0.0622, 0, 0.47083],
+    // U+006a j
+    107: [0, 0.69444, 0.01852, 0, 0.6037],
+    // U+006b k
+    108: [0, 0.69444, 88e-4, 0, 0.34815],
+    // U+006c l
+    109: [0, 0.44444, 0, 0, 1.0324],
+    // U+006d m
+    110: [0, 0.44444, 0, 0, 0.71296],
+    // U+006e n
+    111: M187,
+    // U+006f o
+    112: [0.19444, 0.44444, 0, 0, 0.60092],
+    // U+0070 p
+    113: [0.19444, 0.44444, 0.03704, 0, 0.54213],
+    // U+0071 q
+    114: [0, 0.44444, 0.03194, 0, 0.5287],
+    // U+0072 r
+    115: [0, 0.44444, 0, 0, 0.53125],
+    // U+0073 s
+    116: [0, 0.63492, 0, 0, 0.41528],
+    // U+0074 t
+    117: [0, 0.44444, 0, 0, 0.68102],
+    // U+0075 u
+    118: [0, 0.44444, 0.03704, 0, 0.56666],
+    // U+0076 v
+    119: [0, 0.44444, 0.02778, 0, 0.83148],
+    // U+0077 w
+    120: [0, 0.44444, 0, 0, 0.65903],
+    // U+0078 x
+    121: [0.19444, 0.44444, 0.03704, 0, 0.59028],
+    // U+0079 y
+    122: [0, 0.44444, 0.04213, 0, 0.55509],
+    // U+007a z
+    160: M7,
+    // U+00a0
+    915: [0, 0.68611, 0.15972, 0, 0.65694],
+    // U+0393 Γ
+    916: M94,
+    // U+0394 Δ
+    920: [0, 0.68611, 0.03194, 0, 0.86722],
+    // U+0398 Θ
+    923: M184,
+    // U+039b Λ
+    926: [0, 0.68611, 0.07458, 0, 0.84125],
+    // U+039e Ξ
+    928: M185,
+    // U+03a0 Π
+    931: [0, 0.68611, 0.05451, 0, 0.88507],
+    // U+03a3 Σ
+    933: [0, 0.68611, 0.15972, 0, 0.67083],
+    // U+03a5 Υ
+    934: M186,
+    // U+03a6 Φ
+    936: [0, 0.68611, 0.11653, 0, 0.71402],
+    // U+03a8 Ψ
+    937: [0, 0.68611, 0.04835, 0, 0.8789],
+    // U+03a9 Ω
+    945: [0, 0.44444, 0, 0, 0.76064],
+    // U+03b1 α
+    946: [0.19444, 0.69444, 0.03403, 0, 0.65972],
+    // U+03b2 β
+    947: [0.19444, 0.44444, 0.06389, 0, 0.59003],
+    // U+03b3 γ
+    948: [0, 0.69444, 0.03819, 0, 0.52222],
+    // U+03b4 δ
+    949: [0, 0.44444, 0, 0, 0.52882],
+    // U+03b5 ε
+    950: [0.19444, 0.69444, 0.06215, 0, 0.50833],
+    // U+03b6 ζ
+    951: [0.19444, 0.44444, 0.03704, 0, 0.6],
+    // U+03b7 η
+    952: [0, 0.69444, 0.03194, 0, 0.5618],
+    // U+03b8 θ
+    953: [0, 0.44444, 0, 0, 0.41204],
+    // U+03b9 ι
+    954: [0, 0.44444, 0, 0, 0.66759],
+    // U+03ba κ
+    955: [0, 0.69444, 0, 0, 0.67083],
+    // U+03bb λ
+    956: [0.19444, 0.44444, 0, 0, 0.70787],
+    // U+03bc μ
+    957: [0, 0.44444, 0.06898, 0, 0.57685],
+    // U+03bd ν
+    958: [0.19444, 0.69444, 0.03021, 0, 0.50833],
+    // U+03be ξ
+    959: M187,
+    // U+03bf ο
+    960: [0, 0.44444, 0.03704, 0, 0.68241],
+    // U+03c0 π
+    961: M188,
+    // U+03c1 ρ
+    962: [0.09722, 0.44444, 0.07917, 0, 0.42361],
+    // U+03c2 ς
+    963: [0, 0.44444, 0.03704, 0, 0.68588],
+    // U+03c3 σ
+    964: [0, 0.44444, 0.13472, 0, 0.52083],
+    // U+03c4 τ
+    965: [0, 0.44444, 0.03704, 0, 0.63055],
+    // U+03c5 υ
+    966: [0.19444, 0.44444, 0, 0, 0.74722],
+    // U+03c6 φ
+    967: [0.19444, 0.44444, 0, 0, 0.71805],
+    // U+03c7 χ
+    968: [0.19444, 0.69444, 0.03704, 0, 0.75833],
+    // U+03c8 ψ
+    969: [0, 0.44444, 0.03704, 0, 0.71782],
+    // U+03c9 ω
+    977: [0, 0.69444, 0, 0, 0.69155],
+    // U+03d1 ϑ
+    981: [0.19444, 0.69444, 0, 0, 0.7125],
+    // U+03d5 ϕ
+    982: [0, 0.44444, 0.03194, 0, 0.975],
+    // U+03d6 ϖ
+    1009: M188,
+    // U+03f1 ϱ
+    1013: [0, 0.44444, 0, 0, 0.48333],
+    // U+03f5 ϵ
+    57649: [0, 0.44444, 0, 0, 0.39352],
+    // U+e131 
+    57911: [0.19444, 0.44444, 0, 0, 0.43889]
+    // U+e237 
   },
   "Math-Italic": {
-    "32": M0,
-    "48": [0, 0.43056, 0, 0],
-    "49": [0, 0.43056, 0, 0],
-    "50": [0, 0.43056, 0, 0],
-    "51": [0.19444, 0.43056, 0, 0],
-    "52": [0.19444, 0.43056, 0, 0],
-    "53": [0.19444, 0.43056, 0, 0],
-    "54": M5,
-    "55": [0.19444, 0.43056, 0, 0],
-    "56": M5,
-    "57": [0.19444, 0.43056, 0, 0],
-    "65": [0, 0.68333, 0, 0.13889],
-    "66": [0, 0.68333, 0.05017, 0.08334],
-    "67": [0, 0.68333, 0.07153, 0.08334],
-    "68": [0, 0.68333, 0.02778, 0.05556],
-    "69": [0, 0.68333, 0.05764, 0.08334],
-    "70": [0, 0.68333, 0.13889, 0.08334],
-    "71": [0, 0.68333, 0, 0.08334],
-    "72": [0, 0.68333, 0.08125, 0.05556],
-    "73": [0, 0.68333, 0.07847, 0.11111],
-    "74": [0, 0.68333, 0.09618, 0.16667],
-    "75": [0, 0.68333, 0.07153, 0.05556],
-    "76": [0, 0.68333, 0, 0.02778],
-    "77": [0, 0.68333, 0.10903, 0.08334],
-    "78": [0, 0.68333, 0.10903, 0.08334],
-    "79": [0, 0.68333, 0.02778, 0.08334],
-    "80": [0, 0.68333, 0.13889, 0.08334],
-    "81": [0.19444, 0.68333, 0, 0.08334],
-    "82": [0, 0.68333, 773e-5, 0.08334],
-    "83": [0, 0.68333, 0.05764, 0.08334],
-    "84": [0, 0.68333, 0.13889, 0.08334],
-    "85": [0, 0.68333, 0.10903, 0.02778],
-    "86": [0, 0.68333, 0.22222, 0],
-    "87": [0, 0.68333, 0.13889, 0],
-    "88": [0, 0.68333, 0.07847, 0.08334],
-    "89": [0, 0.68333, 0.22222, 0],
-    "90": [0, 0.68333, 0.07153, 0.08334],
-    "97": [0, 0.43056, 0, 0],
-    "98": M6,
-    "99": [0, 0.43056, 0, 0.05556],
-    "100": [0, 0.69444, 0, 0.16667],
-    "101": [0, 0.43056, 0, 0.05556],
-    "102": [0.19444, 0.69444, 0.10764, 0.16667],
-    "103": [0.19444, 0.43056, 0.03588, 0.02778],
-    "104": M6,
-    "105": [0, 0.65952, 0, 0],
-    "106": [0.19444, 0.65952, 0.05724, 0],
-    "107": [0, 0.69444, 0.03148, 0],
-    "108": [0, 0.69444, 0.01968, 0.08334],
-    "109": [0, 0.43056, 0, 0],
-    "110": [0, 0.43056, 0, 0],
-    "111": [0, 0.43056, 0, 0.05556],
-    "112": [0.19444, 0.43056, 0, 0.08334],
-    "113": [0.19444, 0.43056, 0.03588, 0.08334],
-    "114": [0, 0.43056, 0.02778, 0.05556],
-    "115": [0, 0.43056, 0, 0.05556],
-    "116": [0, 0.61508, 0, 0.08334],
-    "117": [0, 0.43056, 0, 0.02778],
-    "118": [0, 0.43056, 0.03588, 0.02778],
-    "119": [0, 0.43056, 0.02691, 0.08334],
-    "120": [0, 0.43056, 0, 0.02778],
-    "121": [0.19444, 0.43056, 0.03588, 0.05556],
-    "122": [0, 0.43056, 0.04398, 0.05556],
-    "160": M0,
-    "915": [0, 0.68333, 0.13889, 0.08334],
-    "916": [0, 0.68333, 0, 0.16667],
-    "920": [0, 0.68333, 0.02778, 0.08334],
-    "923": [0, 0.68333, 0, 0.16667],
-    "926": [0, 0.68333, 0.07569, 0.08334],
-    "928": [0, 0.68333, 0.08125, 0.05556],
-    "931": [0, 0.68333, 0.05764, 0.08334],
-    "933": [0, 0.68333, 0.13889, 0.05556],
-    "934": [0, 0.68333, 0, 0.08334],
-    "936": [0, 0.68333, 0.11, 0.05556],
-    "937": [0, 0.68333, 0.05017, 0.08334],
-    "945": [0, 0.43056, 37e-4, 0.02778],
-    "946": [0.19444, 0.69444, 0.05278, 0.08334],
-    "947": [0.19444, 0.43056, 0.05556, 0],
-    "948": [0, 0.69444, 0.03785, 0.05556],
-    "949": [0, 0.43056, 0, 0.08334],
-    "950": [0.19444, 0.69444, 0.07378, 0.08334],
-    "951": [0.19444, 0.43056, 0.03588, 0.05556],
-    "952": [0, 0.69444, 0.02778, 0.08334],
-    "953": [0, 0.43056, 0, 0.05556],
-    "954": [0, 0.43056, 0, 0],
-    "955": M6,
-    "956": [0.19444, 0.43056, 0, 0.02778],
-    "957": [0, 0.43056, 0.06366, 0.02778],
-    "958": [0.19444, 0.69444, 0.04601, 0.11111],
-    "959": [0, 0.43056, 0, 0.05556],
-    "960": [0, 0.43056, 0.03588, 0],
-    "961": [0.19444, 0.43056, 0, 0.08334],
-    "962": [0.09722, 0.43056, 0.07986, 0.08334],
-    "963": [0, 0.43056, 0.03588, 0],
-    "964": [0, 0.43056, 0.1132, 0.02778],
-    "965": [0, 0.43056, 0.03588, 0.02778],
-    "966": [0.19444, 0.43056, 0, 0.08334],
-    "967": [0.19444, 0.43056, 0, 0.05556],
-    "968": [0.19444, 0.69444, 0.03588, 0.11111],
-    "969": [0, 0.43056, 0.03588, 0],
-    "977": [0, 0.69444, 0, 0.08334],
-    "981": [0.19444, 0.69444, 0, 0.08334],
-    "982": [0, 0.43056, 0.02778, 0],
-    "1009": [0.19444, 0.43056, 0, 0.08334],
-    "1013": [0, 0.43056, 0, 0.05556],
-    "57649": [0, 0.43056, 0, 0.02778],
-    "57911": [0.19444, 0.43056, 0, 0.08334]
+    32: M7,
+    // U+0020
+    48: M146,
+    // U+0030 0
+    49: M146,
+    // U+0031 1
+    50: M146,
+    // U+0032 2
+    51: M189,
+    // U+0033 3
+    52: M189,
+    // U+0034 4
+    53: M189,
+    // U+0035 5
+    54: M135,
+    // U+0036 6
+    55: M189,
+    // U+0037 7
+    56: M135,
+    // U+0038 8
+    57: M189,
+    // U+0039 9
+    65: [0, 0.68333, 0, 0.13889, 0.75],
+    // U+0041 A
+    66: [0, 0.68333, 0.05017, 0.08334, 0.75851],
+    // U+0042 B
+    67: [0, 0.68333, 0.07153, 0.08334, 0.71472],
+    // U+0043 C
+    68: [0, 0.68333, 0.02778, 0.05556, 0.82792],
+    // U+0044 D
+    69: [0, 0.68333, 0.05764, 0.08334, 0.7382],
+    // U+0045 E
+    70: [0, 0.68333, 0.13889, 0.08334, 0.64306],
+    // U+0046 F
+    71: [0, 0.68333, 0, 0.08334, 0.78625],
+    // U+0047 G
+    72: M191,
+    // U+0048 H
+    73: [0, 0.68333, 0.07847, 0.11111, 0.43958],
+    // U+0049 I
+    74: [0, 0.68333, 0.09618, 0.16667, 0.55451],
+    // U+004a J
+    75: [0, 0.68333, 0.07153, 0.05556, 0.84931],
+    // U+004b K
+    76: [0, 0.68333, 0, 0.02778, 0.68056],
+    // U+004c L
+    77: [0, 0.68333, 0.10903, 0.08334, 0.97014],
+    // U+004d M
+    78: [0, 0.68333, 0.10903, 0.08334, 0.80347],
+    // U+004e N
+    79: M190,
+    // U+004f O
+    80: [0, 0.68333, 0.13889, 0.08334, 0.64201],
+    // U+0050 P
+    81: [0.19444, 0.68333, 0, 0.08334, 0.79056],
+    // U+0051 Q
+    82: [0, 0.68333, 773e-5, 0.08334, 0.75929],
+    // U+0052 R
+    83: [0, 0.68333, 0.05764, 0.08334, 0.6132],
+    // U+0053 S
+    84: [0, 0.68333, 0.13889, 0.08334, 0.58438],
+    // U+0054 T
+    85: [0, 0.68333, 0.10903, 0.02778, 0.68278],
+    // U+0055 U
+    86: [0, 0.68333, 0.22222, 0, 0.58333],
+    // U+0056 V
+    87: [0, 0.68333, 0.13889, 0, 0.94445],
+    // U+0057 W
+    88: [0, 0.68333, 0.07847, 0.08334, 0.82847],
+    // U+0058 X
+    89: [0, 0.68333, 0.22222, 0, 0.58056],
+    // U+0059 Y
+    90: [0, 0.68333, 0.07153, 0.08334, 0.68264],
+    // U+005a Z
+    97: [0, 0.43056, 0, 0, 0.52859],
+    // U+0061 a
+    98: [0, 0.69444, 0, 0, 0.42917],
+    // U+0062 b
+    99: [0, 0.43056, 0, 0.05556, 0.43276],
+    // U+0063 c
+    100: [0, 0.69444, 0, 0.16667, 0.52049],
+    // U+0064 d
+    101: [0, 0.43056, 0, 0.05556, 0.46563],
+    // U+0065 e
+    102: [0.19444, 0.69444, 0.10764, 0.16667, 0.48959],
+    // U+0066 f
+    103: [0.19444, 0.43056, 0.03588, 0.02778, 0.47697],
+    // U+0067 g
+    104: [0, 0.69444, 0, 0, 0.57616],
+    // U+0068 h
+    105: [0, 0.65952, 0, 0, 0.34451],
+    // U+0069 i
+    106: [0.19444, 0.65952, 0.05724, 0, 0.41181],
+    // U+006a j
+    107: [0, 0.69444, 0.03148, 0, 0.5206],
+    // U+006b k
+    108: [0, 0.69444, 0.01968, 0.08334, 0.29838],
+    // U+006c l
+    109: [0, 0.43056, 0, 0, 0.87801],
+    // U+006d m
+    110: [0, 0.43056, 0, 0, 0.60023],
+    // U+006e n
+    111: M192,
+    // U+006f o
+    112: [0.19444, 0.43056, 0, 0.08334, 0.50313],
+    // U+0070 p
+    113: [0.19444, 0.43056, 0.03588, 0.08334, 0.44641],
+    // U+0071 q
+    114: [0, 0.43056, 0.02778, 0.05556, 0.45116],
+    // U+0072 r
+    115: [0, 0.43056, 0, 0.05556, 0.46875],
+    // U+0073 s
+    116: [0, 0.61508, 0, 0.08334, 0.36111],
+    // U+0074 t
+    117: [0, 0.43056, 0, 0.02778, 0.57246],
+    // U+0075 u
+    118: [0, 0.43056, 0.03588, 0.02778, 0.48472],
+    // U+0076 v
+    119: [0, 0.43056, 0.02691, 0.08334, 0.71592],
+    // U+0077 w
+    120: [0, 0.43056, 0, 0.02778, 0.57153],
+    // U+0078 x
+    121: [0.19444, 0.43056, 0.03588, 0.05556, 0.49028],
+    // U+0079 y
+    122: [0, 0.43056, 0.04398, 0.05556, 0.46505],
+    // U+007a z
+    160: M7,
+    // U+00a0
+    915: [0, 0.68333, 0.13889, 0.08334, 0.61528],
+    // U+0393 Γ
+    916: [0, 0.68333, 0, 0.16667, 0.83334],
+    // U+0394 Δ
+    920: M190,
+    // U+0398 Θ
+    923: [0, 0.68333, 0, 0.16667, 0.69445],
+    // U+039b Λ
+    926: [0, 0.68333, 0.07569, 0.08334, 0.74236],
+    // U+039e Ξ
+    928: M191,
+    // U+03a0 Π
+    931: [0, 0.68333, 0.05764, 0.08334, 0.77986],
+    // U+03a3 Σ
+    933: [0, 0.68333, 0.13889, 0.05556, 0.58333],
+    // U+03a5 Υ
+    934: [0, 0.68333, 0, 0.08334, 0.66667],
+    // U+03a6 Φ
+    936: [0, 0.68333, 0.11, 0.05556, 0.61222],
+    // U+03a8 Ψ
+    937: [0, 0.68333, 0.05017, 0.08334, 0.7724],
+    // U+03a9 Ω
+    945: [0, 0.43056, 37e-4, 0.02778, 0.6397],
+    // U+03b1 α
+    946: [0.19444, 0.69444, 0.05278, 0.08334, 0.56563],
+    // U+03b2 β
+    947: [0.19444, 0.43056, 0.05556, 0, 0.51773],
+    // U+03b3 γ
+    948: [0, 0.69444, 0.03785, 0.05556, 0.44444],
+    // U+03b4 δ
+    949: [0, 0.43056, 0, 0.08334, 0.46632],
+    // U+03b5 ε
+    950: [0.19444, 0.69444, 0.07378, 0.08334, 0.4375],
+    // U+03b6 ζ
+    951: [0.19444, 0.43056, 0.03588, 0.05556, 0.49653],
+    // U+03b7 η
+    952: [0, 0.69444, 0.02778, 0.08334, 0.46944],
+    // U+03b8 θ
+    953: [0, 0.43056, 0, 0.05556, 0.35394],
+    // U+03b9 ι
+    954: [0, 0.43056, 0, 0, 0.57616],
+    // U+03ba κ
+    955: [0, 0.69444, 0, 0, 0.58334],
+    // U+03bb λ
+    956: [0.19444, 0.43056, 0, 0.02778, 0.60255],
+    // U+03bc μ
+    957: [0, 0.43056, 0.06366, 0.02778, 0.49398],
+    // U+03bd ν
+    958: [0.19444, 0.69444, 0.04601, 0.11111, 0.4375],
+    // U+03be ξ
+    959: M192,
+    // U+03bf ο
+    960: [0, 0.43056, 0.03588, 0, 0.57003],
+    // U+03c0 π
+    961: M193,
+    // U+03c1 ρ
+    962: [0.09722, 0.43056, 0.07986, 0.08334, 0.36285],
+    // U+03c2 ς
+    963: [0, 0.43056, 0.03588, 0, 0.57141],
+    // U+03c3 σ
+    964: [0, 0.43056, 0.1132, 0.02778, 0.43715],
+    // U+03c4 τ
+    965: [0, 0.43056, 0.03588, 0.02778, 0.54028],
+    // U+03c5 υ
+    966: [0.19444, 0.43056, 0, 0.08334, 0.65417],
+    // U+03c6 φ
+    967: [0.19444, 0.43056, 0, 0.05556, 0.62569],
+    // U+03c7 χ
+    968: [0.19444, 0.69444, 0.03588, 0.11111, 0.65139],
+    // U+03c8 ψ
+    969: [0, 0.43056, 0.03588, 0, 0.62245],
+    // U+03c9 ω
+    977: [0, 0.69444, 0, 0.08334, 0.59144],
+    // U+03d1 ϑ
+    981: [0.19444, 0.69444, 0, 0.08334, 0.59583],
+    // U+03d5 ϕ
+    982: [0, 0.43056, 0.02778, 0, 0.82813],
+    // U+03d6 ϖ
+    1009: M193,
+    // U+03f1 ϱ
+    1013: [0, 0.43056, 0, 0.05556, 0.4059],
+    // U+03f5 ϵ
+    57649: [0, 0.43056, 0, 0.02778, 0.32246],
+    // U+e131 
+    57911: [0.19444, 0.43056, 0, 0.08334, 0.38403]
+    // U+e237 
   },
   "SansSerif-Bold": {
-    "32": M0,
-    "33": M6,
-    "34": M6,
-    "35": M16,
-    "36": [0.05556, 0.75, 0, 0],
-    "37": [0.05556, 0.75, 0, 0],
-    "38": M6,
-    "39": M6,
-    "40": M15,
-    "41": M15,
-    "42": M14,
-    "43": [0.11667, 0.61667, 0, 0],
-    "44": [0.10556, 0.13056, 0, 0],
-    "45": [0, 0.45833, 0, 0],
-    "46": [0, 0.13056, 0, 0],
-    "47": M15,
-    "48": M6,
-    "49": M6,
-    "50": M6,
-    "51": M6,
-    "52": M6,
-    "53": M6,
-    "54": M6,
-    "55": M6,
-    "56": M6,
-    "57": M6,
-    "58": [0, 0.45833, 0, 0],
-    "59": [0.10556, 0.45833, 0, 0],
-    "61": [-0.09375, 0.40625, 0, 0],
-    "63": M6,
-    "64": M6,
-    "65": M6,
-    "66": M6,
-    "67": M6,
-    "68": M6,
-    "69": M6,
-    "70": M6,
-    "71": M6,
-    "72": M6,
-    "73": M6,
-    "74": M6,
-    "75": M6,
-    "76": M6,
-    "77": M6,
-    "78": M6,
-    "79": M6,
-    "80": M6,
-    "81": [0.10556, 0.69444, 0, 0],
-    "82": M6,
-    "83": M6,
-    "84": M6,
-    "85": M6,
-    "86": [0, 0.69444, 0.01528, 0],
-    "87": [0, 0.69444, 0.01528, 0],
-    "88": M6,
-    "89": [0, 0.69444, 0.0275, 0],
-    "90": M6,
-    "91": M15,
-    "93": M15,
-    "94": M6,
-    "95": [0.35, 0.10833, 0.03056, 0],
-    "97": [0, 0.45833, 0, 0],
-    "98": M6,
-    "99": [0, 0.45833, 0, 0],
-    "100": M6,
-    "101": [0, 0.45833, 0, 0],
-    "102": [0, 0.69444, 0.07639, 0],
-    "103": [0.19444, 0.45833, 0.01528, 0],
-    "104": M6,
-    "105": M6,
-    "106": M16,
-    "107": M6,
-    "108": M6,
-    "109": [0, 0.45833, 0, 0],
-    "110": [0, 0.45833, 0, 0],
-    "111": [0, 0.45833, 0, 0],
-    "112": [0.19444, 0.45833, 0, 0],
-    "113": [0.19444, 0.45833, 0, 0],
-    "114": [0, 0.45833, 0.01528, 0],
-    "115": [0, 0.45833, 0, 0],
-    "116": [0, 0.58929, 0, 0],
-    "117": [0, 0.45833, 0, 0],
-    "118": [0, 0.45833, 0.01528, 0],
-    "119": [0, 0.45833, 0.01528, 0],
-    "120": [0, 0.45833, 0, 0],
-    "121": [0.19444, 0.45833, 0.01528, 0],
-    "122": [0, 0.45833, 0, 0],
-    "126": [0.35, 0.34444, 0, 0],
-    "160": M0,
-    "168": M6,
-    "176": M6,
-    "180": M6,
-    "184": [0.17014, 0, 0, 0],
-    "305": [0, 0.45833, 0, 0],
-    "567": [0.19444, 0.45833, 0, 0],
-    "710": M6,
-    "711": [0, 0.63542, 0, 0],
-    "713": [0, 0.63778, 0, 0],
-    "728": M6,
-    "729": M6,
-    "730": M6,
-    "732": M6,
-    "733": M6,
-    "915": M6,
-    "916": M6,
-    "920": M6,
-    "923": M6,
-    "926": M6,
-    "928": M6,
-    "931": M6,
-    "933": M6,
-    "934": M6,
-    "936": M6,
-    "937": M6,
-    "8211": [0, 0.45833, 0.03056, 0],
-    "8212": [0, 0.45833, 0.03056, 0],
-    "8216": M6,
-    "8217": M6,
-    "8220": M6,
-    "8221": M6
+    32: M7,
+    // U+0020
+    33: [0, 0.69444, 0, 0, 0.36667],
+    // U+0021 !
+    34: M210,
+    // U+0022 "
+    35: [0.19444, 0.69444, 0, 0, 0.91667],
+    // U+0023 #
+    36: [0.05556, 0.75, 0, 0, 0.55],
+    // U+0024 $
+    37: [0.05556, 0.75, 0, 0, 1.02912],
+    // U+0025 %
+    38: [0, 0.69444, 0, 0, 0.83056],
+    // U+0026 &
+    39: M206,
+    // U+0027 '
+    40: M194,
+    // U+0028 (
+    41: M194,
+    // U+0029 )
+    42: [0, 0.75, 0, 0, 0.55],
+    // U+002a *
+    43: [0.11667, 0.61667, 0, 0, 0.85556],
+    // U+002b +
+    44: [0.10556, 0.13056, 0, 0, 0.30556],
+    // U+002c ,
+    45: [0, 0.45833, 0, 0, 0.36667],
+    // U+002d -
+    46: [0, 0.13056, 0, 0, 0.30556],
+    // U+002e .
+    47: [0.25, 0.75, 0, 0, 0.55],
+    // U+002f /
+    48: M195,
+    // U+0030 0
+    49: M195,
+    // U+0031 1
+    50: M195,
+    // U+0032 2
+    51: M195,
+    // U+0033 3
+    52: M195,
+    // U+0034 4
+    53: M195,
+    // U+0035 5
+    54: M195,
+    // U+0036 6
+    55: M195,
+    // U+0037 7
+    56: M195,
+    // U+0038 8
+    57: M195,
+    // U+0039 9
+    58: [0, 0.45833, 0, 0, 0.30556],
+    // U+003a :
+    59: [0.10556, 0.45833, 0, 0, 0.30556],
+    // U+003b ;
+    61: [-0.09375, 0.40625, 0, 0, 0.85556],
+    // U+003d =
+    63: M198,
+    // U+003f ?
+    64: M196,
+    // U+0040 @
+    65: M196,
+    // U+0041 A
+    66: M196,
+    // U+0042 B
+    67: M199,
+    // U+0043 C
+    68: M197,
+    // U+0044 D
+    69: [0, 0.69444, 0, 0, 0.64167],
+    // U+0045 E
+    70: M170,
+    // U+0046 F
+    71: M196,
+    // U+0047 G
+    72: M197,
+    // U+0048 H
+    73: [0, 0.69444, 0, 0, 0.33056],
+    // U+0049 I
+    74: M198,
+    // U+004a J
+    75: M200,
+    // U+004b K
+    76: M207,
+    // U+004c L
+    77: [0, 0.69444, 0, 0, 0.97778],
+    // U+004d M
+    78: M197,
+    // U+004e N
+    79: M197,
+    // U+004f O
+    80: M199,
+    // U+0050 P
+    81: [0.10556, 0.69444, 0, 0, 0.79445],
+    // U+0051 Q
+    82: M199,
+    // U+0052 R
+    83: M170,
+    // U+0053 S
+    84: M196,
+    // U+0054 T
+    85: M200,
+    // U+0055 U
+    86: [0, 0.69444, 0.01528, 0, 0.73334],
+    // U+0056 V
+    87: [0, 0.69444, 0.01528, 0, 1.03889],
+    // U+0057 W
+    88: M196,
+    // U+0058 X
+    89: [0, 0.69444, 0.0275, 0, 0.73334],
+    // U+0059 Y
+    90: M208,
+    // U+005a Z
+    91: M201,
+    // U+005b [
+    93: M201,
+    // U+005d ]
+    94: M195,
+    // U+005e ^
+    95: [0.35, 0.10833, 0.03056, 0, 0.55],
+    // U+005f _
+    97: [0, 0.45833, 0, 0, 0.525],
+    // U+0061 a
+    98: M202,
+    // U+0062 b
+    99: [0, 0.45833, 0, 0, 0.48889],
+    // U+0063 c
+    100: M202,
+    // U+0064 d
+    101: [0, 0.45833, 0, 0, 0.51111],
+    // U+0065 e
+    102: [0, 0.69444, 0.07639, 0, 0.33611],
+    // U+0066 f
+    103: [0.19444, 0.45833, 0.01528, 0, 0.55],
+    // U+0067 g
+    104: M202,
+    // U+0068 h
+    105: M203,
+    // U+0069 i
+    106: [0.19444, 0.69444, 0, 0, 0.28611],
+    // U+006a j
+    107: [0, 0.69444, 0, 0, 0.53056],
+    // U+006b k
+    108: M203,
+    // U+006c l
+    109: [0, 0.45833, 0, 0, 0.86667],
+    // U+006d m
+    110: M205,
+    // U+006e n
+    111: [0, 0.45833, 0, 0, 0.55],
+    // U+006f o
+    112: M204,
+    // U+0070 p
+    113: M204,
+    // U+0071 q
+    114: [0, 0.45833, 0.01528, 0, 0.37222],
+    // U+0072 r
+    115: [0, 0.45833, 0, 0, 0.42167],
+    // U+0073 s
+    116: [0, 0.58929, 0, 0, 0.40417],
+    // U+0074 t
+    117: M205,
+    // U+0075 u
+    118: [0, 0.45833, 0.01528, 0, 0.5],
+    // U+0076 v
+    119: [0, 0.45833, 0.01528, 0, 0.74445],
+    // U+0077 w
+    120: [0, 0.45833, 0, 0, 0.5],
+    // U+0078 x
+    121: [0.19444, 0.45833, 0.01528, 0, 0.5],
+    // U+0079 y
+    122: [0, 0.45833, 0, 0, 0.47639],
+    // U+007a z
+    126: [0.35, 0.34444, 0, 0, 0.55],
+    // U+007e ~
+    160: M7,
+    // U+00a0
+    168: M195,
+    // U+00a8 ¨
+    176: M196,
+    // U+00b0 °
+    180: M195,
+    // U+00b4 ´
+    184: [0.17014, 0, 0, 0, 0.48889],
+    // U+00b8 ¸
+    305: [0, 0.45833, 0, 0, 0.25556],
+    // U+0131 ı
+    567: [0.19444, 0.45833, 0, 0, 0.28611],
+    // U+0237 ȷ
+    710: M195,
+    // U+02c6 ˆ
+    711: [0, 0.63542, 0, 0, 0.55],
+    // U+02c7 ˇ
+    713: [0, 0.63778, 0, 0, 0.55],
+    // U+02c9 ˉ
+    728: M195,
+    // U+02d8 ˘
+    729: M206,
+    // U+02d9 ˙
+    730: M196,
+    // U+02da ˚
+    732: M195,
+    // U+02dc ˜
+    733: M195,
+    // U+02dd ˝
+    915: M207,
+    // U+0393 Γ
+    916: [0, 0.69444, 0, 0, 0.91667],
+    // U+0394 Δ
+    920: M209,
+    // U+0398 Θ
+    923: M208,
+    // U+039b Λ
+    926: M196,
+    // U+039e Ξ
+    928: M197,
+    // U+03a0 Π
+    931: M197,
+    // U+03a3 Σ
+    933: M209,
+    // U+03a5 Υ
+    934: M197,
+    // U+03a6 Φ
+    936: M209,
+    // U+03a8 Ψ
+    937: M197,
+    // U+03a9 Ω
+    8211: [0, 0.45833, 0.03056, 0, 0.55],
+    // U+2013 –
+    8212: [0, 0.45833, 0.03056, 0, 1.10001],
+    // U+2014 —
+    8216: M206,
+    // U+2018 ‘
+    8217: M206,
+    // U+2019 ’
+    8220: M210,
+    // U+201c “
+    8221: M210
+    // U+201d ”
   },
   "SansSerif-Italic": {
-    "32": M0,
-    "33": [0, 0.69444, 0.05733, 0],
-    "34": [0, 0.69444, 316e-5, 0],
-    "35": [0.19444, 0.69444, 0.05087, 0],
-    "36": [0.05556, 0.75, 0.11156, 0],
-    "37": [0.05556, 0.75, 0.03126, 0],
-    "38": [0, 0.69444, 0.03058, 0],
-    "39": [0, 0.69444, 0.07816, 0],
-    "40": [0.25, 0.75, 0.13164, 0],
-    "41": [0.25, 0.75, 0.02536, 0],
-    "42": [0, 0.75, 0.11775, 0],
-    "43": [0.08333, 0.58333, 0.02536, 0],
-    "44": [0.125, 0.08333, 0, 0],
-    "45": [0, 0.44444, 0.01946, 0],
-    "46": [0, 0.08333, 0, 0],
-    "47": [0.25, 0.75, 0.13164, 0],
-    "48": [0, 0.65556, 0.11156, 0],
-    "49": [0, 0.65556, 0.11156, 0],
-    "50": [0, 0.65556, 0.11156, 0],
-    "51": [0, 0.65556, 0.11156, 0],
-    "52": [0, 0.65556, 0.11156, 0],
-    "53": [0, 0.65556, 0.11156, 0],
-    "54": [0, 0.65556, 0.11156, 0],
-    "55": [0, 0.65556, 0.11156, 0],
-    "56": [0, 0.65556, 0.11156, 0],
-    "57": [0, 0.65556, 0.11156, 0],
-    "58": [0, 0.44444, 0.02502, 0],
-    "59": [0.125, 0.44444, 0.02502, 0],
-    "61": [-0.13, 0.37, 0.05087, 0],
-    "63": [0, 0.69444, 0.11809, 0],
-    "64": [0, 0.69444, 0.07555, 0],
-    "65": M6,
-    "66": [0, 0.69444, 0.08293, 0],
-    "67": [0, 0.69444, 0.11983, 0],
-    "68": [0, 0.69444, 0.07555, 0],
-    "69": [0, 0.69444, 0.11983, 0],
-    "70": [0, 0.69444, 0.13372, 0],
-    "71": [0, 0.69444, 0.11983, 0],
-    "72": [0, 0.69444, 0.08094, 0],
-    "73": [0, 0.69444, 0.13372, 0],
-    "74": [0, 0.69444, 0.08094, 0],
-    "75": [0, 0.69444, 0.11983, 0],
-    "76": M6,
-    "77": [0, 0.69444, 0.08094, 0],
-    "78": [0, 0.69444, 0.08094, 0],
-    "79": [0, 0.69444, 0.07555, 0],
-    "80": [0, 0.69444, 0.08293, 0],
-    "81": [0.125, 0.69444, 0.07555, 0],
-    "82": [0, 0.69444, 0.08293, 0],
-    "83": [0, 0.69444, 0.09205, 0],
-    "84": [0, 0.69444, 0.13372, 0],
-    "85": [0, 0.69444, 0.08094, 0],
-    "86": [0, 0.69444, 0.1615, 0],
-    "87": [0, 0.69444, 0.1615, 0],
-    "88": [0, 0.69444, 0.13372, 0],
-    "89": [0, 0.69444, 0.17261, 0],
-    "90": [0, 0.69444, 0.11983, 0],
-    "91": [0.25, 0.75, 0.15942, 0],
-    "93": [0.25, 0.75, 0.08719, 0],
-    "94": [0, 0.69444, 0.0799, 0],
-    "95": [0.35, 0.09444, 0.08616, 0],
-    "97": [0, 0.44444, 981e-5, 0],
-    "98": [0, 0.69444, 0.03057, 0],
-    "99": [0, 0.44444, 0.08336, 0],
-    "100": [0, 0.69444, 0.09483, 0],
-    "101": [0, 0.44444, 0.06778, 0],
-    "102": [0, 0.69444, 0.21705, 0],
-    "103": [0.19444, 0.44444, 0.10836, 0],
-    "104": [0, 0.69444, 0.01778, 0],
-    "105": [0, 0.67937, 0.09718, 0],
-    "106": [0.19444, 0.67937, 0.09162, 0],
-    "107": [0, 0.69444, 0.08336, 0],
-    "108": [0, 0.69444, 0.09483, 0],
-    "109": [0, 0.44444, 0.01778, 0],
-    "110": [0, 0.44444, 0.01778, 0],
-    "111": [0, 0.44444, 0.06613, 0],
-    "112": [0.19444, 0.44444, 0.0389, 0],
-    "113": [0.19444, 0.44444, 0.04169, 0],
-    "114": [0, 0.44444, 0.10836, 0],
-    "115": [0, 0.44444, 0.0778, 0],
-    "116": [0, 0.57143, 0.07225, 0],
-    "117": [0, 0.44444, 0.04169, 0],
-    "118": [0, 0.44444, 0.10836, 0],
-    "119": [0, 0.44444, 0.10836, 0],
-    "120": [0, 0.44444, 0.09169, 0],
-    "121": [0.19444, 0.44444, 0.10836, 0],
-    "122": [0, 0.44444, 0.08752, 0],
-    "126": [0.35, 0.32659, 0.08826, 0],
-    "160": M0,
-    "168": [0, 0.67937, 0.06385, 0],
-    "176": M6,
-    "184": [0.17014, 0, 0, 0],
-    "305": [0, 0.44444, 0.04169, 0],
-    "567": [0.19444, 0.44444, 0.04169, 0],
-    "710": [0, 0.69444, 0.0799, 0],
-    "711": [0, 0.63194, 0.08432, 0],
-    "713": [0, 0.60889, 0.08776, 0],
-    "714": [0, 0.69444, 0.09205, 0],
-    "715": M6,
-    "728": [0, 0.69444, 0.09483, 0],
-    "729": [0, 0.67937, 0.07774, 0],
-    "730": M6,
-    "732": [0, 0.67659, 0.08826, 0],
-    "733": [0, 0.69444, 0.09205, 0],
-    "915": [0, 0.69444, 0.13372, 0],
-    "916": M6,
-    "920": [0, 0.69444, 0.07555, 0],
-    "923": M6,
-    "926": [0, 0.69444, 0.12816, 0],
-    "928": [0, 0.69444, 0.08094, 0],
-    "931": [0, 0.69444, 0.11983, 0],
-    "933": [0, 0.69444, 0.09031, 0],
-    "934": [0, 0.69444, 0.04603, 0],
-    "936": [0, 0.69444, 0.09031, 0],
-    "937": [0, 0.69444, 0.08293, 0],
-    "8211": [0, 0.44444, 0.08616, 0],
-    "8212": [0, 0.44444, 0.08616, 0],
-    "8216": [0, 0.69444, 0.07816, 0],
-    "8217": [0, 0.69444, 0.07816, 0],
-    "8220": [0, 0.69444, 0.14205, 0],
-    "8221": [0, 0.69444, 316e-5, 0]
+    32: M7,
+    // U+0020
+    33: [0, 0.69444, 0.05733, 0, 0.31945],
+    // U+0021 !
+    34: M219,
+    // U+0022 "
+    35: [0.19444, 0.69444, 0.05087, 0, 0.83334],
+    // U+0023 #
+    36: [0.05556, 0.75, 0.11156, 0, 0.5],
+    // U+0024 $
+    37: [0.05556, 0.75, 0.03126, 0, 0.83334],
+    // U+0025 %
+    38: [0, 0.69444, 0.03058, 0, 0.75834],
+    // U+0026 &
+    39: M218,
+    // U+0027 '
+    40: [0.25, 0.75, 0.13164, 0, 0.38889],
+    // U+0028 (
+    41: [0.25, 0.75, 0.02536, 0, 0.38889],
+    // U+0029 )
+    42: [0, 0.75, 0.11775, 0, 0.5],
+    // U+002a *
+    43: [0.08333, 0.58333, 0.02536, 0, 0.77778],
+    // U+002b +
+    44: M223,
+    // U+002c ,
+    45: [0, 0.44444, 0.01946, 0, 0.33333],
+    // U+002d -
+    46: M224,
+    // U+002e .
+    47: [0.25, 0.75, 0.13164, 0, 0.5],
+    // U+002f /
+    48: M211,
+    // U+0030 0
+    49: M211,
+    // U+0031 1
+    50: M211,
+    // U+0032 2
+    51: M211,
+    // U+0033 3
+    52: M211,
+    // U+0034 4
+    53: M211,
+    // U+0035 5
+    54: M211,
+    // U+0036 6
+    55: M211,
+    // U+0037 7
+    56: M211,
+    // U+0038 8
+    57: M211,
+    // U+0039 9
+    58: [0, 0.44444, 0.02502, 0, 0.27778],
+    // U+003a :
+    59: [0.125, 0.44444, 0.02502, 0, 0.27778],
+    // U+003b ;
+    61: [-0.13, 0.37, 0.05087, 0, 0.77778],
+    // U+003d =
+    63: [0, 0.69444, 0.11809, 0, 0.47222],
+    // U+003f ?
+    64: [0, 0.69444, 0.07555, 0, 0.66667],
+    // U+0040 @
+    65: M227,
+    // U+0041 A
+    66: [0, 0.69444, 0.08293, 0, 0.66667],
+    // U+0042 B
+    67: [0, 0.69444, 0.11983, 0, 0.63889],
+    // U+0043 C
+    68: [0, 0.69444, 0.07555, 0, 0.72223],
+    // U+0044 D
+    69: [0, 0.69444, 0.11983, 0, 0.59722],
+    // U+0045 E
+    70: [0, 0.69444, 0.13372, 0, 0.56945],
+    // U+0046 F
+    71: [0, 0.69444, 0.11983, 0, 0.66667],
+    // U+0047 G
+    72: M212,
+    // U+0048 H
+    73: [0, 0.69444, 0.13372, 0, 0.27778],
+    // U+0049 I
+    74: [0, 0.69444, 0.08094, 0, 0.47222],
+    // U+004a J
+    75: [0, 0.69444, 0.11983, 0, 0.69445],
+    // U+004b K
+    76: M229,
+    // U+004c L
+    77: [0, 0.69444, 0.08094, 0, 0.875],
+    // U+004d M
+    78: M212,
+    // U+004e N
+    79: [0, 0.69444, 0.07555, 0, 0.73611],
+    // U+004f O
+    80: [0, 0.69444, 0.08293, 0, 0.63889],
+    // U+0050 P
+    81: [0.125, 0.69444, 0.07555, 0, 0.73611],
+    // U+0051 Q
+    82: [0, 0.69444, 0.08293, 0, 0.64584],
+    // U+0052 R
+    83: [0, 0.69444, 0.09205, 0, 0.55556],
+    // U+0053 S
+    84: [0, 0.69444, 0.13372, 0, 0.68056],
+    // U+0054 T
+    85: [0, 0.69444, 0.08094, 0, 0.6875],
+    // U+0055 U
+    86: [0, 0.69444, 0.1615, 0, 0.66667],
+    // U+0056 V
+    87: [0, 0.69444, 0.1615, 0, 0.94445],
+    // U+0057 W
+    88: [0, 0.69444, 0.13372, 0, 0.66667],
+    // U+0058 X
+    89: [0, 0.69444, 0.17261, 0, 0.66667],
+    // U+0059 Y
+    90: [0, 0.69444, 0.11983, 0, 0.61111],
+    // U+005a Z
+    91: [0.25, 0.75, 0.15942, 0, 0.28889],
+    // U+005b [
+    93: [0.25, 0.75, 0.08719, 0, 0.28889],
+    // U+005d ]
+    94: M214,
+    // U+005e ^
+    95: [0.35, 0.09444, 0.08616, 0, 0.5],
+    // U+005f _
+    97: [0, 0.44444, 981e-5, 0, 0.48056],
+    // U+0061 a
+    98: [0, 0.69444, 0.03057, 0, 0.51667],
+    // U+0062 b
+    99: [0, 0.44444, 0.08336, 0, 0.44445],
+    // U+0063 c
+    100: [0, 0.69444, 0.09483, 0, 0.51667],
+    // U+0064 d
+    101: [0, 0.44444, 0.06778, 0, 0.44445],
+    // U+0065 e
+    102: [0, 0.69444, 0.21705, 0, 0.30556],
+    // U+0066 f
+    103: [0.19444, 0.44444, 0.10836, 0, 0.5],
+    // U+0067 g
+    104: [0, 0.69444, 0.01778, 0, 0.51667],
+    // U+0068 h
+    105: [0, 0.67937, 0.09718, 0, 0.23889],
+    // U+0069 i
+    106: [0.19444, 0.67937, 0.09162, 0, 0.26667],
+    // U+006a j
+    107: [0, 0.69444, 0.08336, 0, 0.48889],
+    // U+006b k
+    108: [0, 0.69444, 0.09483, 0, 0.23889],
+    // U+006c l
+    109: [0, 0.44444, 0.01778, 0, 0.79445],
+    // U+006d m
+    110: [0, 0.44444, 0.01778, 0, 0.51667],
+    // U+006e n
+    111: [0, 0.44444, 0.06613, 0, 0.5],
+    // U+006f o
+    112: [0.19444, 0.44444, 0.0389, 0, 0.51667],
+    // U+0070 p
+    113: [0.19444, 0.44444, 0.04169, 0, 0.51667],
+    // U+0071 q
+    114: [0, 0.44444, 0.10836, 0, 0.34167],
+    // U+0072 r
+    115: [0, 0.44444, 0.0778, 0, 0.38333],
+    // U+0073 s
+    116: [0, 0.57143, 0.07225, 0, 0.36111],
+    // U+0074 t
+    117: [0, 0.44444, 0.04169, 0, 0.51667],
+    // U+0075 u
+    118: [0, 0.44444, 0.10836, 0, 0.46111],
+    // U+0076 v
+    119: [0, 0.44444, 0.10836, 0, 0.68334],
+    // U+0077 w
+    120: [0, 0.44444, 0.09169, 0, 0.46111],
+    // U+0078 x
+    121: [0.19444, 0.44444, 0.10836, 0, 0.46111],
+    // U+0079 y
+    122: [0, 0.44444, 0.08752, 0, 0.43472],
+    // U+007a z
+    126: [0.35, 0.32659, 0.08826, 0, 0.5],
+    // U+007e ~
+    160: M7,
+    // U+00a0
+    168: [0, 0.67937, 0.06385, 0, 0.5],
+    // U+00a8 ¨
+    176: M215,
+    // U+00b0 °
+    184: M213,
+    // U+00b8 ¸
+    305: [0, 0.44444, 0.04169, 0, 0.23889],
+    // U+0131 ı
+    567: [0.19444, 0.44444, 0.04169, 0, 0.26667],
+    // U+0237 ȷ
+    710: M214,
+    // U+02c6 ˆ
+    711: [0, 0.63194, 0.08432, 0, 0.5],
+    // U+02c7 ˇ
+    713: [0, 0.60889, 0.08776, 0, 0.5],
+    // U+02c9 ˉ
+    714: M216,
+    // U+02ca ˊ
+    715: M143,
+    // U+02cb ˋ
+    728: [0, 0.69444, 0.09483, 0, 0.5],
+    // U+02d8 ˘
+    729: [0, 0.67937, 0.07774, 0, 0.27778],
+    // U+02d9 ˙
+    730: M215,
+    // U+02da ˚
+    732: [0, 0.67659, 0.08826, 0, 0.5],
+    // U+02dc ˜
+    733: M216,
+    // U+02dd ˝
+    915: [0, 0.69444, 0.13372, 0, 0.54167],
+    // U+0393 Γ
+    916: M237,
+    // U+0394 Δ
+    920: [0, 0.69444, 0.07555, 0, 0.77778],
+    // U+0398 Θ
+    923: M170,
+    // U+039b Λ
+    926: [0, 0.69444, 0.12816, 0, 0.66667],
+    // U+039e Ξ
+    928: M212,
+    // U+03a0 Π
+    931: [0, 0.69444, 0.11983, 0, 0.72222],
+    // U+03a3 Σ
+    933: M217,
+    // U+03a5 Υ
+    934: [0, 0.69444, 0.04603, 0, 0.72222],
+    // U+03a6 Φ
+    936: M217,
+    // U+03a8 Ψ
+    937: [0, 0.69444, 0.08293, 0, 0.72222],
+    // U+03a9 Ω
+    8211: [0, 0.44444, 0.08616, 0, 0.5],
+    // U+2013 –
+    8212: [0, 0.44444, 0.08616, 0, 1],
+    // U+2014 —
+    8216: M218,
+    // U+2018 ‘
+    8217: M218,
+    // U+2019 ’
+    8220: [0, 0.69444, 0.14205, 0, 0.5],
+    // U+201c “
+    8221: M219
+    // U+201d ”
   },
   "SansSerif-Regular": {
-    "32": M0,
-    "33": M6,
-    "34": M6,
-    "35": M16,
-    "36": [0.05556, 0.75, 0, 0],
-    "37": [0.05556, 0.75, 0, 0],
-    "38": M6,
-    "39": M6,
-    "40": M15,
-    "41": M15,
-    "42": M14,
-    "43": [0.08333, 0.58333, 0, 0],
-    "44": [0.125, 0.08333, 0, 0],
-    "45": M7,
-    "46": [0, 0.08333, 0, 0],
-    "47": M15,
-    "48": [0, 0.65556, 0, 0],
-    "49": [0, 0.65556, 0, 0],
-    "50": [0, 0.65556, 0, 0],
-    "51": [0, 0.65556, 0, 0],
-    "52": [0, 0.65556, 0, 0],
-    "53": [0, 0.65556, 0, 0],
-    "54": [0, 0.65556, 0, 0],
-    "55": [0, 0.65556, 0, 0],
-    "56": [0, 0.65556, 0, 0],
-    "57": [0, 0.65556, 0, 0],
-    "58": M7,
-    "59": [0.125, 0.44444, 0, 0],
-    "61": [-0.13, 0.37, 0, 0],
-    "63": M6,
-    "64": M6,
-    "65": M6,
-    "66": M6,
-    "67": M6,
-    "68": M6,
-    "69": M6,
-    "70": M6,
-    "71": M6,
-    "72": M6,
-    "73": M6,
-    "74": M6,
-    "75": M6,
-    "76": M6,
-    "77": M6,
-    "78": M6,
-    "79": M6,
-    "80": M6,
-    "81": [0.125, 0.69444, 0, 0],
-    "82": M6,
-    "83": M6,
-    "84": M6,
-    "85": M6,
-    "86": [0, 0.69444, 0.01389, 0],
-    "87": [0, 0.69444, 0.01389, 0],
-    "88": M6,
-    "89": [0, 0.69444, 0.025, 0],
-    "90": M6,
-    "91": M15,
-    "93": M15,
-    "94": M6,
-    "95": [0.35, 0.09444, 0.02778, 0],
-    "97": M7,
-    "98": M6,
-    "99": M7,
-    "100": M6,
-    "101": M7,
-    "102": [0, 0.69444, 0.06944, 0],
-    "103": [0.19444, 0.44444, 0.01389, 0],
-    "104": M6,
-    "105": [0, 0.67937, 0, 0],
-    "106": [0.19444, 0.67937, 0, 0],
-    "107": M6,
-    "108": M6,
-    "109": M7,
-    "110": M7,
-    "111": M7,
-    "112": M8,
-    "113": M8,
-    "114": [0, 0.44444, 0.01389, 0],
-    "115": M7,
-    "116": [0, 0.57143, 0, 0],
-    "117": M7,
-    "118": [0, 0.44444, 0.01389, 0],
-    "119": [0, 0.44444, 0.01389, 0],
-    "120": M7,
-    "121": [0.19444, 0.44444, 0.01389, 0],
-    "122": M7,
-    "126": [0.35, 0.32659, 0, 0],
-    "160": M0,
-    "168": [0, 0.67937, 0, 0],
-    "176": M6,
-    "184": [0.17014, 0, 0, 0],
-    "305": M7,
-    "567": M8,
-    "710": M6,
-    "711": [0, 0.63194, 0, 0],
-    "713": [0, 0.60889, 0, 0],
-    "714": M6,
-    "715": M6,
-    "728": M6,
-    "729": [0, 0.67937, 0, 0],
-    "730": M6,
-    "732": [0, 0.67659, 0, 0],
-    "733": M6,
-    "915": M6,
-    "916": M6,
-    "920": M6,
-    "923": M6,
-    "926": M6,
-    "928": M6,
-    "931": M6,
-    "933": M6,
-    "934": M6,
-    "936": M6,
-    "937": M6,
-    "8211": [0, 0.44444, 0.02778, 0],
-    "8212": [0, 0.44444, 0.02778, 0],
-    "8216": M6,
-    "8217": M6,
-    "8220": M6,
-    "8221": M6
+    32: M7,
+    // U+0020
+    33: [0, 0.69444, 0, 0, 0.31945],
+    // U+0021 !
+    34: M143,
+    // U+0022 "
+    35: M220,
+    // U+0023 #
+    36: M161,
+    // U+0024 $
+    37: M221,
+    // U+0025 %
+    38: [0, 0.69444, 0, 0, 0.75834],
+    // U+0026 &
+    39: M133,
+    // U+0027 '
+    40: M134,
+    // U+0028 (
+    41: M134,
+    // U+0029 )
+    42: M222,
+    // U+002a *
+    43: M149,
+    // U+002b +
+    44: M223,
+    // U+002c ,
+    45: [0, 0.44444, 0, 0, 0.33333],
+    // U+002d -
+    46: M224,
+    // U+002e .
+    47: M141,
+    // U+002f /
+    48: M225,
+    // U+0030 0
+    49: M225,
+    // U+0031 1
+    50: M225,
+    // U+0032 2
+    51: M225,
+    // U+0033 3
+    52: M225,
+    // U+0034 4
+    53: M225,
+    // U+0035 5
+    54: M225,
+    // U+0036 6
+    55: M225,
+    // U+0037 7
+    56: M225,
+    // U+0038 8
+    57: M225,
+    // U+0039 9
+    58: [0, 0.44444, 0, 0, 0.27778],
+    // U+003a :
+    59: [0.125, 0.44444, 0, 0, 0.27778],
+    // U+003b ;
+    61: [-0.13, 0.37, 0, 0, 0.77778],
+    // U+003d =
+    63: M226,
+    // U+003f ?
+    64: M227,
+    // U+0040 @
+    65: M227,
+    // U+0041 A
+    66: M227,
+    // U+0042 B
+    67: M75,
+    // U+0043 C
+    68: [0, 0.69444, 0, 0, 0.72223],
+    // U+0044 D
+    69: M228,
+    // U+0045 E
+    70: [0, 0.69444, 0, 0, 0.56945],
+    // U+0046 F
+    71: M227,
+    // U+0047 G
+    72: M230,
+    // U+0048 H
+    73: M133,
+    // U+0049 I
+    74: M226,
+    // U+004a J
+    75: [0, 0.69444, 0, 0, 0.69445],
+    // U+004b K
+    76: M229,
+    // U+004c L
+    77: [0, 0.69444, 0, 0, 0.875],
+    // U+004d M
+    78: M230,
+    // U+004e N
+    79: [0, 0.69444, 0, 0, 0.73611],
+    // U+004f O
+    80: M75,
+    // U+0050 P
+    81: [0.125, 0.69444, 0, 0, 0.73611],
+    // U+0051 Q
+    82: [0, 0.69444, 0, 0, 0.64584],
+    // U+0052 R
+    83: M144,
+    // U+0053 S
+    84: [0, 0.69444, 0, 0, 0.68056],
+    // U+0054 T
+    85: [0, 0.69444, 0, 0, 0.6875],
+    // U+0055 U
+    86: [0, 0.69444, 0.01389, 0, 0.66667],
+    // U+0056 V
+    87: [0, 0.69444, 0.01389, 0, 0.94445],
+    // U+0057 W
+    88: M227,
+    // U+0058 X
+    89: [0, 0.69444, 0.025, 0, 0.66667],
+    // U+0059 Y
+    90: M170,
+    // U+005a Z
+    91: M231,
+    // U+005b [
+    93: M231,
+    // U+005d ]
+    94: M143,
+    // U+005e ^
+    95: [0.35, 0.09444, 0.02778, 0, 0.5],
+    // U+005f _
+    97: [0, 0.44444, 0, 0, 0.48056],
+    // U+0061 a
+    98: M232,
+    // U+0062 b
+    99: M233,
+    // U+0063 c
+    100: M232,
+    // U+0064 d
+    101: M233,
+    // U+0065 e
+    102: [0, 0.69444, 0.06944, 0, 0.30556],
+    // U+0066 f
+    103: [0.19444, 0.44444, 0.01389, 0, 0.5],
+    // U+0067 g
+    104: M232,
+    // U+0068 h
+    105: [0, 0.67937, 0, 0, 0.23889],
+    // U+0069 i
+    106: [0.19444, 0.67937, 0, 0, 0.26667],
+    // U+006a j
+    107: [0, 0.69444, 0, 0, 0.48889],
+    // U+006b k
+    108: [0, 0.69444, 0, 0, 0.23889],
+    // U+006c l
+    109: [0, 0.44444, 0, 0, 0.79445],
+    // U+006d m
+    110: M236,
+    // U+006e n
+    111: [0, 0.44444, 0, 0, 0.5],
+    // U+006f o
+    112: M234,
+    // U+0070 p
+    113: M234,
+    // U+0071 q
+    114: [0, 0.44444, 0.01389, 0, 0.34167],
+    // U+0072 r
+    115: M235,
+    // U+0073 s
+    116: [0, 0.57143, 0, 0, 0.36111],
+    // U+0074 t
+    117: M236,
+    // U+0075 u
+    118: [0, 0.44444, 0.01389, 0, 0.46111],
+    // U+0076 v
+    119: [0, 0.44444, 0.01389, 0, 0.68334],
+    // U+0077 w
+    120: [0, 0.44444, 0, 0, 0.46111],
+    // U+0078 x
+    121: [0.19444, 0.44444, 0.01389, 0, 0.46111],
+    // U+0079 y
+    122: [0, 0.44444, 0, 0, 0.43472],
+    // U+007a z
+    126: [0.35, 0.32659, 0, 0, 0.5],
+    // U+007e ~
+    160: M7,
+    // U+00a0
+    168: [0, 0.67937, 0, 0, 0.5],
+    // U+00a8 ¨
+    176: M227,
+    // U+00b0 °
+    184: M213,
+    // U+00b8 ¸
+    305: [0, 0.44444, 0, 0, 0.23889],
+    // U+0131 ı
+    567: [0.19444, 0.44444, 0, 0, 0.26667],
+    // U+0237 ȷ
+    710: M143,
+    // U+02c6 ˆ
+    711: [0, 0.63194, 0, 0, 0.5],
+    // U+02c7 ˇ
+    713: [0, 0.60889, 0, 0, 0.5],
+    // U+02c9 ˉ
+    714: M143,
+    // U+02ca ˊ
+    715: M143,
+    // U+02cb ˋ
+    728: M143,
+    // U+02d8 ˘
+    729: [0, 0.67937, 0, 0, 0.27778],
+    // U+02d9 ˙
+    730: M227,
+    // U+02da ˚
+    732: [0, 0.67659, 0, 0, 0.5],
+    // U+02dc ˜
+    733: M143,
+    // U+02dd ˝
+    915: M229,
+    // U+0393 Γ
+    916: M237,
+    // U+0394 Δ
+    920: M136,
+    // U+0398 Θ
+    923: M170,
+    // U+039b Λ
+    926: M227,
+    // U+039e Ξ
+    928: M230,
+    // U+03a0 Π
+    931: M156,
+    // U+03a3 Σ
+    933: M136,
+    // U+03a5 Υ
+    934: M156,
+    // U+03a6 Φ
+    936: M136,
+    // U+03a8 Ψ
+    937: M156,
+    // U+03a9 Ω
+    8211: [0, 0.44444, 0.02778, 0, 0.5],
+    // U+2013 –
+    8212: [0, 0.44444, 0.02778, 0, 1],
+    // U+2014 —
+    8216: M133,
+    // U+2018 ‘
+    8217: M133,
+    // U+2019 ’
+    8220: M143,
+    // U+201c “
+    8221: M143
+    // U+201d ”
   },
   "Script-Regular": {
-    "32": M0,
-    "65": [0, 0.7, 0.22925, 0],
-    "66": [0, 0.7, 0.04087, 0],
-    "67": [0, 0.7, 0.1689, 0],
-    "68": [0, 0.7, 0.09371, 0],
-    "69": [0, 0.7, 0.18583, 0],
-    "70": [0, 0.7, 0.13634, 0],
-    "71": [0, 0.7, 0.17322, 0],
-    "72": [0, 0.7, 0.29694, 0],
-    "73": [0, 0.7, 0.19189, 0],
-    "74": [0.27778, 0.7, 0.19189, 0],
-    "75": [0, 0.7, 0.31259, 0],
-    "76": [0, 0.7, 0.19189, 0],
-    "77": [0, 0.7, 0.15981, 0],
-    "78": [0, 0.7, 0.3525, 0],
-    "79": [0, 0.7, 0.08078, 0],
-    "80": [0, 0.7, 0.08078, 0],
-    "81": [0, 0.7, 0.03305, 0],
-    "82": [0, 0.7, 0.06259, 0],
-    "83": [0, 0.7, 0.19189, 0],
-    "84": [0, 0.7, 0.29087, 0],
-    "85": [0, 0.7, 0.25815, 0],
-    "86": [0, 0.7, 0.27523, 0],
-    "87": [0, 0.7, 0.27523, 0],
-    "88": [0, 0.7, 0.26006, 0],
-    "89": [0, 0.7, 0.2939, 0],
-    "90": [0, 0.7, 0.24037, 0],
-    "160": M0
+    32: M7,
+    // U+0020
+    65: [0, 0.7, 0.22925, 0, 0.80253],
+    // U+0041 A
+    66: [0, 0.7, 0.04087, 0, 0.90757],
+    // U+0042 B
+    67: [0, 0.7, 0.1689, 0, 0.66619],
+    // U+0043 C
+    68: [0, 0.7, 0.09371, 0, 0.77443],
+    // U+0044 D
+    69: [0, 0.7, 0.18583, 0, 0.56162],
+    // U+0045 E
+    70: [0, 0.7, 0.13634, 0, 0.89544],
+    // U+0046 F
+    71: [0, 0.7, 0.17322, 0, 0.60961],
+    // U+0047 G
+    72: [0, 0.7, 0.29694, 0, 0.96919],
+    // U+0048 H
+    73: [0, 0.7, 0.19189, 0, 0.80907],
+    // U+0049 I
+    74: [0.27778, 0.7, 0.19189, 0, 1.05159],
+    // U+004a J
+    75: [0, 0.7, 0.31259, 0, 0.91364],
+    // U+004b K
+    76: [0, 0.7, 0.19189, 0, 0.87373],
+    // U+004c L
+    77: [0, 0.7, 0.15981, 0, 1.08031],
+    // U+004d M
+    78: [0, 0.7, 0.3525, 0, 0.9015],
+    // U+004e N
+    79: [0, 0.7, 0.08078, 0, 0.73787],
+    // U+004f O
+    80: [0, 0.7, 0.08078, 0, 1.01262],
+    // U+0050 P
+    81: [0, 0.7, 0.03305, 0, 0.88282],
+    // U+0051 Q
+    82: [0, 0.7, 0.06259, 0, 0.85],
+    // U+0052 R
+    83: [0, 0.7, 0.19189, 0, 0.86767],
+    // U+0053 S
+    84: [0, 0.7, 0.29087, 0, 0.74697],
+    // U+0054 T
+    85: [0, 0.7, 0.25815, 0, 0.79996],
+    // U+0055 U
+    86: [0, 0.7, 0.27523, 0, 0.62204],
+    // U+0056 V
+    87: [0, 0.7, 0.27523, 0, 0.80532],
+    // U+0057 W
+    88: [0, 0.7, 0.26006, 0, 0.94445],
+    // U+0058 X
+    89: [0, 0.7, 0.2939, 0, 0.70961],
+    // U+0059 Y
+    90: [0, 0.7, 0.24037, 0, 0.8212],
+    // U+005a Z
+    160: M7
+    // U+00a0
   },
   "Size1-Regular": {
-    "32": M0,
-    "40": M10,
-    "41": M10,
-    "47": M10,
-    "91": M10,
-    "92": M10,
-    "93": M10,
-    "123": M10,
-    "125": M10,
-    "160": M0,
-    "710": [0, 0.72222, 0, 0],
-    "732": [0, 0.72222, 0, 0],
-    "770": [0, 0.72222, 0, 0],
-    "771": [0, 0.72222, 0, 0],
-    "8214": [-99e-5, 0.601, 0, 0],
-    "8593": [1e-5, 0.6, 0, 0],
-    "8595": [1e-5, 0.6, 0, 0],
-    "8657": [1e-5, 0.6, 0, 0],
-    "8659": [1e-5, 0.6, 0, 0],
-    "8719": M17,
-    "8720": M17,
-    "8721": M17,
-    "8730": M10,
-    "8739": [-599e-5, 0.606, 0, 0],
-    "8741": [-599e-5, 0.606, 0, 0],
-    "8747": [0.30612, 0.805, 0.19445, 0],
-    "8748": [0.306, 0.805, 0.19445, 0],
-    "8749": [0.306, 0.805, 0.19445, 0],
-    "8750": [0.30612, 0.805, 0.19445, 0],
-    "8896": M17,
-    "8897": M17,
-    "8898": M17,
-    "8899": M17,
-    "8968": M10,
-    "8969": M10,
-    "8970": M10,
-    "8971": M10,
-    "9168": [-99e-5, 0.601, 0, 0],
-    "10216": M10,
-    "10217": M10,
-    "10752": M17,
-    "10753": M17,
-    "10754": M17,
-    "10756": M17,
-    "10758": M17
+    32: M7,
+    // U+0020
+    40: M238,
+    // U+0028 (
+    41: M238,
+    // U+0029 )
+    47: M239,
+    // U+002f /
+    91: M240,
+    // U+005b [
+    92: M239,
+    // U+005c \
+    93: M240,
+    // U+005d ]
+    123: M241,
+    // U+007b {
+    125: M241,
+    // U+007d }
+    160: M7,
+    // U+00a0
+    710: M242,
+    // U+02c6 ˆ
+    732: M242,
+    // U+02dc ˜
+    770: M242,
+    // U+0302 ̂
+    771: M242,
+    // U+0303 ̃
+    8214: [-99e-5, 0.601, 0, 0, 0.77778],
+    // U+2016 ‖
+    8593: M243,
+    // U+2191 ↑
+    8595: M243,
+    // U+2193 ↓
+    8657: M244,
+    // U+21d1 ⇑
+    8659: M244,
+    // U+21d3 ⇓
+    8719: M245,
+    // U+220f ∏
+    8720: M245,
+    // U+2210 ∐
+    8721: [0.25001, 0.75, 0, 0, 1.05556],
+    // U+2211 ∑
+    8730: [0.35001, 0.85, 0, 0, 1],
+    // U+221a √
+    8739: [-599e-5, 0.606, 0, 0, 0.33333],
+    // U+2223 ∣
+    8741: [-599e-5, 0.606, 0, 0, 0.55556],
+    // U+2225 ∥
+    8747: M247,
+    // U+222b ∫
+    8748: M246,
+    // U+222c ∬
+    8749: M246,
+    // U+222d ∭
+    8750: M247,
+    // U+222e ∮
+    8896: M248,
+    // U+22c0 ⋀
+    8897: M248,
+    // U+22c1 ⋁
+    8898: M248,
+    // U+22c2 ⋂
+    8899: M248,
+    // U+22c3 ⋃
+    8968: M249,
+    // U+2308 ⌈
+    8969: M249,
+    // U+2309 ⌉
+    8970: M249,
+    // U+230a ⌊
+    8971: M249,
+    // U+230b ⌋
+    9168: M277,
+    // U+23d0 ⏐
+    10216: M249,
+    // U+27e8 ⟨
+    10217: M249,
+    // U+27e9 ⟩
+    10752: M250,
+    // U+2a00 ⨀
+    10753: M250,
+    // U+2a01 ⨁
+    10754: M250,
+    // U+2a02 ⨂
+    10756: M248,
+    // U+2a04 ⨄
+    10758: M248
+    // U+2a06 ⨆
   },
   "Size2-Regular": {
-    "32": M0,
-    "40": M19,
-    "41": M19,
-    "47": M19,
-    "91": M19,
-    "92": M19,
-    "93": M19,
-    "123": M19,
-    "125": M19,
-    "160": M0,
-    "710": M14,
-    "732": M14,
-    "770": M14,
-    "771": M14,
-    "8719": M18,
-    "8720": M18,
-    "8721": M18,
-    "8730": M19,
-    "8747": [0.86225, 1.36, 0.44445, 0],
-    "8748": [0.862, 1.36, 0.44445, 0],
-    "8749": [0.862, 1.36, 0.44445, 0],
-    "8750": [0.86225, 1.36, 0.44445, 0],
-    "8896": M18,
-    "8897": M18,
-    "8898": M18,
-    "8899": M18,
-    "8968": M19,
-    "8969": M19,
-    "8970": M19,
-    "8971": M19,
-    "10216": M19,
-    "10217": M19,
-    "10752": M18,
-    "10753": M18,
-    "10754": M18,
-    "10756": M18,
-    "10758": M18
+    32: M7,
+    // U+0020
+    40: M251,
+    // U+0028 (
+    41: M251,
+    // U+0029 )
+    47: M252,
+    // U+002f /
+    91: M253,
+    // U+005b [
+    92: M252,
+    // U+005c \
+    93: M253,
+    // U+005d ]
+    123: M254,
+    // U+007b {
+    125: M254,
+    // U+007d }
+    160: M7,
+    // U+00a0
+    710: M255,
+    // U+02c6 ˆ
+    732: M255,
+    // U+02dc ˜
+    770: M255,
+    // U+0302 ̂
+    771: M255,
+    // U+0303 ̃
+    8719: M256,
+    // U+220f ∏
+    8720: M256,
+    // U+2210 ∐
+    8721: [0.55001, 1.05, 0, 0, 1.44445],
+    // U+2211 ∑
+    8730: [0.65002, 1.15, 0, 0, 1],
+    // U+221a √
+    8747: M258,
+    // U+222b ∫
+    8748: M257,
+    // U+222c ∬
+    8749: M257,
+    // U+222d ∭
+    8750: M258,
+    // U+222e ∮
+    8896: M259,
+    // U+22c0 ⋀
+    8897: M259,
+    // U+22c1 ⋁
+    8898: M259,
+    // U+22c2 ⋂
+    8899: M259,
+    // U+22c3 ⋃
+    8968: M260,
+    // U+2308 ⌈
+    8969: M260,
+    // U+2309 ⌉
+    8970: M260,
+    // U+230a ⌊
+    8971: M260,
+    // U+230b ⌋
+    10216: M261,
+    // U+27e8 ⟨
+    10217: M261,
+    // U+27e9 ⟩
+    10752: M262,
+    // U+2a00 ⨀
+    10753: M262,
+    // U+2a01 ⨁
+    10754: M262,
+    // U+2a02 ⨂
+    10756: M259,
+    // U+2a04 ⨄
+    10758: M259
+    // U+2a06 ⨆
   },
   "Size3-Regular": {
-    "32": M0,
-    "40": M13,
-    "41": M13,
-    "47": M13,
-    "91": M13,
-    "92": M13,
-    "93": M13,
-    "123": M13,
-    "125": M13,
-    "160": M0,
-    "710": M14,
-    "732": M14,
-    "770": M14,
-    "771": M14,
-    "8730": M13,
-    "8968": M13,
-    "8969": M13,
-    "8970": M13,
-    "8971": M13,
-    "10216": M13,
-    "10217": M13
+    32: M7,
+    // U+0020
+    40: M263,
+    // U+0028 (
+    41: M263,
+    // U+0029 )
+    47: M264,
+    // U+002f /
+    91: M265,
+    // U+005b [
+    92: M264,
+    // U+005c \
+    93: M265,
+    // U+005d ]
+    123: M266,
+    // U+007b {
+    125: M266,
+    // U+007d }
+    160: M7,
+    // U+00a0
+    710: M267,
+    // U+02c6 ˆ
+    732: M267,
+    // U+02dc ˜
+    770: M267,
+    // U+0302 ̂
+    771: M267,
+    // U+0303 ̃
+    8730: [0.95003, 1.45, 0, 0, 1],
+    // U+221a √
+    8968: M268,
+    // U+2308 ⌈
+    8969: M268,
+    // U+2309 ⌉
+    8970: M268,
+    // U+230a ⌊
+    8971: M268,
+    // U+230b ⌋
+    10216: M266,
+    // U+27e8 ⟨
+    10217: M266
+    // U+27e9 ⟩
   },
   "Size4-Regular": {
-    "32": M0,
-    "40": M12,
-    "41": M12,
-    "47": M12,
-    "91": M12,
-    "92": M12,
-    "93": M12,
-    "123": M12,
-    "125": M12,
-    "160": M0,
-    "710": [0, 0.825, 0, 0],
-    "732": [0, 0.825, 0, 0],
-    "770": [0, 0.825, 0, 0],
-    "771": [0, 0.825, 0, 0],
-    "8730": M12,
-    "8968": M12,
-    "8969": M12,
-    "8970": M12,
-    "8971": M12,
-    "9115": [0.64502, 1.155, 0, 0],
-    "9116": [1e-5, 0.6, 0, 0],
-    "9117": [0.64502, 1.155, 0, 0],
-    "9118": [0.64502, 1.155, 0, 0],
-    "9119": [1e-5, 0.6, 0, 0],
-    "9120": [0.64502, 1.155, 0, 0],
-    "9121": [0.64502, 1.155, 0, 0],
-    "9122": [-99e-5, 0.601, 0, 0],
-    "9123": [0.64502, 1.155, 0, 0],
-    "9124": [0.64502, 1.155, 0, 0],
-    "9125": [-99e-5, 0.601, 0, 0],
-    "9126": [0.64502, 1.155, 0, 0],
-    "9127": [1e-5, 0.9, 0, 0],
-    "9128": M19,
-    "9129": [0.90001, 0, 0, 0],
-    "9130": [0, 0.3, 0, 0],
-    "9131": [1e-5, 0.9, 0, 0],
-    "9132": M19,
-    "9133": [0.90001, 0, 0, 0],
-    "9143": [0.88502, 0.915, 0, 0],
-    "10216": M12,
-    "10217": M12,
-    "57344": [-499e-5, 0.605, 0, 0],
-    "57345": [-499e-5, 0.605, 0, 0],
-    "57680": [0, 0.12, 0, 0],
-    "57681": [0, 0.12, 0, 0],
-    "57682": [0, 0.12, 0, 0],
-    "57683": [0, 0.12, 0, 0]
+    32: M7,
+    // U+0020
+    40: M269,
+    // U+0028 (
+    41: M269,
+    // U+0029 )
+    47: M270,
+    // U+002f /
+    91: M271,
+    // U+005b [
+    92: M270,
+    // U+005c \
+    93: M271,
+    // U+005d ]
+    123: M272,
+    // U+007b {
+    125: M272,
+    // U+007d }
+    160: M7,
+    // U+00a0
+    710: M273,
+    // U+02c6 ˆ
+    732: M273,
+    // U+02dc ˜
+    770: M273,
+    // U+0302 ̂
+    771: M273,
+    // U+0303 ̃
+    8730: [1.25003, 1.75, 0, 0, 1],
+    // U+221a √
+    8968: M274,
+    // U+2308 ⌈
+    8969: M274,
+    // U+2309 ⌉
+    8970: M274,
+    // U+230a ⌊
+    8971: M274,
+    // U+230b ⌋
+    9115: M275,
+    // U+239b ⎛
+    9116: M276,
+    // U+239c ⎜
+    9117: M275,
+    // U+239d ⎝
+    9118: M275,
+    // U+239e ⎞
+    9119: M276,
+    // U+239f ⎟
+    9120: M275,
+    // U+23a0 ⎠
+    9121: M278,
+    // U+23a1 ⎡
+    9122: M277,
+    // U+23a2 ⎢
+    9123: M278,
+    // U+23a3 ⎣
+    9124: M278,
+    // U+23a4 ⎤
+    9125: M277,
+    // U+23a5 ⎥
+    9126: M278,
+    // U+23a6 ⎦
+    9127: M279,
+    // U+23a7 ⎧
+    9128: M280,
+    // U+23a8 ⎨
+    9129: M281,
+    // U+23a9 ⎩
+    9130: [0, 0.3, 0, 0, 0.88889],
+    // U+23aa ⎪
+    9131: M279,
+    // U+23ab ⎫
+    9132: M280,
+    // U+23ac ⎬
+    9133: M281,
+    // U+23ad ⎭
+    9143: [0.88502, 0.915, 0, 0, 1.05556],
+    // U+23b7 ⎷
+    10216: M272,
+    // U+27e8 ⟨
+    10217: M272,
+    // U+27e9 ⟩
+    57344: M282,
+    // U+e000 
+    57345: M282,
+    // U+e001 
+    57680: M283,
+    // U+e150 
+    57681: M283,
+    // U+e151 
+    57682: M283,
+    // U+e152 
+    57683: M283
+    // U+e153 
   },
   "Typewriter-Regular": {
-    "32": M0,
-    "33": M11,
-    "34": M11,
-    "35": M11,
-    "36": [0.08333, 0.69444, 0, 0],
-    "37": [0.08333, 0.69444, 0, 0],
-    "38": M11,
-    "39": M11,
-    "40": [0.08333, 0.69444, 0, 0],
-    "41": [0.08333, 0.69444, 0, 0],
-    "42": [0, 0.52083, 0, 0],
-    "43": [-0.08056, 0.53055, 0, 0],
-    "44": [0.13889, 0.125, 0, 0],
-    "45": [-0.08056, 0.53055, 0, 0],
-    "46": [0, 0.125, 0, 0],
-    "47": [0.08333, 0.69444, 0, 0],
-    "48": M11,
-    "49": M11,
-    "50": M11,
-    "51": M11,
-    "52": M11,
-    "53": M11,
-    "54": M11,
-    "55": M11,
-    "56": M11,
-    "57": M11,
-    "58": [0, 0.43056, 0, 0],
-    "59": [0.13889, 0.43056, 0, 0],
-    "60": [-0.05556, 0.55556, 0, 0],
-    "61": [-0.19549, 0.41562, 0, 0],
-    "62": [-0.05556, 0.55556, 0, 0],
-    "63": M11,
-    "64": M11,
-    "65": M11,
-    "66": M11,
-    "67": M11,
-    "68": M11,
-    "69": M11,
-    "70": M11,
-    "71": M11,
-    "72": M11,
-    "73": M11,
-    "74": M11,
-    "75": M11,
-    "76": M11,
-    "77": M11,
-    "78": M11,
-    "79": M11,
-    "80": M11,
-    "81": [0.13889, 0.61111, 0, 0],
-    "82": M11,
-    "83": M11,
-    "84": M11,
-    "85": M11,
-    "86": M11,
-    "87": M11,
-    "88": M11,
-    "89": M11,
-    "90": M11,
-    "91": [0.08333, 0.69444, 0, 0],
-    "92": [0.08333, 0.69444, 0, 0],
-    "93": [0.08333, 0.69444, 0, 0],
-    "94": M11,
-    "95": [0.09514, 0, 0, 0],
-    "96": M11,
-    "97": [0, 0.43056, 0, 0],
-    "98": M11,
-    "99": [0, 0.43056, 0, 0],
-    "100": M11,
-    "101": [0, 0.43056, 0, 0],
-    "102": M11,
-    "103": [0.22222, 0.43056, 0, 0],
-    "104": M11,
-    "105": M11,
-    "106": [0.22222, 0.61111, 0, 0],
-    "107": M11,
-    "108": M11,
-    "109": [0, 0.43056, 0, 0],
-    "110": [0, 0.43056, 0, 0],
-    "111": [0, 0.43056, 0, 0],
-    "112": [0.22222, 0.43056, 0, 0],
-    "113": [0.22222, 0.43056, 0, 0],
-    "114": [0, 0.43056, 0, 0],
-    "115": [0, 0.43056, 0, 0],
-    "116": [0, 0.55358, 0, 0],
-    "117": [0, 0.43056, 0, 0],
-    "118": [0, 0.43056, 0, 0],
-    "119": [0, 0.43056, 0, 0],
-    "120": [0, 0.43056, 0, 0],
-    "121": [0.22222, 0.43056, 0, 0],
-    "122": [0, 0.43056, 0, 0],
-    "123": [0.08333, 0.69444, 0, 0],
-    "124": [0.08333, 0.69444, 0, 0],
-    "125": [0.08333, 0.69444, 0, 0],
-    "126": M11,
-    "127": M11,
-    "160": M0,
-    "176": M11,
-    "184": [0.19445, 0, 0, 0],
-    "305": [0, 0.43056, 0, 0],
-    "567": [0.22222, 0.43056, 0, 0],
-    "711": [0, 0.56597, 0, 0],
-    "713": [0, 0.56555, 0, 0],
-    "714": M11,
-    "715": M11,
-    "728": M11,
-    "730": M11,
-    "770": M11,
-    "771": M11,
-    "776": M11,
-    "915": M11,
-    "916": M11,
-    "920": M11,
-    "923": M11,
-    "926": M11,
-    "928": M11,
-    "931": M11,
-    "933": M11,
-    "934": M11,
-    "936": M11,
-    "937": M11,
-    "8216": M11,
-    "8217": M11,
-    "8242": M11,
-    "9251": [0.11111, 0.21944, 0, 0]
+    32: M290,
+    // U+0020
+    33: M284,
+    // U+0021 !
+    34: M284,
+    // U+0022 "
+    35: M284,
+    // U+0023 #
+    36: M285,
+    // U+0024 $
+    37: M285,
+    // U+0025 %
+    38: M284,
+    // U+0026 &
+    39: M284,
+    // U+0027 '
+    40: M285,
+    // U+0028 (
+    41: M285,
+    // U+0029 )
+    42: [0, 0.52083, 0, 0, 0.525],
+    // U+002a *
+    43: M286,
+    // U+002b +
+    44: [0.13889, 0.125, 0, 0, 0.525],
+    // U+002c ,
+    45: M286,
+    // U+002d -
+    46: [0, 0.125, 0, 0, 0.525],
+    // U+002e .
+    47: M285,
+    // U+002f /
+    48: M284,
+    // U+0030 0
+    49: M284,
+    // U+0031 1
+    50: M284,
+    // U+0032 2
+    51: M284,
+    // U+0033 3
+    52: M284,
+    // U+0034 4
+    53: M284,
+    // U+0035 5
+    54: M284,
+    // U+0036 6
+    55: M284,
+    // U+0037 7
+    56: M284,
+    // U+0038 8
+    57: M284,
+    // U+0039 9
+    58: M288,
+    // U+003a :
+    59: [0.13889, 0.43056, 0, 0, 0.525],
+    // U+003b ;
+    60: M287,
+    // U+003c <
+    61: [-0.19549, 0.41562, 0, 0, 0.525],
+    // U+003d =
+    62: M287,
+    // U+003e >
+    63: M284,
+    // U+003f ?
+    64: M284,
+    // U+0040 @
+    65: M284,
+    // U+0041 A
+    66: M284,
+    // U+0042 B
+    67: M284,
+    // U+0043 C
+    68: M284,
+    // U+0044 D
+    69: M284,
+    // U+0045 E
+    70: M284,
+    // U+0046 F
+    71: M284,
+    // U+0047 G
+    72: M284,
+    // U+0048 H
+    73: M284,
+    // U+0049 I
+    74: M284,
+    // U+004a J
+    75: M284,
+    // U+004b K
+    76: M284,
+    // U+004c L
+    77: M284,
+    // U+004d M
+    78: M284,
+    // U+004e N
+    79: M284,
+    // U+004f O
+    80: M284,
+    // U+0050 P
+    81: [0.13889, 0.61111, 0, 0, 0.525],
+    // U+0051 Q
+    82: M284,
+    // U+0052 R
+    83: M284,
+    // U+0053 S
+    84: M284,
+    // U+0054 T
+    85: M284,
+    // U+0055 U
+    86: M284,
+    // U+0056 V
+    87: M284,
+    // U+0057 W
+    88: M284,
+    // U+0058 X
+    89: M284,
+    // U+0059 Y
+    90: M284,
+    // U+005a Z
+    91: M285,
+    // U+005b [
+    92: M285,
+    // U+005c \
+    93: M285,
+    // U+005d ]
+    94: M284,
+    // U+005e ^
+    95: [0.09514, 0, 0, 0, 0.525],
+    // U+005f _
+    96: M284,
+    // U+0060 `
+    97: M288,
+    // U+0061 a
+    98: M284,
+    // U+0062 b
+    99: M288,
+    // U+0063 c
+    100: M284,
+    // U+0064 d
+    101: M288,
+    // U+0065 e
+    102: M284,
+    // U+0066 f
+    103: M289,
+    // U+0067 g
+    104: M284,
+    // U+0068 h
+    105: M284,
+    // U+0069 i
+    106: [0.22222, 0.61111, 0, 0, 0.525],
+    // U+006a j
+    107: M284,
+    // U+006b k
+    108: M284,
+    // U+006c l
+    109: M288,
+    // U+006d m
+    110: M288,
+    // U+006e n
+    111: M288,
+    // U+006f o
+    112: M289,
+    // U+0070 p
+    113: M289,
+    // U+0071 q
+    114: M288,
+    // U+0072 r
+    115: M288,
+    // U+0073 s
+    116: [0, 0.55358, 0, 0, 0.525],
+    // U+0074 t
+    117: M288,
+    // U+0075 u
+    118: M288,
+    // U+0076 v
+    119: M288,
+    // U+0077 w
+    120: M288,
+    // U+0078 x
+    121: M289,
+    // U+0079 y
+    122: M288,
+    // U+007a z
+    123: M285,
+    // U+007b {
+    124: M285,
+    // U+007c |
+    125: M285,
+    // U+007d }
+    126: M284,
+    // U+007e ~
+    127: M284,
+    // U+007f 
+    160: M290,
+    // U+00a0
+    176: M284,
+    // U+00b0 °
+    184: [0.19445, 0, 0, 0, 0.525],
+    // U+00b8 ¸
+    305: M288,
+    // U+0131 ı
+    567: M289,
+    // U+0237 ȷ
+    711: [0, 0.56597, 0, 0, 0.525],
+    // U+02c7 ˇ
+    713: [0, 0.56555, 0, 0, 0.525],
+    // U+02c9 ˉ
+    714: M284,
+    // U+02ca ˊ
+    715: M284,
+    // U+02cb ˋ
+    728: M284,
+    // U+02d8 ˘
+    730: M284,
+    // U+02da ˚
+    770: M284,
+    // U+0302 ̂
+    771: M284,
+    // U+0303 ̃
+    776: M284,
+    // U+0308 ̈
+    915: M284,
+    // U+0393 Γ
+    916: M284,
+    // U+0394 Δ
+    920: M284,
+    // U+0398 Θ
+    923: M284,
+    // U+039b Λ
+    926: M284,
+    // U+039e Ξ
+    928: M284,
+    // U+03a0 Π
+    931: M284,
+    // U+03a3 Σ
+    933: M284,
+    // U+03a5 Υ
+    934: M284,
+    // U+03a6 Φ
+    936: M284,
+    // U+03a8 Ψ
+    937: M284,
+    // U+03a9 Ω
+    8216: M284,
+    // U+2018 ‘
+    8217: M284,
+    // U+2019 ’
+    8242: M284,
+    // U+2032 ′
+    9251: [0.11111, 0.21944, 0, 0, 0.525]
+    // U+2423 ␣
   }
 };
 
@@ -3792,8 +6990,10 @@ var FONT_METRICS = {
   xHeight: [X_HEIGHT, X_HEIGHT, X_HEIGHT],
   quad: [1, 1.171, 1.472],
   extraSpace: [0, 0, 0],
-  num1: [0.677, 0.732, 0.925],
-  num2: [0.394, 0.384, 0.387],
+  num1: [0.5, 0.732, 0.925],
+  // Was   num1: [0.677, 0.732, 0.925],
+  num2: [0.394, 0.384, 0.5],
+  // Was   num2: [0.394, 0.384, 0.387],
   num3: [0.444, 0.471, 0.504],
   denom1: [0.686, 0.752, 1.025],
   denom2: [0.345, 0.344, 0.532],
@@ -3924,7 +7124,8 @@ function getCharacterMetrics(codepoint, fontName) {
       depth: metrics[0],
       height: metrics[1],
       italic: metrics[2],
-      skew: metrics[3]
+      skew: metrics[3],
+      width: metrics[4]
     };
   }
   if (codepoint === 11034) {
@@ -3933,7 +7134,8 @@ function getCharacterMetrics(codepoint, fontName) {
       depth: 0.2,
       height: 0.8,
       italic: 0,
-      skew: 0
+      skew: 0,
+      width: 0.8
     };
   }
   const char = String.fromCodePoint(codepoint);
@@ -3946,7 +7148,8 @@ function getCharacterMetrics(codepoint, fontName) {
       depth: 0.2,
       height: 0.9,
       italic: 0,
-      skew: 0
+      skew: 0,
+      width: 1
     };
   }
   return {
@@ -3954,7 +7157,8 @@ function getCharacterMetrics(codepoint, fontName) {
     depth: 0.2,
     height: 0.7,
     italic: 0,
-    skew: 0
+    skew: 0,
+    width: 0.8
   };
 }
 
@@ -4690,14 +7894,18 @@ var _Mode = class {
     );
   }
   static serialize(atoms, options) {
+    var _a3;
     if (!atoms || atoms.length === 0)
       return "";
-    const tokens = [];
-    for (const run of getModeRuns(atoms)) {
-      const mode = _Mode._registry[run[0].mode];
-      tokens.push(...mode.serialize(run, options));
+    if ((_a3 = options.skipStyles) != null ? _a3 : false) {
+      const body = [];
+      for (const run of getModeRuns(atoms)) {
+        const mode = _Mode._registry[run[0].mode];
+        body.push(...mode.serialize(run, options));
+      }
+      return joinLatex(body);
     }
-    return joinLatex(tokens);
+    return joinLatex(emitFontSizeRun(atoms, options));
   }
   static getFont(mode, box, style) {
     return _Mode._registry[mode].getFont(box, style);
@@ -4751,6 +7959,83 @@ function getPropertyRuns(atoms, property) {
     result.push(run);
   return result;
 }
+function emitColorRun(run, options) {
+  var _a3;
+  const { parent } = run[0];
+  const parentColor = parent == null ? void 0 : parent.computedStyle.color;
+  const result = [];
+  for (const modeRun of getModeRuns(run)) {
+    const mode = options.defaultMode;
+    for (const colorRun of getPropertyRuns(modeRun, "color")) {
+      const style = colorRun[0].computedStyle;
+      const body = Mode._registry[colorRun[0].mode].serialize(colorRun, __spreadProps(__spreadValues({}, options), {
+        defaultMode: mode === "text" ? "text" : "math"
+      }));
+      if (!options.skipStyles && style.color && style.color !== "none" && (!parent || parentColor !== style.color)) {
+        result.push(
+          latexCommand(
+            "\\textcolor",
+            (_a3 = style.verbatimColor) != null ? _a3 : style.color,
+            joinLatex(body)
+          )
+        );
+      } else
+        result.push(joinLatex(body));
+    }
+  }
+  return result;
+}
+function emitBackgroundColorRun(run, options) {
+  const { parent } = run[0];
+  const parentColor = parent == null ? void 0 : parent.computedStyle.backgroundColor;
+  return getPropertyRuns(run, "backgroundColor").map((x) => {
+    var _a3;
+    if (x.length > 0 || x[0].type !== "box") {
+      const style = x[0].computedStyle;
+      if (style.backgroundColor && style.backgroundColor !== "none" && (!parent || parentColor !== style.backgroundColor)) {
+        return latexCommand(
+          "\\colorbox",
+          (_a3 = style.verbatimBackgroundColor) != null ? _a3 : style.backgroundColor,
+          joinLatex(emitColorRun(x, __spreadProps(__spreadValues({}, options), { defaultMode: "text" })))
+        );
+      }
+    }
+    return joinLatex(emitColorRun(x, options));
+  });
+}
+function emitFontSizeRun(run, options) {
+  if (run.length === 0)
+    return [];
+  const { parent } = run[0];
+  const contextFontsize = parent == null ? void 0 : parent.computedStyle.fontSize;
+  const result = [];
+  for (const sizeRun of getPropertyRuns(run, "fontSize")) {
+    const fontsize = sizeRun[0].computedStyle.fontSize;
+    const body = emitBackgroundColorRun(sizeRun, options);
+    if (body) {
+      if (fontsize && fontsize !== "auto" && (!parent || contextFontsize !== fontsize)) {
+        result.push(
+          [
+            "",
+            "\\tiny",
+            "\\scriptsize",
+            "\\footnotesize",
+            "\\small",
+            "\\normalsize",
+            "\\large",
+            "\\Large",
+            "\\LARGE",
+            "\\huge",
+            "\\Huge"
+          ][fontsize],
+          ...body
+        );
+      } else
+        result.push(...body);
+    }
+  }
+  return result;
+}
 
 // src/core/box.ts
 function boxType(type) {
@@ -4797,7 +8082,7 @@ function toString(arg1, arg2) {
 }
 var Box = class {
   constructor(content, options) {
-    var _a3, _b3, _c2, _d2, _e;
+    var _a3, _b3, _c2, _d2, _e, _f;
     if (typeof content === "number")
       this.value = String.fromCodePoint(content);
     else if (typeof content === "string")
@@ -4814,8 +8099,6 @@ var Box = class {
     if (options == null ? void 0 : options.caret)
       this.caret = options.caret;
     this.classes = (_b3 = options == null ? void 0 : options.classes) != null ? _b3 : "";
-    if (this.isSelected)
-      this.classes += " ML__selected";
     this.isTight = (_c2 = options == null ? void 0 : options.isTight) != null ? _c2 : false;
     if (options == null ? void 0 : options.properties) {
       for (const prop of Object.keys(options.properties))
@@ -4823,38 +8106,48 @@ var Box = class {
     }
     if (options == null ? void 0 : options.attributes)
       this.attributes = options.attributes;
-    let fontName = (options == null ? void 0 : options.fontFamily) || "Main-Regular";
+    let fontName = options == null ? void 0 : options.fontFamily;
     if ((options == null ? void 0 : options.style) && this.value) {
-      fontName = Mode.getFont((_d2 = options.mode) != null ? _d2 : "math", this, __spreadProps(__spreadValues({}, options.style), {
+      fontName = (_e = Mode.getFont((_d2 = options.mode) != null ? _d2 : "math", this, __spreadProps(__spreadValues({
+        variant: "normal"
+      }, options.style), {
         letterShapeStyle: options.letterShapeStyle
-      })) || "Main-Regular";
+      }))) != null ? _e : void 0;
     }
+    fontName || (fontName = "Main-Regular");
     this.height = 0;
     this.depth = 0;
+    this._width = 0;
+    this.hasExplicitWidth = false;
     this.skew = 0;
     this.italic = 0;
     this.maxFontSize = 0;
+    this.scale = 1;
     if (this.type === "latex") {
       this.height = 0.8;
       this.depth = 0.2;
+      this._width = 1;
     } else if (typeof content === "number") {
       const metrics = getCharacterMetrics(content, fontName);
       this.height = metrics.height;
       this.depth = metrics.depth;
+      this._width = metrics.width;
       this.skew = metrics.skew;
       this.italic = metrics.italic;
     } else if (this.value) {
       this.height = -Infinity;
       this.depth = -Infinity;
+      this._width = 0;
       this.skew = -Infinity;
       this.italic = -Infinity;
       for (let i = 0; i < this.value.length; i++) {
         const metrics = getCharacterMetrics(
           this.value.codePointAt(i),
-          fontName || "Main-Regular"
+          fontName
         );
         this.height = Math.max(this.height, metrics.height);
         this.depth = Math.max(this.depth, metrics.depth);
+        this._width += metrics.width;
         this.skew = metrics.skew;
         this.italic = metrics.italic;
       }
@@ -4863,22 +8156,26 @@ var Box = class {
         const child = this.children[0];
         this.height = child.height;
         this.depth = child.depth;
+        this._width = child.width;
         this.maxFontSize = child.maxFontSize;
         this.skew = child.skew;
         this.italic = child.italic;
       } else {
         let height = -Infinity;
         let depth = -Infinity;
+        let width = 0;
         let maxFontSize = 0;
         for (const child of this.children) {
           if (child.height > height)
             height = child.height;
           if (child.depth > depth)
             depth = child.depth;
-          maxFontSize = Math.max(maxFontSize, (_e = child.maxFontSize) != null ? _e : 0);
+          maxFontSize = Math.max(maxFontSize, (_f = child.maxFontSize) != null ? _f : 0);
+          width += child.width;
         }
         this.height = height;
         this.depth = depth;
+        this._width = width;
         this.maxFontSize = maxFontSize;
       }
     }
@@ -4886,15 +8183,15 @@ var Box = class {
       this.height = options.height;
     if ((options == null ? void 0 : options.depth) !== void 0)
       this.depth = options.depth;
+    if ((options == null ? void 0 : options.width) !== void 0)
+      this.width = options.width;
     if ((options == null ? void 0 : options.maxFontSize) !== void 0)
       this.maxFontSize = options.maxFontSize;
   }
   set atomID(id) {
     if (id === void 0 || id.length === 0)
       return;
-    if (!this.attributes)
-      this.attributes = {};
-    this.attributes["data-atom-id"] = id;
+    this.id = id;
   }
   selected(isSelected) {
     if (this.isSelected === isSelected)
@@ -4953,144 +8250,146 @@ var Box = class {
       this.cssProperties["margin-right"] = toString(value, "em");
     }
   }
+  get width() {
+    return this._width;
+  }
   set width(value) {
-    if (!Number.isFinite(value))
-      return;
-    if (value === 0) {
-      if (this.cssProperties)
-        delete this.cssProperties.width;
-    } else {
-      if (!this.cssProperties)
-        this.cssProperties = {};
-      this.cssProperties.width = toString(value, "em");
-    }
+    this._width = value;
+    this.hasExplicitWidth = true;
   }
   /**
+   * Apply the context (color, backgroundColor, size) to the box.
    * If necessary wrap this box with another one that adjust the font-size
    * to account for a change in size between the context and its parent.
-   * Also, apply color and background-color attributes.
    */
-  wrap(context, options) {
+  wrap(context) {
     const parent = context.parent;
     if (!parent)
       return this;
     if (context.isPhantom)
       this.setStyle("opacity", 0);
-    let newColor = context.color;
-    if (newColor === parent.color)
-      newColor = "";
-    this.setStyle("color", newColor);
-    const newSize = context.effectiveFontSize === parent.effectiveFontSize ? void 0 : context.effectiveFontSize;
+    const color = context.color;
+    if (color && color !== parent.color)
+      this.setStyle("color", color);
     let backgroundColor = context.backgroundColor;
     if (this.isSelected)
       backgroundColor = highlight(backgroundColor);
-    if (backgroundColor === parent.backgroundColor)
-      backgroundColor = "";
-    if (backgroundColor) {
+    if (backgroundColor && backgroundColor !== parent.backgroundColor) {
       this.setStyle("background-color", backgroundColor);
       this.setStyle("display", "inline-block");
     }
-    if (!newSize && !(options && (options.classes || options.type)))
-      return this;
-    const result = new Box(this, __spreadProps(__spreadValues({}, options), { type: "lift" }));
-    const factor = context.scalingFactor;
-    if (factor !== 1)
-      result.setStyle("font-size", factor * 100, "%");
-    return result;
+    console.assert(this.scale === 1);
+    const scale = context.scalingFactor;
+    this.scale = scale;
+    this.height *= scale;
+    this.depth *= scale;
+    this._width *= scale;
+    this.skew *= scale;
+    this.italic *= scale;
+    return this;
   }
   /**
    * Generate the HTML markup to represent this box.
    */
   toMarkup() {
-    var _a3, _b3, _c2;
+    var _a3, _b3, _c2, _d2;
     let body = (_a3 = this.value) != null ? _a3 : "";
     if (this.children)
       for (const box of this.children)
         body += box.toMarkup();
+    let svgMarkup = "";
+    if (this.svgBody)
+      svgMarkup = svgBodyToMarkup(this.svgBody);
+    else if (this.svgOverlay) {
+      svgMarkup = '<span style="';
+      svgMarkup += "display: inline-block;";
+      svgMarkup += `height:${this.height + this.depth}em;`;
+      svgMarkup += `vertical-align:${this.depth}em;`;
+      svgMarkup += '">';
+      svgMarkup += body;
+      svgMarkup += "</span>";
+      svgMarkup += '<svg style="position:absolute;overflow:overlay;';
+      svgMarkup += `height:${this.height + this.depth}em;`;
+      const padding2 = (_b3 = this.cssProperties) == null ? void 0 : _b3.padding;
+      if (padding2) {
+        svgMarkup += `top:${padding2};`;
+        svgMarkup += `left:${padding2};`;
+        svgMarkup += `width:calc(100% - 2 * ${padding2} );`;
+      } else
+        svgMarkup += "top:0;left:0;width:100%;";
+      svgMarkup += "z-index:2;";
+      svgMarkup += '"';
+      if (this.svgStyle)
+        svgMarkup += ` style="${this.svgStyle}"`;
+      svgMarkup += `>${this.svgOverlay}</svg>`;
+    }
+    let props = "";
     const classes = this.classes.split(" ");
     classes.push(
-      (_b3 = {
+      (_c2 = {
         latex: "ML__latex",
         placeholder: "ML__placeholder",
         error: "ML__error"
-      }[this.type]) != null ? _b3 : ""
+      }[this.type]) != null ? _c2 : ""
     );
     if (this.caret === "latex")
       classes.push("ML__latex-caret");
+    if (this.isSelected)
+      classes.push("ML__selected");
     const classList = classes.length === 1 ? classes[0] : classes.filter((x, e, a) => x.length > 0 && a.indexOf(x) === e).join(" ");
-    let result = "";
-    if (body.length > 0 && body !== "\u200B" || classList.length > 0 || this.cssId || this.htmlData || this.htmlStyle || this.attributes || this.cssProperties || this.svgBody || this.svgOverlay) {
-      let props = "";
-      if (this.cssId) {
-        props += ` id="${this.cssId.replace(/ /g, "-")}" `;
-      }
-      if (this.htmlData) {
-        const entries = this.htmlData.split(",");
-        for (const entry of entries) {
-          const matched = entry.match(/([^=]+)=(.+$)/);
-          if (matched) {
-            const key = matched[1].trim().replace(/ /g, "-");
-            if (key)
-              props += ` data-${key}="${matched[2]}" `;
-          } else {
-            const key = entry.trim().replace(/ /g, "-");
-            if (key)
-              props += ` data-${key} `;
-          }
-        }
-      }
-      if (this.htmlStyle) {
-        const entries = this.htmlStyle.split(";");
-        let styleString = "";
-        for (const entry of entries) {
-          const matched = entry.match(/([^=]+):(.+$)/);
-          if (matched) {
-            const key = matched[1].trim().replace(/ /g, "-");
-            if (key)
-              styleString += `${key}:${matched[2]};`;
-          }
-        }
-        if (styleString)
-          props += ` style="${styleString}"`;
-      }
-      if (this.attributes) {
-        props += " " + Object.keys(this.attributes).map((x) => `${x}="${this.attributes[x]}"`).join(" ");
-      }
-      if (classList.length > 0)
-        props += ` class="${classList}"`;
-      const cssProps = this.cssProperties;
-      if (cssProps) {
-        const styles = Object.keys(cssProps).map((x) => `${x}:${cssProps[x]}`);
-        if (styles.length > 0)
-          props += ` style="${styles.join(";")}"`;
-      }
-      let svgMarkup = "";
-      if (this.svgBody)
-        svgMarkup = svgBodyToMarkup(this.svgBody);
-      else if (this.svgOverlay) {
-        svgMarkup = '<span style="';
-        svgMarkup += "display: inline-block;";
-        svgMarkup += `height:${this.height + this.depth}em;`;
-        svgMarkup += `vertical-align:${this.depth}em;`;
-        svgMarkup += '">';
-        svgMarkup += body;
-        svgMarkup += "</span>";
-        svgMarkup += '<svg style="position:absolute;overflow:overlay;';
-        svgMarkup += `height:${this.height + this.depth}em;`;
-        if ((_c2 = this.cssProperties) == null ? void 0 : _c2.padding) {
-          svgMarkup += `top:${this.cssProperties.padding}em;`;
-          svgMarkup += `left:${this.cssProperties.padding}em;`;
-          svgMarkup += `width:calc(100% - 2 * ${this.cssProperties.padding}em );`;
-        } else
-          svgMarkup += "top:0;left:0;width:100%;";
-        svgMarkup += "z-index:2;";
-        svgMarkup += '"';
-        if (this.svgStyle)
-          svgMarkup += ` style="${this.svgStyle}"`;
-        svgMarkup += `>${this.svgOverlay}</svg>`;
-      }
-      result = `<span${props}>${body}${svgMarkup}</span>`;
+    if (classList.length > 0)
+      props += ` class="${classList}"`;
+    if (this.id)
+      props += ` data-atom-id=${this.id}`;
+    if (this.cssId)
+      props += ` id="${this.cssId.replace(/ /g, "-")}" `;
+    if (this.attributes) {
+      props += " " + Object.keys(this.attributes).map((x) => `${x}="${this.attributes[x]}"`).join(" ");
     }
+    if (this.htmlData) {
+      const entries = this.htmlData.split(",");
+      for (const entry of entries) {
+        const matched = entry.match(/([^=]+)=(.+$)/);
+        if (matched) {
+          const key = matched[1].trim().replace(/ /g, "-");
+          if (key)
+            props += ` data-${key}="${matched[2]}" `;
+        } else {
+          const key = entry.trim().replace(/ /g, "-");
+          if (key)
+            props += ` data-${key} `;
+        }
+      }
+    }
+    const cssProps = (_d2 = this.cssProperties) != null ? _d2 : {};
+    if (this.hasExplicitWidth) {
+      console.assert(cssProps.width === void 0);
+      cssProps.width = `${Math.round(this._width * 100) / 100}em`;
+    }
+    const styles = Object.keys(cssProps).map((x) => `${x}:${cssProps[x]}`);
+    if (this.scale !== void 0 && this.scale !== 1 && (body.length > 0 || svgMarkup.length > 0))
+      styles.push(`font-size: ${Math.round(this.scale * 1e4) / 100}%`);
+    if (this.htmlStyle) {
+      const entries = this.htmlStyle.split(";");
+      let styleString = "";
+      for (const entry of entries) {
+        const matched = entry.match(/([^=]+):(.+$)/);
+        if (matched) {
+          const key = matched[1].trim().replace(/ /g, "-");
+          if (key)
+            styleString += `${key}:${matched[2]};`;
+        }
+      }
+      if (styleString)
+        props += ` style="${styleString}"`;
+    }
+    if (styles.length > 0)
+      props += ` style="${styles.join(";")}"`;
+    let result = "";
+    if (props.length > 0 || svgMarkup.length > 0)
+      result = `<span${props}>${body}${svgMarkup}</span>`;
+    else
+      result = body;
     if (this.caret === "text")
       result += '<span class="ML__text-caret"></span>';
     else if (this.caret === "math")
@@ -5160,15 +8459,13 @@ var Box = class {
     this.value += box.value;
     this.height = Math.max(this.height, box.height);
     this.depth = Math.max(this.depth, box.depth);
+    this._width = this._width + box._width;
     this.maxFontSize = Math.max(this.maxFontSize, box.maxFontSize);
     this.italic = box.italic;
     return true;
   }
 };
 function coalesceRecursive(boxes) {
-  boxes = boxes == null ? void 0 : boxes.filter(
-    (x) => !(x.height === 0 && x.depth === 0 && !x.value && !x.classes && !x.cssProperties)
-  );
   if (!boxes || boxes.length === 0)
     return [];
   boxes[0].children = coalesceRecursive(boxes[0].children);
@@ -5527,7 +8824,12 @@ function convertDimensionToPt(value, precision) {
 function convertDimensionToEm(value, precision) {
   if (value === null)
     return 0;
-  return convertDimensionToPt(value, precision) / PT_PER_EM;
+  const result = convertDimensionToPt(value) / PT_PER_EM;
+  if (Number.isFinite(precision)) {
+    const factor = 10 ** precision;
+    return Math.round(result * factor) / factor;
+  }
+  return result;
 }
 function serializeDimension(value) {
   var _a3;
@@ -5557,19 +8859,26 @@ function serializeLatexValue(value) {
       result = `\`${String.fromCodePoint(value.number)}`;
     else {
       const i = Math.round(value.number) >>> 0;
-      let pad = "00000000";
       if (value.base === "hexadecimal") {
+        result = Number(i).toString(16).toUpperCase();
         if (i <= 255)
-          pad = "00";
+          result = result.padStart(2, "0");
         else if (i <= 65535)
-          pad = "0000";
-        result = `"${`${pad}${Number(i).toString(16)}`.slice(-pad.length).toUpperCase()}`;
+          result = result.padStart(4, "0");
+        else if (i <= 16777215)
+          result = result.padStart(6, "0");
+        else
+          result = result.padStart(8, "0");
+        result = `"${result}`;
       } else if (value.base === "octal") {
+        result = Number(i).toString(8);
         if (i <= 63)
-          pad = "00";
+          result = result.padStart(2, "0");
         else if (i <= 30583)
-          pad = "0000";
-        result = `'${`${pad}${Number(i).toString(8)}`.slice(-pad.length)}`;
+          result = result.padStart(4, "0");
+        else
+          result = result.padStart(8, "0");
+        result = `'${result}`;
       }
     }
   }
@@ -5589,6 +8898,44 @@ function serializeLatexValue(value) {
   if ((_b3 = value.relax) != null ? _b3 : false)
     result += "\\relax";
   return result;
+}
+function multiplyLatexValue(value, factor) {
+  if (value === null || value === void 0)
+    return null;
+  if ("number" in value)
+    return __spreadProps(__spreadValues({}, value), { number: value.number * factor });
+  if ("register" in value) {
+    if ("factor" in value && value.factor)
+      return __spreadProps(__spreadValues({}, value), { factor: value.factor * factor });
+    return __spreadProps(__spreadValues({}, value), { factor });
+  }
+  if ("dimension" in value)
+    return __spreadProps(__spreadValues({}, value), { dimension: value.dimension * factor });
+  if ("glue" in value) {
+    if (value.shrink && value.grow) {
+      return {
+        glue: multiplyLatexValue(value.glue, factor),
+        shrink: multiplyLatexValue(value.shrink, factor),
+        grow: multiplyLatexValue(value.grow, factor)
+      };
+    }
+    if (value.shrink) {
+      return {
+        glue: multiplyLatexValue(value.glue, factor),
+        shrink: multiplyLatexValue(value.shrink, factor)
+      };
+    }
+    if (value.grow) {
+      return {
+        glue: multiplyLatexValue(value.glue, factor),
+        grow: multiplyLatexValue(value.grow, factor)
+      };
+    }
+    return {
+      glue: multiplyLatexValue(value.glue, factor)
+    };
+  }
+  return null;
 }
 
 // src/core/registers.ts
@@ -5838,7 +9185,9 @@ var Context = class {
     if (this.atomIdsSettings.overrideID)
       return this.atomIdsSettings.overrideID;
     if (typeof this.atomIdsSettings.seed !== "number") {
-      return Date.now().toString(36).slice(-2) + Math.floor(Math.random() * 1e5).toString(36);
+      return `${Date.now().toString(36).slice(-2)}${Math.floor(
+        Math.random() * 1e5
+      ).toString(36)}`;
     }
     const result = this.atomIdsSettings.seed.toString(36);
     this.atomIdsSettings.seed += 1;
@@ -6029,8 +9378,8 @@ var Context = class {
 
 // src/core/atom-class.ts
 var NAMED_BRANCHES = [
-  "above",
   "body",
+  "above",
   "below",
   "superscript",
   "subscript"
@@ -6043,22 +9392,6 @@ function isCellBranch(branch) {
 }
 var Atom = class {
   constructor(options) {
-    // If no branches
-    // Used to match a DOM element to an Atom
-    // (the corresponding DOM element has a `data-atom-id` attribute)
-    this.id = void 0;
-    // (optional)
-    // Verbatim LaTeX of the command and its arguments
-    // Note that the empty string is a valid verbatim LaTeX , so it's important
-    // to distinguish between `verbatimLatex === undefined` and `typeof verbatimLatex === 'string'`
-    this.verbatimLatex = void 0;
-    // If true, some structural changes have been made to the atom
-    // (insertion or removal of children) or one of its children is dirty
-    /** @internal */
-    this._isDirty = false;
-    // A monotonically increasing counter to detect structural changes
-    /** @internal */
-    this._changeCounter = 0;
     // How to display "limits" (i.e. superscript/subscript) for example
     // with `\sum`:
     // - 'over-under': directly above and below the symbol
@@ -6071,22 +9404,25 @@ var Atom = class {
     // `\displaylimits`.
     // Necessary so the proper LaTeX can be output.
     this.explicitSubsupPlacement = false;
-    var _a3, _b3, _c2, _d2, _e, _f, _g, _h, _i, _j;
-    this.type = options == null ? void 0 : options.type;
-    if (typeof (options == null ? void 0 : options.value) === "string")
+    var _a3, _b3, _c2, _d2, _e, _f, _g, _h, _i;
+    this.type = options.type;
+    if (typeof options.value === "string")
       this.value = options.value;
-    this.command = (_b3 = (_a3 = options == null ? void 0 : options.command) != null ? _a3 : this.value) != null ? _b3 : "";
-    this.mode = (_c2 = options == null ? void 0 : options.mode) != null ? _c2 : "math";
-    this.isFunction = (_d2 = options == null ? void 0 : options.isFunction) != null ? _d2 : false;
-    this.subsupPlacement = options == null ? void 0 : options.limits;
-    this.style = (_e = __spreadValues({}, options == null ? void 0 : options.style)) != null ? _e : {};
-    this.displayContainsHighlight = (_f = options == null ? void 0 : options.displayContainsHighlight) != null ? _f : false;
-    this.captureSelection = (_g = options == null ? void 0 : options.captureSelection) != null ? _g : false;
-    this.skipBoundary = (_h = options == null ? void 0 : options.skipBoundary) != null ? _h : false;
-    this.verbatimLatex = (_i = options == null ? void 0 : options.verbatimLatex) != null ? _i : void 0;
-    this.args = (_j = options == null ? void 0 : options.args) != null ? _j : void 0;
-    if (options == null ? void 0 : options.body)
+    this.command = (_b3 = (_a3 = options.command) != null ? _a3 : this.value) != null ? _b3 : "";
+    this.mode = (_c2 = options.mode) != null ? _c2 : "math";
+    this.isFunction = (_d2 = options.isFunction) != null ? _d2 : false;
+    this.subsupPlacement = options.limits;
+    this.style = (_e = __spreadValues({}, options.style)) != null ? _e : {};
+    this.displayContainsHighlight = (_f = options.displayContainsHighlight) != null ? _f : false;
+    this.captureSelection = (_g = options.captureSelection) != null ? _g : false;
+    this.skipBoundary = (_h = options.skipBoundary) != null ? _h : false;
+    this.verbatimLatex = (_i = options.verbatimLatex) != null ? _i : void 0;
+    if (options.args)
+      this.args = options.args;
+    if (options.body)
       this.body = options.body;
+    if (this.type === "root")
+      this._changeCounter = 0;
   }
   /**
    * Return a list of boxes equivalent to atoms.
@@ -6095,47 +9431,33 @@ var Atom = class {
    * a box corresponds to something to draw on screen (a character, a line,
    * etc...).
    *
-   * @param parentContext Font family, variant, size, color, and other info useful
+   * @param context Font family, variant, size, color, and other info useful
    * to render an expression
    */
-  static createBox(parentContext, atoms, options) {
-    var _a3, _b3, _c2, _d2;
+  static createBox(context, atoms, options) {
+    var _a3;
     if (!atoms)
       return null;
-    const classes = ((_a3 = options == null ? void 0 : options.classes) != null ? _a3 : "").trim();
     const runs = getStyleRuns(atoms);
-    if (runs.length === 1) {
-      const run = runs[0];
-      if (run[0].style) {
-        return renderStyleRun(parentContext, run, __spreadProps(__spreadValues({}, options), {
-          style: {
-            color: run[0].style.color,
-            backgroundColor: run[0].style.backgroundColor,
-            fontSize: run[0].style.fontSize
-          }
-        }));
-      }
-      return renderStyleRun(parentContext, run, options);
-    }
     const boxes = [];
     for (const run of runs) {
-      const context = new Context(
-        { parent: parentContext },
-        {
-          color: (_b3 = run[0].style) == null ? void 0 : _b3.color,
-          backgroundColor: (_c2 = run[0].style) == null ? void 0 : _c2.backgroundColor,
-          fontSize: (_d2 = run[0].style) == null ? void 0 : _d2.fontSize
+      const style = run[0].style;
+      const box = renderStyleRun(context, run, {
+        style: {
+          color: style.color,
+          backgroundColor: style.backgroundColor,
+          fontSize: style.fontSize
         }
-      );
-      const box = renderStyleRun(context, run);
+      });
       if (box)
         boxes.push(box);
     }
     if (boxes.length === 0)
       return null;
+    const classes = ((_a3 = options == null ? void 0 : options.classes) != null ? _a3 : "").trim();
     if (boxes.length === 1 && !classes && !(options == null ? void 0 : options.type))
-      return boxes[0].wrap(parentContext);
-    return new Box(boxes, { classes, type: options == null ? void 0 : options.type }).wrap(parentContext);
+      return boxes[0].wrap(context);
+    return new Box(boxes, { classes, type: options == null ? void 0 : options.type }).wrap(context);
   }
   /**
    * Given an atom or an array of atoms, return a LaTeX string representation
@@ -6168,8 +9490,13 @@ var Atom = class {
   }
   static fromJson(json) {
     if (typeof json === "string")
-      return new Atom({ type: "mord", value: json });
+      return new Atom({ type: "mord", value: json, mode: "math" });
     return new Atom(json);
+  }
+  get latexMode() {
+    if (this.mode === "math")
+      return "math";
+    return "text";
   }
   toJson() {
     const result = {};
@@ -6214,34 +9541,38 @@ var Atom = class {
     }
     return result;
   }
+  // Used to detect changes and send appropriate notifications
   get changeCounter() {
+    if (this.parent)
+      return this.parent.changeCounter;
     return this._changeCounter;
   }
-  get isDirty() {
-    return this._isDirty;
-  }
   set isDirty(dirty) {
-    this._isDirty = dirty;
     if (dirty) {
-      this._changeCounter++;
-      this.verbatimLatex = void 0;
+      if (this.type === "root")
+        this._changeCounter++;
+      if ("verbatimLatex" in this)
+        this.verbatimLatex = void 0;
       this._children = void 0;
       let { parent } = this;
       while (parent) {
-        parent._isDirty = true;
-        parent._changeCounter++;
-        parent.verbatimLatex = void 0;
+        if (parent.type === "root")
+          parent._changeCounter++;
+        if ("verbatimLatex" in parent)
+          parent.verbatimLatex = void 0;
         parent._children = void 0;
         parent = parent.parent;
       }
     }
   }
   /**
-   * Serialize the atom  to LaTeX
+   * Serialize the atom  to LaTeX.
+   * Used internally by Mode: does not serialize styling. To serialize
+   * one or more atoms, use `Atom.serialize()`
    */
-  serialize(options) {
+  _serialize(options) {
     var _a3;
-    if (!options.expandMacro && typeof this.verbatimLatex === "string")
+    if (!(options.expandMacro || options.skipStyles) && typeof this.verbatimLatex === "string")
       return this.verbatimLatex;
     const def = getDefinition(this.command, this.mode);
     if (def == null ? void 0 : def.serialize)
@@ -6260,19 +9591,13 @@ var Atom = class {
     }
     if (!this.value || this.value === "\u200B")
       return "";
-    let c = this.command;
-    if (this.mode === "text") {
-      c = (_a3 = {
-        "$": "\\$",
-        "{": "\\textbraceleft",
-        "}": "\\textbraceright",
-        "\\": "\\textbackslash"
-      }[c]) != null ? _a3 : c;
-    }
-    return c != null ? c : unicodeCharToLatex(this.mode, this.value);
+    return (_a3 = this.command) != null ? _a3 : unicodeCharToLatex(this.mode, this.value);
   }
   bodyToLatex(options) {
-    return Mode.serialize(this.body, options);
+    var _a3;
+    return Mode.serialize(this.body, __spreadProps(__spreadValues({}, options), {
+      defaultMode: (_a3 = options.defaultMode) != null ? _a3 : this.latexMode
+    }));
   }
   aboveToLatex(options) {
     return Mode.serialize(this.above, options);
@@ -6282,6 +9607,7 @@ var Atom = class {
   }
   supsubToLatex(options) {
     let result = "";
+    options = __spreadProps(__spreadValues({}, options), { defaultMode: "math" });
     if (this.branch("subscript") !== void 0) {
       const sub = Mode.serialize(this.subscript, options);
       if (sub.length === 0)
@@ -6769,7 +10095,6 @@ var Atom = class {
         shift: -supShift,
         children: [{ box: supBox, marginRight: scriptspace }]
       });
-      supsub.wrap(parentContext);
     }
     return new Box(
       [
@@ -6834,12 +10159,7 @@ var Atom = class {
       }),
       letterShapeStyle: context.letterShapeStyle,
       classes
-    }) : (_d2 = Atom.createBox(context, value, {
-      type,
-      mode: this.mode,
-      style: this.style,
-      classes
-    })) != null ? _d2 : new Box(null);
+    }) : (_d2 = Atom.createBox(context, value, { type, classes })) != null ? _d2 : new Box(null);
     if (context.isTight)
       result.isTight = true;
     if (this.mode !== "math" || this.style.variant === "main")
@@ -6896,13 +10216,10 @@ function getStyleRuns(atoms) {
   return runs;
 }
 function renderStyleRun(parentContext, atoms, options) {
-  var _a3, _b3, _c2, _d2;
-  function isText(atom) {
-    return atom.mode === "text";
-  }
+  var _a3, _b3, _c2, _d2, _e;
   if (!atoms || atoms.length === 0)
     return null;
-  const context = new Context({ parent: parentContext }, options == null ? void 0 : options.style);
+  const context = new Context({ parent: parentContext }, options.style);
   const displaySelection = !((_a3 = context.atomIdsSettings) == null ? void 0 : _a3.groupNumbers);
   let boxes = [];
   if (atoms.length === 1) {
@@ -6942,906 +10259,16 @@ function renderStyleRun(parentContext, atoms, options) {
   }
   if (boxes.length === 0)
     return null;
-  let result;
-  if (options || context.isTight || boxes.length > 1) {
-    result = new Box(boxes, __spreadProps(__spreadValues({
-      isTight: context.isTight
-    }, options != null ? options : {}), {
-      type: "lift"
-    }));
-    result.isSelected = boxes.every((x) => x.isSelected);
-  } else
-    result = boxes[0];
-  return result.wrap(context).wrap(parentContext);
+  const result = new Box(boxes, __spreadProps(__spreadValues({
+    isTight: context.isTight
+  }, options), {
+    type: (_e = options.type) != null ? _e : "lift"
+  }));
+  result.isSelected = boxes.every((x) => x.isSelected);
+  return result.wrap(context);
 }
-
-// src/core-definitions/unicode.ts
-var MATH_LETTER_EXCEPTIONS = {
-  119893: 8462,
-  119965: 8492,
-  119968: 8496,
-  119969: 8497,
-  119971: 8459,
-  119972: 8464,
-  119975: 8466,
-  119976: 8499,
-  119981: 8475,
-  119994: 8495,
-  119996: 8458,
-  120004: 8500,
-  120070: 8493,
-  120075: 8460,
-  120076: 8465,
-  120085: 8476,
-  120093: 8488,
-  120122: 8450,
-  120127: 8461,
-  120133: 8469,
-  120135: 8473,
-  120136: 8474,
-  120137: 8477,
-  120145: 8484
-};
-var MATH_UNICODE_BLOCKS = [
-  { start: 119808, len: 26, offset: 65, style: "bold" },
-  { start: 119834, len: 26, offset: 97, style: "bold" },
-  { start: 119860, len: 26, offset: 65, style: "italic" },
-  { start: 119886, len: 26, offset: 97, style: "italic" },
-  { start: 119912, len: 26, offset: 65, style: "bolditalic" },
-  { start: 119938, len: 26, offset: 97, style: "bolditalic" },
-  { start: 119964, len: 26, offset: 65, variant: "script" },
-  { start: 119990, len: 26, offset: 97, variant: "script" },
-  { start: 120016, len: 26, offset: 65, variant: "script", style: "bold" },
-  { start: 120042, len: 26, offset: 97, variant: "script", style: "bold" },
-  { start: 120068, len: 26, offset: 65, variant: "fraktur" },
-  { start: 120094, len: 26, offset: 97, variant: "fraktur" },
-  { start: 120172, len: 26, offset: 65, variant: "fraktur", style: "bold" },
-  { start: 120198, len: 26, offset: 97, variant: "fraktur", style: "bold" },
-  { start: 120120, len: 26, offset: 65, variant: "double-struck" },
-  { start: 120146, len: 26, offset: 97, variant: "double-struck" },
-  { start: 120224, len: 26, offset: 65, variant: "sans-serif" },
-  { start: 120250, len: 26, offset: 97, variant: "sans-serif" },
-  {
-    start: 120276,
-    len: 26,
-    offset: 65,
-    variant: "sans-serif",
-    style: "bold"
-  },
-  {
-    start: 120302,
-    len: 26,
-    offset: 97,
-    variant: "sans-serif",
-    style: "bold"
-  },
-  {
-    start: 120328,
-    len: 26,
-    offset: 65,
-    variant: "sans-serif",
-    style: "italic"
-  },
-  {
-    start: 120354,
-    len: 26,
-    offset: 97,
-    variant: "sans-serif",
-    style: "italic"
-  },
-  {
-    start: 120380,
-    len: 26,
-    offset: 65,
-    variant: "sans-serif",
-    style: "bolditalic"
-  },
-  {
-    start: 120406,
-    len: 26,
-    offset: 97,
-    variant: "sans-serif",
-    style: "bolditalic"
-  },
-  { start: 120432, len: 26, offset: 65, variant: "monospace" },
-  { start: 120458, len: 26, offset: 97, variant: "monospace" },
-  { start: 120488, len: 25, offset: 913, style: "bold" },
-  { start: 120514, len: 25, offset: 945, style: "bold" },
-  { start: 120546, len: 25, offset: 913, style: "italic" },
-  { start: 120572, len: 25, offset: 945, style: "italic" },
-  { start: 120604, len: 25, offset: 913, style: "bolditalic" },
-  { start: 120630, len: 25, offset: 945, style: "bolditalic" },
-  {
-    start: 120662,
-    len: 25,
-    offset: 913,
-    variant: "sans-serif",
-    style: "bold"
-  },
-  {
-    start: 120688,
-    len: 25,
-    offset: 945,
-    variant: "sans-serif",
-    style: "bold"
-  },
-  {
-    start: 120720,
-    len: 25,
-    offset: 913,
-    variant: "sans-serif",
-    style: "bolditalic"
-  },
-  {
-    start: 120746,
-    len: 25,
-    offset: 945,
-    variant: "sans-serif",
-    style: "bolditalic"
-  },
-  { start: 120782, len: 10, offset: 48, variant: "main", style: "bold" },
-  { start: 120792, len: 10, offset: 48, variant: "double-struck" },
-  { start: 120803, len: 10, offset: 48, variant: "sans-serif" },
-  {
-    start: 120812,
-    len: 10,
-    offset: 48,
-    variant: "sans-serif",
-    style: "bold"
-  },
-  { start: 120822, len: 10, offset: 48, variant: "monospace" }
-];
-function mathVariantToUnicode(char, variant, style) {
-  if (!/[A-Za-z\d]/.test(char))
-    return char;
-  if (!variant && !style)
-    return char;
-  const codepoint = char.codePointAt(0);
-  if (codepoint === void 0)
-    return char;
-  for (const MATH_UNICODE_BLOCK of MATH_UNICODE_BLOCKS) {
-    if (!variant || MATH_UNICODE_BLOCK.variant === variant) {
-      if (!style || MATH_UNICODE_BLOCK.style === style) {
-        if (codepoint >= MATH_UNICODE_BLOCK.offset && codepoint < MATH_UNICODE_BLOCK.offset + MATH_UNICODE_BLOCK.len) {
-          const result = MATH_UNICODE_BLOCK.start + codepoint - MATH_UNICODE_BLOCK.offset;
-          return String.fromCodePoint(MATH_LETTER_EXCEPTIONS[result] || result);
-        }
-      }
-    }
-  }
-  return char;
-}
-function unicodeToMathVariant(codepoint) {
-  var _a3;
-  if ((codepoint < 119808 || codepoint > 120831) && (codepoint < 8448 || codepoint > 8527))
-    return { char: String.fromCodePoint(codepoint) };
-  for (const c in MATH_LETTER_EXCEPTIONS) {
-    if (MATH_LETTER_EXCEPTIONS[c] === codepoint) {
-      codepoint = (_a3 = c.codePointAt(0)) != null ? _a3 : 0;
-      break;
-    }
-  }
-  for (const MATH_UNICODE_BLOCK of MATH_UNICODE_BLOCKS) {
-    if (codepoint >= MATH_UNICODE_BLOCK.start && codepoint < MATH_UNICODE_BLOCK.start + MATH_UNICODE_BLOCK.len) {
-      return {
-        char: String.fromCodePoint(
-          codepoint - MATH_UNICODE_BLOCK.start + MATH_UNICODE_BLOCK.offset
-        ),
-        variant: MATH_UNICODE_BLOCK.variant,
-        style: MATH_UNICODE_BLOCK.style
-      };
-    }
-  }
-  return { char: String.fromCodePoint(codepoint) };
-}
-
-// src/core-definitions/definitions-utils.ts
-function argAtoms(arg) {
-  if (!arg)
-    return [];
-  if (Array.isArray(arg))
-    return arg;
-  if (typeof arg === "object" && "group" in arg)
-    return arg.group;
-  return [];
-}
-var MATH_SYMBOLS = {};
-var REVERSE_MATH_SYMBOLS = {
-  60: "\\lt",
-  62: "\\gt",
-  111: "o",
-  // Also \omicron
-  38: "\\&",
-  // Also \And
-  123: "\\lbrace",
-  125: "\\rbrace",
-  91: "\\lbrack",
-  93: "\\rbrack",
-  58: "\\colon",
-  // Also :
-  160: "~",
-  // Also \space
-  172: "\\neg",
-  // Also \lnot
-  183: "\\cdot",
-  188: "\\frac{1}{4}",
-  189: "\\frac{1}{2}",
-  190: "\\frac{3}{4}",
-  8304: "^{0}",
-  8305: "^{i}",
-  185: "^{1}",
-  178: "^{2}",
-  179: "^{3}",
-  8224: "\\dagger",
-  // Also \dag
-  8225: "\\ddagger",
-  // Also \ddag
-  8230: "\\ldots",
-  // Also \mathellipsis
-  8308: "^{4}",
-  8309: "^{5}",
-  8310: "^{6}",
-  8311: "^{7}",
-  8312: "^{8}",
-  8313: "^{9}",
-  8314: "^{+}",
-  8315: "^{-}",
-  8316: "^{=}",
-  8319: "^{n}",
-  8320: "_{0}",
-  8321: "_{1}",
-  8322: "_{2}",
-  8323: "_{3}",
-  8324: "_{4}",
-  8325: "_{5}",
-  8326: "_{6}",
-  8327: "_{7}",
-  8328: "_{8}",
-  8329: "_{9}",
-  8330: "_{+}",
-  8331: "_{-}",
-  8332: "_{=}",
-  8336: "_{a}",
-  8337: "_{e}",
-  8338: "_{o}",
-  8339: "_{x}",
-  8242: "\\prime",
-  39: "\\prime",
-  8592: "\\gets",
-  // Also \leftarrow
-  8594: "\\to",
-  // Also \rightarrow
-  9651: "\\triangle",
-  // Also \bigtriangleup, \vartriangle
-  9661: "\\triangledown",
-  8715: "\\owns",
-  // Also \ni
-  8727: "\\ast",
-  // Also *
-  8739: "\\vert",
-  // Also |, \mvert, \lvert, \rvert
-  8741: "\\Vert",
-  // Also \parallel \shortparallel
-  8743: "\\land",
-  // Also \wedge
-  8744: "\\lor",
-  // Also \vee
-  8901: "\\cdot",
-  // Also \centerdot, \cdotp
-  8904: "\\bowtie",
-  // Also \Joint
-  8800: "\\ne",
-  // Also \neq
-  8804: "\\le",
-  // Also \leq
-  8805: "\\ge",
-  // Also \geq
-  8869: "\\bot",
-  // Also \perp
-  10231: "\\biconditional",
-  // Also \longleftrightarrow
-  10232: "\\impliedby",
-  // Also \Longleftarrow
-  10233: "\\implies",
-  // Also \Longrightarrow
-  10234: "\\iff",
-  8450: "\\mathbb{C}",
-  8469: "\\mathbb{N}",
-  8473: "\\mathbb{P}",
-  8474: "\\mathbb{Q}",
-  8477: "\\mathbb{R}",
-  8484: "\\mathbb{Z}",
-  8461: "\\mathbb{H}",
-  8476: "\\Re",
-  8465: "\\Im",
-  42: "\\ast",
-  11036: "\\square",
-  9633: "\\square",
-  8720: "\\coprod",
-  8716: "\\not\\ni",
-  9671: "\\diamond",
-  8846: "\\uplus",
-  8851: "\\sqcap",
-  8852: "\\sqcup",
-  8768: "\\wr",
-  8750: "\\oint",
-  8226: "\\textbullet",
-  8722: "-",
-  978: "\\Upsilon"
-};
-var LATEX_COMMANDS = {};
-var ENVIRONMENTS = {};
-var TEXVC_MACROS = {
-  //////////////////////////////////////////////////////////////////////
-  // texvc.sty
-  // The texvc package contains macros available in mediawiki pages.
-  // We omit the functions deprecated at
-  // https://en.wikipedia.org/wiki/Help:Displaying_a_formula#Deprecated_syntax
-  // We also omit texvc's \O, which conflicts with \text{\O}
-  darr: "\\downarrow",
-  dArr: "\\Downarrow",
-  Darr: "\\Downarrow",
-  lang: "\\langle",
-  rang: "\\rangle",
-  uarr: "\\uparrow",
-  uArr: "\\Uparrow",
-  Uarr: "\\Uparrow",
-  N: "\\mathbb{N}",
-  R: "\\mathbb{R}",
-  Z: "\\mathbb{Z}",
-  alef: "\\aleph",
-  alefsym: "\\aleph",
-  Alpha: "\\mathrm{A}",
-  Beta: "\\mathrm{B}",
-  bull: "\\bullet",
-  Chi: "\\mathrm{X}",
-  clubs: "\\clubsuit",
-  cnums: "\\mathbb{C}",
-  Complex: "\\mathbb{C}",
-  Dagger: "\\ddagger",
-  diamonds: "\\diamondsuit",
-  empty: "\\emptyset",
-  Epsilon: "\\mathrm{E}",
-  Eta: "\\mathrm{H}",
-  exist: "\\exists",
-  harr: "\\leftrightarrow",
-  hArr: "\\Leftrightarrow",
-  Harr: "\\Leftrightarrow",
-  hearts: "\\heartsuit",
-  image: "\\Im",
-  infin: "\\infty",
-  Iota: "\\mathrm{I}",
-  isin: "\\in",
-  Kappa: "\\mathrm{K}",
-  larr: "\\leftarrow",
-  lArr: "\\Leftarrow",
-  Larr: "\\Leftarrow",
-  lrarr: "\\leftrightarrow",
-  lrArr: "\\Leftrightarrow",
-  Lrarr: "\\Leftrightarrow",
-  Mu: "\\mathrm{M}",
-  natnums: "\\mathbb{N}",
-  Nu: "\\mathrm{N}",
-  Omicron: "\\mathrm{O}",
-  plusmn: "\\pm",
-  rarr: "\\rightarrow",
-  rArr: "\\Rightarrow",
-  Rarr: "\\Rightarrow",
-  real: "\\Re",
-  reals: "\\mathbb{R}",
-  Reals: "\\mathbb{R}",
-  Rho: "\\mathrm{P}",
-  sdot: "\\cdot",
-  sect: "\\S",
-  spades: "\\spadesuit",
-  sub: "\\subset",
-  sube: "\\subseteq",
-  supe: "\\supseteq",
-  Tau: "\\mathrm{T}",
-  thetasym: "\\vartheta",
-  // TODO: varcoppa: { def: "\\\mbox{\\coppa}", expand: false },
-  weierp: "\\wp",
-  Zeta: "\\mathrm{Z}"
-};
-var AMSMATH_MACROS = {
-  // amsmath.sty
-  // http://mirrors.concertpass.com/tex-archive/macros/latex/required/amsmath/amsmath.pdf
-  // Italic Greek capital letters.  AMS defines these with \DeclareMathSymbol,
-  // but they are equivalent to \mathit{\Letter}.
-  varGamma: "\\mathit{\\Gamma}",
-  varDelta: "\\mathit{\\Delta}",
-  varTheta: "\\mathit{\\Theta}",
-  varLambda: "\\mathit{\\Lambda}",
-  varXi: "\\mathit{\\Xi}",
-  varPi: "\\mathit{\\Pi}",
-  varSigma: "\\mathit{\\Sigma}",
-  varUpsilon: "\\mathit{\\Upsilon}",
-  varPhi: "\\mathit{\\Phi}",
-  varPsi: "\\mathit{\\Psi}",
-  varOmega: "\\mathit{\\Omega}",
-  // From http://tug.ctan.org/macros/latex/required/amsmath/amsmath.dtx
-  // > \newcommand{\pod}[1]{
-  // >    \allowbreak
-  // >    \if@display
-  // >      \mkern18mu
-  // >    \else
-  // >      \mkern8mu
-  // >    \fi
-  // >    (#1)
-  // > }
-  // 18mu = \quad
-  // > \renewcommand{\pmod}[1]{
-  // >  \pod{{\operator@font mod}\mkern6mu#1}
-  // > }
-  pmod: {
-    def: "\\quad(\\operatorname{mod}\\ #1)",
-    args: 1,
-    expand: false
-  },
-  // > \newcommand{\mod}[1]{
-  // >    \allowbreak
-  // >    \if@display
-  // >      \mkern18mu
-  // >    \else
-  // >      \mkern12mu
-  // >    \fi
-  //>     {\operator@font mod}\,\,#1}
-  mod: {
-    def: "\\quad\\operatorname{mod}\\,\\,#1",
-    args: 1,
-    expand: false
-  },
-  // > \renewcommand{\bmod}{
-  // >  \nonscript\mskip-\medmuskip\mkern5mu
-  // >  \mathbin{\operator@font mod}
-  // >  \penalty900 \mkern5mu
-  // >  \nonscript\mskip-\medmuskip
-  // > }
-  // 5mu = \;
-  bmod: {
-    def: "\\;\\mathbin{\\operatorname{mod }}",
-    expand: false
-  }
-};
-var BRAKET_MACROS = {
-  bra: "\\mathinner{\\langle{#1}|}",
-  ket: "\\mathinner{|{#1}\\rangle}",
-  braket: "\\mathinner{\\langle{#1}\\rangle}",
-  set: "\\mathinner{\\lbrace #1 \\rbrace}",
-  Bra: "\\left\\langle #1\\right|",
-  Ket: "\\left|#1\\right\\rangle",
-  Braket: "\\left\\langle{#1}\\right\\rangle",
-  Set: "\\left\\lbrace #1 \\right\\rbrace"
-};
-var DEFAULT_MACROS = {
-  "iff": "\\;\u27FA\\;",
-  // >2,000 Note: additional spaces around the arrows
-  "nicefrac": "^{#1}\\!\\!/\\!_{#2}",
-  // Proof Wiki
-  "rd": "\\mathrm{d}",
-  "rD": "\\mathrm{D}",
-  // From Wolfram Alpha
-  "doubleStruckCapitalN": "\\mathbb{N}",
-  "doubleStruckCapitalR": "\\mathbb{R}",
-  "doubleStruckCapitalQ": "\\mathbb{Q}",
-  "doubleStruckCapitalZ": "\\mathbb{Z}",
-  "doubleStruckCapitalP": "\\mathbb{P}",
-  "scriptCapitalE": "\\mathscr{E}",
-  "scriptCapitalH": "\\mathscr{H}",
-  "scriptCapitalL": "\\mathscr{L}",
-  "gothicCapitalC": "\\mathfrak{C}",
-  "gothicCapitalH": "\\mathfrak{H}",
-  "gothicCapitalI": "\\mathfrak{I}",
-  "gothicCapitalR": "\\mathfrak{R}",
-  "imaginaryI": "\\mathrm{i}",
-  // NOTE: set in main (upright) as per ISO 80000-2:2009.
-  "imaginaryJ": "\\mathrm{j}",
-  // NOTE: set in main (upright) as per ISO 80000-2:2009.
-  "exponentialE": "\\mathrm{e}",
-  // NOTE: set in main (upright) as per ISO 80000-2:2009.
-  "differentialD": "\\mathrm{d}",
-  // NOTE: set in main (upright) as per ISO 80000-2:2009.
-  "capitalDifferentialD": "\\mathrm{D}",
-  // NOTE: set in main (upright) as per ISO 80000-2:2009.
-  "mathstrut": { def: "\\vphantom{(}", expand: false },
-  // mhchem
-  "tripledash": "\\vphantom{-}\\raisebox{2mu}{$\\mkern2mu\\tiny\\text{-}\\mkern1mu\\text{-}\\mkern1mu\\text{-}\\mkern2mu$}",
-  "braket.sty": { package: BRAKET_MACROS },
-  "amsmath.sty": {
-    package: AMSMATH_MACROS,
-    expand: false
-  },
-  "texvc.sty": {
-    package: TEXVC_MACROS,
-    expand: false
-  }
-};
-var TEXT_SYMBOLS = {
-  " ": 32,
-  "\\#": 35,
-  "\\&": 38,
-  "\\$": 36,
-  "\\%": 37,
-  "\\_": 95,
-  "\\euro": 8364,
-  "\\maltese": 10016,
-  "\\{": 123,
-  "\\}": 125,
-  "\\nobreakspace": 160,
-  "\\ldots": 8230,
-  "\\textellipsis": 8230,
-  "\\backslash": 92,
-  "`": 8216,
-  "'": 8217,
-  "``": 8220,
-  "''": 8221,
-  "\\degree": 176,
-  "\\textasciicircum": 94,
-  "\\textasciitilde": 126,
-  "\\textasteriskcentered": 42,
-  "\\textbackslash": 92,
-  "\\textbraceleft": 123,
-  "\\textbraceright": 125,
-  "\\textbullet": 8226,
-  "\\textdollar": 36,
-  "\\textsterling": 163,
-  "\\textdagger": 8224,
-  "\\textdaggerdbl": 8225,
-  "\u2013": 8211,
-  // EN DASH
-  "\u2014": 8212,
-  // EM DASH
-  "\u2018": 8216,
-  // LEFT SINGLE QUOTATION MARK
-  "\u2019": 8217,
-  // RIGHT SINGLE QUOTATION MARK
-  "\u201C": 8220,
-  // LEFT DOUBLE QUOTATION MARK
-  "\u201D": 8221,
-  // RIGHT DOUBLE QUOTATION MARK
-  '"': 8221,
-  // DOUBLE PRIME
-  "\\ss": 223,
-  // LATIN SMALL LETTER SHARP S
-  "\\ae": 230,
-  // LATIN SMALL LETTER AE
-  "\\oe": 339,
-  // LATIN SMALL LIGATURE OE
-  "\\AE": 198,
-  // LATIN CAPITAL LETTER AE
-  "\\OE": 338,
-  // LATIN CAPITAL LIGATURE OE
-  "\\O": 216,
-  // LATIN CAPITAL LETTER O WITH STROKE
-  "\\i": 305,
-  // LATIN SMALL LETTER DOTLESS I
-  "\\j": 567,
-  // LATIN SMALL LETTER DOTLESS J
-  "\\aa": 229,
-  // LATIN SMALL LETTER A WITH RING ABOVE
-  "\\AA": 197
-  // LATIN CAPITAL LETTER A WITH RING ABOVE
-};
-var COMMAND_MODE_CHARACTERS = /[\w!@*()-=+{}[\]\\';:?/.,~<>`|$%#&^" ]/;
-var LETTER;
-var LETTER_AND_DIGITS;
-if (supportRegexPropertyEscape()) {
-  LETTER = new RegExp("\\p{Letter}", "u");
-  LETTER_AND_DIGITS = new RegExp("[0-9\\p{Letter}]", "u");
-} else {
-  LETTER = /[a-zA-ZаАбБвВгГдДеЕёЁжЖзЗиИйЙкКлЛмМнНоОпПрРсСтТуУфФхХцЦчЧшШщЩъЪыЫьЬэЭюЮяĄąĆćĘęŁłŃńÓóŚśŹźŻżàâäôéèëêïîçùûüÿæœÀÂÄÔÉÈËÊÏÎŸÇÙÛÜÆŒößÖẞìíòúÌÍÒÚáñÁÑ]/;
-  LETTER_AND_DIGITS = /[\da-zA-ZаАбБвВгГдДеЕёЁжЖзЗиИйЙкКлЛмМнНоОпПрРсСтТуУфФхХцЦчЧшШщЩъЪыЫьЬэЭюЮяĄąĆćĘęŁłŃńÓóŚśŹźŻżàâäôéèëêïîçùûüÿæœÀÂÄÔÉÈËÊÏÎŸÇÙÛÜÆŒößÖẞìíòúÌÍÒÚáñÁÑ]/;
-}
-function newSymbol(symbol, value, type = "mord", variant) {
-  if (value === void 0)
-    return;
-  MATH_SYMBOLS[symbol] = {
-    definitionType: "symbol",
-    type,
-    variant,
-    codepoint: value
-  };
-  if (!REVERSE_MATH_SYMBOLS[value])
-    REVERSE_MATH_SYMBOLS[value] = symbol;
-  if (!TEXT_SYMBOLS[symbol])
-    TEXT_SYMBOLS[symbol] = value;
-}
-function newSymbols(value, inType, inVariant) {
-  if (typeof value === "string") {
-    for (let i = 0; i < value.length; i++) {
-      const ch = value.charAt(i);
-      newSymbol(ch, ch.codePointAt(0));
-    }
-    return;
-  }
-  for (const [symbol, val, type, variant] of value)
-    newSymbol(symbol, val, type != null ? type : inType, variant != null ? variant : inVariant);
-}
-function newSymbolRange(from, to) {
-  for (let i = from; i <= to; i++)
-    newSymbol(String.fromCodePoint(i), i);
-}
-function getEnvironmentDefinition(name) {
-  var _a3;
-  return (_a3 = ENVIRONMENTS[name]) != null ? _a3 : null;
-}
-function suggest(mf, s) {
-  var _a3, _b3;
-  if (s.length === 0 || s === "\\" || !s.startsWith("\\"))
-    return [];
-  const result = [];
-  for (const p in LATEX_COMMANDS) {
-    if (p.startsWith(s) && !LATEX_COMMANDS[p].infix)
-      result.push({ match: p, frequency: (_a3 = LATEX_COMMANDS[p].frequency) != null ? _a3 : 0 });
-  }
-  for (const p in MATH_SYMBOLS) {
-    if (p.startsWith(s))
-      result.push({ match: p, frequency: (_b3 = MATH_SYMBOLS[p].frequency) != null ? _b3 : 0 });
-  }
-  const command = s.substring(1);
-  for (const p of Object.keys(mf.options.macros))
-    if (p.startsWith(command))
-      result.push({ match: "\\" + p, frequency: 0 });
-  result.sort((a, b) => {
-    var _a4, _b4;
-    if (a.frequency === b.frequency) {
-      if (a.match.length === b.match.length)
-        return a.match < b.match ? -1 : 1;
-      return a.match.length - b.match.length;
-    }
-    return ((_a4 = b.frequency) != null ? _a4 : 0) - ((_b4 = a.frequency) != null ? _b4 : 0);
-  });
-  return result.map((x) => x.match);
-}
-function parseParameterTemplateArgument(argTemplate) {
-  let type = "auto";
-  const r = argTemplate.match(/:([^=]+)/);
-  if (r)
-    type = r[1].trim();
-  return type;
-}
-function parseParameterTemplate(parameterTemplate) {
-  if (!parameterTemplate)
-    return [];
-  const result = [];
-  let parameters = parameterTemplate.split("]");
-  if (parameters[0].startsWith("[")) {
-    result.push({
-      isOptional: true,
-      type: parseParameterTemplateArgument(parameters[0].slice(1))
-    });
-    for (let i = 1; i <= parameters.length; i++)
-      result.push(...parseParameterTemplate(parameters[i]));
-  } else {
-    parameters = parameterTemplate.split("}");
-    if (parameters[0].startsWith("{")) {
-      result.push({
-        isOptional: false,
-        type: parseParameterTemplateArgument(parameters[0].slice(1))
-      });
-      for (let i = 1; i <= parameters.length; i++)
-        result.push(...parseParameterTemplate(parameters[i]));
-    }
-  }
-  return result;
-}
-function parseArgAsString(atoms) {
-  if (!atoms)
-    return "";
-  let result = "";
-  let success = true;
-  for (const atom of atoms) {
-    if (typeof atom.value === "string")
-      result += atom.value;
-    else
-      success = false;
-  }
-  return success ? result : "";
-}
-function defineEnvironment(names, createAtom) {
-  if (typeof names === "string")
-    names = [names];
-  const def = {
-    tabular: false,
-    params: [],
-    createAtom
-  };
-  for (const name of names)
-    ENVIRONMENTS[name] = def;
-}
-function defineTabularEnvironment(names, parameters, createAtom) {
-  if (typeof names === "string")
-    names = [names];
-  const parsedParameters = parseParameterTemplate(parameters);
-  const data = {
-    tabular: true,
-    params: parsedParameters,
-    createAtom
-  };
-  for (const name of names)
-    ENVIRONMENTS[name] = data;
-}
-function defineFunction(names, parameters, options) {
-  var _a3, _b3;
-  if (!options)
-    options = {};
-  const data = {
-    definitionType: "function",
-    // The parameters for this function, an array of
-    // {optional, type}
-    params: parseParameterTemplate(parameters),
-    ifMode: options.ifMode,
-    isFunction: (_a3 = options.isFunction) != null ? _a3 : false,
-    applyMode: options.applyMode,
-    infix: (_b3 = options.infix) != null ? _b3 : false,
-    createAtom: options.createAtom,
-    applyStyle: options.applyStyle,
-    serialize: options.serialize,
-    render: options.render
-  };
-  if (typeof names === "string")
-    LATEX_COMMANDS["\\" + names] = data;
-  else
-    for (const name of names)
-      LATEX_COMMANDS["\\" + name] = data;
-}
-var _DEFAULT_MACROS;
-function getMacros(otherMacros) {
-  if (!_DEFAULT_MACROS)
-    _DEFAULT_MACROS = normalizeMacroDictionary(DEFAULT_MACROS);
-  if (!otherMacros)
-    return _DEFAULT_MACROS;
-  return normalizeMacroDictionary(__spreadValues(__spreadValues({}, _DEFAULT_MACROS), otherMacros));
-}
-function normalizeMacroDefinition(def, options) {
-  var _a3, _b3, _c2, _d2;
-  if (typeof def === "string") {
-    let argCount = 0;
-    const defString = def;
-    if (/(^|[^\\])#1/.test(defString))
-      argCount = 1;
-    if (/(^|[^\\])#2/.test(defString))
-      argCount = 2;
-    if (/(^|[^\\])#3/.test(defString))
-      argCount = 3;
-    if (/(^|[^\\])#4/.test(defString))
-      argCount = 4;
-    if (/(^|[^\\])#5/.test(defString))
-      argCount = 5;
-    if (/(^|[^\\])#6/.test(defString))
-      argCount = 6;
-    if (/(^|[^\\])#7/.test(defString))
-      argCount = 7;
-    if (/(^|[^\\])#8/.test(defString))
-      argCount = 8;
-    if (/(^|[^\\])#9/.test(defString))
-      argCount = 9;
-    return {
-      expand: (_a3 = options == null ? void 0 : options.expand) != null ? _a3 : true,
-      captureSelection: (_b3 = options == null ? void 0 : options.captureSelection) != null ? _b3 : true,
-      args: argCount,
-      def: defString
-    };
-  }
-  return __spreadValues({
-    expand: (_c2 = options == null ? void 0 : options.expand) != null ? _c2 : true,
-    captureSelection: (_d2 = options == null ? void 0 : options.captureSelection) != null ? _d2 : true,
-    args: 0
-  }, def);
-}
-function normalizeMacroDictionary(macros) {
-  if (!macros)
-    return {};
-  const result = {};
-  for (const macro of Object.keys(macros)) {
-    const macroDef = macros[macro];
-    if (macroDef === void 0 || macroDef === null)
-      delete result[macro];
-    else if (typeof macroDef === "object" && "package" in macroDef) {
-      for (const packageMacro of Object.keys(macroDef.package)) {
-        result[packageMacro] = normalizeMacroDefinition(
-          macroDef.package[packageMacro],
-          {
-            expand: macroDef.expand,
-            captureSelection: macroDef.captureSelection
-          }
-        );
-      }
-    } else
-      result[macro] = normalizeMacroDefinition(macroDef);
-  }
-  return result;
-}
-function getDefinition(token, parseMode = "math") {
-  if (!token || token.length === 0)
-    return null;
-  let info = null;
-  if (token.startsWith("\\")) {
-    info = LATEX_COMMANDS[token];
-    if (info) {
-      if (!info.ifMode || info.ifMode === parseMode)
-        return info;
-      return null;
-    }
-    if (parseMode === "math")
-      info = MATH_SYMBOLS[token];
-    else if (TEXT_SYMBOLS[token]) {
-      info = {
-        definitionType: "symbol",
-        type: "mord",
-        codepoint: TEXT_SYMBOLS[token]
-      };
-    }
-  } else if (parseMode === "math") {
-    info = MATH_SYMBOLS[token];
-    if (!info && token.length === 1) {
-      const command = charToLatex("math", token.codePointAt(0));
-      if (command.startsWith("\\"))
-        return __spreadProps(__spreadValues({}, getDefinition(command, "math")), { command });
-      return null;
-    }
-  } else if (TEXT_SYMBOLS[token]) {
-    info = {
-      definitionType: "symbol",
-      type: "mord",
-      codepoint: TEXT_SYMBOLS[token]
-    };
-  } else if (parseMode === "text") {
-    info = {
-      definitionType: "symbol",
-      type: "mord",
-      codepoint: token.codePointAt(0)
-    };
-  }
-  if (info && info.definitionType === "symbol" && info.type === "mord" && (info.codepoint === 102 || info.codepoint === 103 || info.codepoint === 104))
-    info.isFunction = true;
-  return info != null ? info : null;
-}
-function getMacroDefinition(token, macros) {
-  if (!token.startsWith("\\"))
-    return null;
-  const command = token.slice(1);
-  return macros[command];
-}
-function unicodeCharToLatex(parseMode, char) {
-  var _a3;
-  if (parseMode === "text")
-    return (_a3 = charToLatex(parseMode, char.codePointAt(0))) != null ? _a3 : char;
-  let result;
-  result = charToLatex(parseMode, char.codePointAt(0));
-  if (result)
-    return result;
-  const cp = char.codePointAt(0);
-  const v = unicodeToMathVariant(cp);
-  if (!v.style && !v.variant)
-    return "";
-  result = v.char;
-  if (v.variant)
-    result = "\\" + v.variant + "{" + result + "}";
-  if (v.style === "bold")
-    result = "\\mathbf{" + result + "}";
-  else if (v.style === "italic")
-    result = "\\mathit{" + result + "}";
-  else if (v.style === "bolditalic")
-    result = "\\mathbfit{" + result + "}";
-  return "\\mathord{" + result + "}";
-}
-function charToLatex(parseMode, codepoint) {
-  if (codepoint === void 0)
-    return "";
-  if (parseMode === "math" && REVERSE_MATH_SYMBOLS[codepoint])
-    return REVERSE_MATH_SYMBOLS[codepoint];
-  if (parseMode === "text") {
-    let textSymbol = Object.keys(TEXT_SYMBOLS).find(
-      (x) => TEXT_SYMBOLS[x] === codepoint
-    );
-    if (!textSymbol) {
-      const hex = codepoint.toString(16);
-      textSymbol = "^".repeat(hex.length) + hex;
-    }
-    return textSymbol;
-  }
-  return String.fromCodePoint(codepoint);
+function isText(atom) {
+  return atom.mode === "text";
 }
 function argumentsToJson(args) {
   return args.map((arg) => {
@@ -7851,21 +10278,6 @@ function argumentsToJson(args) {
       return { atoms: arg.map((x) => x.toJson()) };
     if (typeof arg === "object" && "group" in arg)
       return { group: arg.group.map((x) => x.toJson()) };
-    return arg;
-  });
-}
-function argumentsFromJson(json) {
-  if (!json)
-    return void 0;
-  if (!Array.isArray(json))
-    return void 0;
-  return json.map((arg) => {
-    if (arg === "<null>")
-      return null;
-    if (typeof arg === "object" && "group" in arg)
-      return { group: arg.group.map((x) => Atom.fromJson(x)) };
-    if ("atoms" in arg)
-      return arg.atoms.map((x) => Atom.fromJson(x));
     return arg;
   });
 }
@@ -7892,7 +10304,7 @@ var TextAtom = class extends Atom {
       result.caret = this.caret;
     return result;
   }
-  serialize(_options) {
+  _serialize(_options) {
     var _a3;
     return (_a3 = this.verbatimLatex) != null ? _a3 : charToLatex("text", this.value.codePointAt(0));
   }
@@ -8677,7 +11089,9 @@ var _ModeEditor = class {
         if (ce) {
           try {
             ce.jsonSerializationOptions = { metadata: ["latex"] };
-            const expr = ce.parse(latex);
+            const expr = ce.parse(
+              model.getValue(exportRange, "latex-unstyled")
+            );
             const mathJson = JSON.stringify(expr.json);
             if (mathJson)
               ev.clipboardData.setData("application/json", mathJson);
@@ -8798,12 +11212,16 @@ var DEFAULT_KEYBINDINGS = [
   { key: "[Undo]", command: "undo" },
   { key: "[Redo]", command: "redo" },
   { key: "[EraseEof]", command: "deleteToGroupEnd" },
-  { key: "ctrl+x", command: "cutToClipboard" },
-  { key: "cmd+x", command: "cutToClipboard" },
-  { key: "ctrl+c", command: "copyToClipboard" },
-  { key: "cmd+c", command: "copyToClipboard" },
-  { key: "ctrl+v", command: "pasteFromClipboard" },
-  { key: "cmd+v", command: "pasteFromClipboard" },
+  // Safari on iOS does not send cut/copy/paste commands when the mathfield
+  // is focused, so intercept the keyboard shortcuts.
+  // This is less desirable because the full clipboard API is not accessible
+  // by this path, and user authorization is required.
+  { key: "ctrl+x", ifPlatform: "ios", command: "cutToClipboard" },
+  { key: "cmd+x", ifPlatform: "ios", command: "cutToClipboard" },
+  { key: "ctrl+c", ifPlatform: "ios", command: "copyToClipboard" },
+  { key: "cmd+c", ifPlatform: "ios", command: "copyToClipboard" },
+  { key: "ctrl+v", ifPlatform: "ios", command: "pasteFromClipboard" },
+  { key: "cmd+v", ifPlatform: "ios", command: "pasteFromClipboard" },
   { key: "ctrl+z", ifPlatform: "!macos", command: "undo" },
   { key: "cmd+z", command: "undo" },
   { key: "ctrl+y", ifPlatform: "!macos", command: "redo" },
@@ -9218,7 +11636,9 @@ function getAtomBounds(mathfield, atom) {
   let result = (_b3 = (_a3 = mathfield.atomBoundsCache) == null ? void 0 : _a3.get(atom.id)) != null ? _b3 : null;
   if (result !== null)
     return result;
-  const node = mathfield.field.querySelector(`[data-atom-id="${atom.id}"]`);
+  const node = mathfield.fieldContent.querySelector(
+    `[data-atom-id="${atom.id}"]`
+  );
   result = node ? getNodeBounds(node) : null;
   if (mathfield.atomBoundsCache) {
     if (result)
@@ -9289,53 +11709,1257 @@ function getLocalDOMRect(el) {
   return new DOMRect(offsetLeft, offsetTop, width, height);
 }
 
+// css/mathfield.less
+var mathfield_default = `@keyframes ML__caret-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+.ML__container {
+  display: inline-flex;
+  flex-flow: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  min-height: 39px;
+  /* Need some room for the virtual keyboard toggle */
+  width: 100%;
+  /* Encourage browsers to consider allocating a hardware accelerated
+   layer for this element. */
+  isolation: isolate;
+  /* Prevent the browser from trying to interpret touch gestures in the field */
+  /* "Disabling double-tap to zoom removes the need for browsers to
+        delay the generation of click events when the user taps the screen." */
+  touch-action: none;
+  --_caret-color: var(--caret-color, hsl(var(--_hue), 40%, 49%));
+  --_selection-color: var(--selection-color, #000);
+  --_selection-background-color: var(--selection-background-color, hsl(var(--_hue), 70%, 85%));
+  --_text-highlight-background-color: var(--highlight-text, hsla(var(--_hue), 40%, 50%, 0.1));
+  --_contains-highlight-background-color: var(--contains-highlight-backround-color, hsl(var(--_hue), 40%, 95%));
+  --_smart-fence-color: var(--smart-fence-color, currentColor);
+  --_smart-fence-opacity: var(--smart-fence-opacity, 0.5);
+  --_latex-color: var(--latex-color, hsl(var(--_hue), 40%, 50%));
+  --_correct-color: var(--correct-color, #10a000);
+  --_incorrect-color: var(--incorrect-color, #a01b00);
+  --_composition-background-color: var(--composition-background-color, #fff1c2);
+  --_composition-text-color: var(--composition-text-color, black);
+  --_composition-underline-color: var(--composition-underline-color, transparent);
+}
+/* This is the actual field content (formula) */
+.ML__content {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  position: relative;
+  overflow: hidden;
+  padding: 2px 0 2px 1px;
+  width: 100%;
+}
+.ML__virtual-keyboard-toggle {
+  box-sizing: border-box;
+  display: flex;
+  align-self: center;
+  align-items: center;
+  flex-shrink: 0;
+  flex-direction: column;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  margin-right: 4px;
+  cursor: pointer;
+  /* Avoid some weird blinking with :hover */
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: background 0.2s cubic-bezier(0.64, 0.09, 0.08, 1);
+  color: hsl(var(--_hue), 40%, 50%);
+  fill: currentColor;
+  background: transparent;
+}
+.ML__virtual-keyboard-toggle:hover {
+  background: hsla(0, 0%, 70%, 0.3);
+  color: #333;
+  fill: currentColor;
+}
+.ML__virtual-keyboard-toggle > span {
+  display: flex;
+  align-self: center;
+  align-items: center;
+}
+/* The invisible element used to capture keyboard events. We're just trying
+ really hard to make sure it doesn't show. */
+.ML__keyboard-sink {
+  display: inline-block;
+  resize: none;
+  outline: none;
+  border: none;
+  /* Need these for Microsoft Edge */
+  position: fixed;
+  clip: rect(0 0 0 0);
+  /* Need this to prevent iOS Safari from auto-zooming */
+  font-size: 1em;
+  font-family: KaTeX_Main;
+}
+.ML__composition {
+  background: var(--_composition-background-color);
+  color: var(--_composition-text-color);
+  text-decoration: underline var(--_composition-underline-color);
+}
+.ML__caret:after {
+  content: '';
+  border: none;
+  border-radius: 2px;
+  border-right: 2px solid var(--_caret-color);
+  margin-right: -2px;
+  position: relative;
+  left: -1px;
+  animation: ML__caret-blink 1.05s step-end forwards infinite;
+}
+.ML__text-caret:after {
+  content: '';
+  border: none;
+  border-radius: 1px;
+  border-right: 1px solid var(--_caret-color);
+  margin-right: -1px;
+  position: relative;
+  left: 0;
+  animation: ML__caret-blink 1.05s step-end forwards infinite;
+}
+.ML__latex-caret:after {
+  content: '_';
+  border: none;
+  margin-right: 0;
+  margin-right: calc(-1ex - 2px);
+  position: relative;
+  color: var(--_caret-color);
+  animation: ML__caret-blink 1.05s step-end forwards infinite;
+}
+.ML__focused .ML__text {
+  background: var(--_text-highlight-background-color);
+}
+/* When using smartFence, the anticipated closing fence is displayed
+with this style */
+.ML__smart-fence__close {
+  opacity: var(--_smart-fence-opacity);
+  color: var(--_smart-fence-color);
+}
+.ML__selected,
+.ML__focused .ML__selected .ML__contains-caret,
+.ML__focused .ML__selected .ML__smart-fence__close,
+.ML__focused .ML__selected .ML__placeholder {
+  color: var(--_selection-color);
+  opacity: 1;
+}
+.ML__selection {
+  box-sizing: border-box;
+  background: var(--_selection-background-color) !important;
+}
+.ML__contains-caret.ML__close,
+.ML__contains-caret.ML__open,
+.ML__contains-caret > .ML__close,
+.ML__contains-caret > .ML__open,
+.ML__contains-caret .ML__sqrt-sign,
+.ML__contains-caret .ML__sqrt-line {
+  color: var(--_caret-color);
+}
+.ML__contains-highlight {
+  background: var(--_contains-highlight-background-color);
+  box-sizing: border-box;
+}
+.ML__latex {
+  font-family: 'Berkeley Mono', 'IBM Plex Mono', 'Source Code Pro', Consolas, 'Roboto Mono', Menlo, 'Bitstream Vera Sans Mono', 'DejaVu Sans Mono', Monaco, Courier, monospace;
+  font-weight: 400;
+  color: var(--_latex-color);
+}
+.ML__suggestion {
+  opacity: 0.5;
+}
+.ML__virtual-keyboard-toggle.is-visible.is-pressed:hover {
+  background: hsl(var(--_hue), 25%, 35%);
+  color: #fafafa;
+  fill: currentColor;
+}
+.ML__virtual-keyboard-toggle:focus {
+  outline: none;
+  border-radius: 8px;
+  border: 2px solid hsl(var(--_hue), 40%, 50%);
+}
+.ML__virtual-keyboard-toggle.is-pressed,
+.ML__virtual-keyboard-toggle.is-active:hover,
+.ML__virtual-keyboard-toggle.is-active {
+  background: hsl(var(--_hue), 25%, 35%);
+  color: #fafafa;
+  fill: currentColor;
+}
+/* Add an attribute 'data-ML__tooltip' to automatically show a
+   tooltip over a element on hover.
+   Use 'data-position="top"' to place the tooltip above the
+   element rather than below.
+   Use 'data-delay' to delay the triggering of the tooltip.
+*/
+[data-ML__tooltip] {
+  position: relative;
+}
+[data-ML__tooltip][data-placement='top']::after {
+  top: inherit;
+  bottom: 100%;
+}
+[data-ML__tooltip]::after {
+  content: attr(data-ML__tooltip);
+  position: absolute;
+  display: none;
+  z-index: 2;
+  right: 110%;
+  left: calc(100% + 8px);
+  width: max-content;
+  max-width: 200px;
+  padding: 8px 8px;
+  border-radius: 2px;
+  background: #616161;
+  color: #fff;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  /* Phone */
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.15s cubic-bezier(0.4, 0, 1, 1);
+}
+@media only screen and (max-width: 767px) {
+  [data-ML__tooltip]::after {
+    padding: 8px 16px;
+    font-size: 16px;
+  }
+}
+:not(.tracking) [data-ML__tooltip]:hover {
+  position: relative;
+}
+:not(.tracking) [data-ML__tooltip]:hover::after {
+  visibility: visible;
+  display: inline-table;
+  opacity: 1;
+  transform: scale(1);
+}
+[data-ML__tooltip][data-delay]::after {
+  transition-delay: 0s;
+}
+[data-ML__tooltip][data-delay]:hover::after {
+  transition-delay: 1s;
+  /* attr(data-delay); Should work. But doesn't. */
+}
+.ML__prompt {
+  border-radius: 2px;
+}
+.ML__editablePromptBox {
+  outline: 1px solid #acacac;
+  border-radius: 2px;
+  z-index: -1;
+}
+.ML__focusedPromptBox {
+  outline: highlight auto 1px;
+}
+.ML__lockedPromptBox {
+  background-color: rgba(142, 142, 141, 0.4);
+  z-index: -1;
+}
+.ML__correctPromptBox {
+  outline: 1px solid var(--_correct-color);
+  box-shadow: 0 0 5px var(--_correct-color);
+}
+.ML__incorrectPromptBox {
+  outline: 1px solid var(--_incorrect-color);
+  box-shadow: 0 0 5px var(--_incorrect-color);
+}
+`;
+
+// css/core.less
+var core_default = ".ML__container {\n  min-height: auto !important;\n  --_hue: var(--hue, 212);\n  --_placeholder-color: var(--placeholder-color, hsl(var(--_hue), 40%, 49%));\n  --_placeholder-opacity: var(--placeholder-opacity, 0.4);\n  --_text-font-family: var(--text-font-family, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif);\n}\n.ML__sr-only {\n  position: absolute;\n  width: 1px;\n  height: 1px;\n  margin: -1px;\n  padding: 0;\n  overflow: hidden;\n  clip: rect(0, 0, 0, 0);\n  clip-path: inset(50%);\n  white-space: nowrap;\n  border: 0;\n}\n.ML__is-inline {\n  display: inline-block;\n}\n.ML__base {\n  visibility: inherit;\n  display: inline-block;\n  position: relative;\n  cursor: text;\n  padding: 0;\n  margin: 0;\n  box-sizing: content-box;\n  border: 0;\n  outline: 0;\n  vertical-align: baseline;\n  font-weight: inherit;\n  font-family: inherit;\n  font-style: inherit;\n  text-decoration: none;\n  width: min-content;\n}\n.ML__strut,\n.ML__strut--bottom {\n  display: inline-block;\n  min-height: 0.5em;\n}\n.ML__small-delim {\n  font-family: KaTeX_Main;\n}\n/* Text mode */\n.ML__text {\n  font-family: var(--_text-font-family);\n  white-space: pre;\n}\n/* Use cmr for 'math upright' */\n.ML__cmr {\n  font-family: KaTeX_Main;\n  font-style: normal;\n}\n.ML__mathit {\n  font-family: KaTeX_Math;\n  /* The KaTeX_Math font is italic by default, so the font-style below is only \n     useful when a fallback font is used\n  */\n  font-style: italic;\n}\n.ML__mathbf {\n  font-family: KaTeX_Main;\n  font-weight: bold;\n}\n/* Lowercase greek symbols should stick to math font when \\mathbf is applied \n   to match TeX idiosyncratic behavior */\n.lcGreek.ML__mathbf {\n  font-family: KaTeX_Math;\n  font-weight: normal;\n}\n.ML__mathbfit {\n  font-family: KaTeX_Math;\n  font-weight: bold;\n  font-style: italic;\n}\n.ML__ams {\n  font-family: KaTeX_AMS;\n}\n/* Blackboard */\n.ML__bb {\n  font-family: KaTeX_AMS;\n}\n.ML__cal {\n  font-family: KaTeX_Caligraphic;\n}\n.ML__frak {\n  font-family: KaTeX_Fraktur;\n}\n.ML__tt {\n  font-family: KaTeX_Typewriter;\n}\n.ML__script {\n  font-family: KaTeX_Script;\n}\n.ML__sans {\n  font-family: KaTeX_SansSerif;\n}\n.ML__series_ul {\n  font-weight: 100;\n}\n.ML__series_el {\n  font-weight: 100;\n}\n.ML__series_l {\n  font-weight: 200;\n}\n.ML__series_sl {\n  font-weight: 300;\n}\n.ML__series_sb {\n  font-weight: 500;\n}\n.ML__bold,\n.ML__boldsymbol {\n  font-weight: 700;\n}\n.ML__series_eb {\n  font-weight: 800;\n}\n.ML__series_ub {\n  font-weight: 900;\n}\n.ML__series_uc {\n  font-stretch: ultra-condensed;\n}\n.ML__series_ec {\n  font-stretch: extra-condensed;\n}\n.ML__series_c {\n  font-stretch: condensed;\n}\n.ML__series_sc {\n  font-stretch: semi-condensed;\n}\n.ML__series_sx {\n  font-stretch: semi-expanded;\n}\n.ML__series_x {\n  font-stretch: expanded;\n}\n.ML__series_ex {\n  font-stretch: extra-expanded;\n}\n.ML__series_ux {\n  font-stretch: ultra-expanded;\n}\n.ML__it {\n  font-style: italic;\n}\n.ML__shape_ol {\n  -webkit-text-stroke: 1px black;\n  text-stroke: 1px black;\n  color: transparent;\n}\n.ML__shape_sc {\n  font-variant: small-caps;\n}\n.ML__shape_sl {\n  font-style: oblique;\n}\n/* First level emphasis */\n.ML__emph {\n  color: #bc2612;\n}\n/* Second level emphasis */\n.ML__emph .ML__emph {\n  color: #0c7f99;\n}\n.ML__highlight {\n  color: #007cb2;\n  background: #edd1b0;\n}\n.ML__center {\n  text-align: center;\n}\n.ML__label_padding {\n  padding: 0 0.5em;\n}\n.ML__frac-line {\n  width: 100%;\n  min-height: 1px;\n}\n.ML__frac-line:after {\n  content: '';\n  display: block;\n  margin-top: max(-1px, -0.04em);\n  min-height: max(1px, 0.04em);\n  /* Ensure the line is visible when printing even if \"turn off background images\" is on*/\n  -webkit-print-color-adjust: exact;\n  print-color-adjust: exact;\n  /* There's a bug since Chrome 62 where \n      sub-pixel border lines don't draw at some zoom \n      levels (110%, 90%). \n      Setting the min-height used to work around it, but that workaround\n      broke in Chrome 84 or so.\n      Setting the background (and the min-height) seems to work for now.\n      */\n  background: currentColor;\n  box-sizing: content-box;\n  /* Vuetify sets the box-sizing to inherit \n            causes the fraction line to not draw at all sizes (see #26) */\n  /* On some versions of Firefox on Windows, the line fails to \n            draw at some zoom levels, but setting the transform triggers\n            the hardware accelerated path, which works */\n  transform: translate(0, 0);\n}\n.ML__sqrt {\n  display: inline-block;\n}\n.ML__sqrt-sign {\n  display: inline-block;\n  position: relative;\n}\n.ML__sqrt-line {\n  display: inline-block;\n  height: max(1px, 0.04em);\n  width: 100%;\n}\n.ML__sqrt-line:before {\n  content: '';\n  display: block;\n  margin-top: min(-1px, -0.04em);\n  min-height: max(1px, 0.04em);\n  /* Ensure the line is visible when printing even if \"turn off background images\" is on*/\n  -webkit-print-color-adjust: exact;\n  print-color-adjust: exact;\n  background: currentColor;\n  /* On some versions of Firefox on Windows, the line fails to \n            draw at some zoom levels, but setting the transform triggers\n            the hardware accelerated path, which works */\n  transform: translate(0, 0);\n}\n.ML__sqrt-line:after {\n  border-bottom-width: 1px;\n  content: ' ';\n  display: block;\n  margin-top: -0.1em;\n}\n.ML__sqrt-index {\n  margin-left: 0.27777778em;\n  margin-right: -0.55555556em;\n}\n.ML__delim-size1 {\n  font-family: KaTeX_Size1;\n}\n.ML__delim-size2 {\n  font-family: KaTeX_Size2;\n}\n.ML__delim-size3 {\n  font-family: KaTeX_Size3;\n}\n.ML__delim-size4 {\n  font-family: KaTeX_Size4;\n}\n.ML__delim-mult .delim-size1 > span {\n  font-family: KaTeX_Size1;\n}\n.ML__delim-mult .delim-size4 > span {\n  font-family: KaTeX_Size4;\n}\n.ML__accent-body > span {\n  font-family: KaTeX_Main;\n  width: 0;\n}\n.ML__accent-vec {\n  position: relative;\n  left: 0.24em;\n}\n.ML__mathlive {\n  display: inline-block;\n  direction: ltr;\n  text-align: left;\n  text-indent: 0;\n  text-rendering: auto;\n  font-family: KaTeX_Main, 'Times New Roman', serif;\n  font-style: normal;\n  font-size-adjust: none;\n  font-stretch: normal;\n  font-variant-caps: normal;\n  letter-spacing: normal;\n  line-height: 1.2;\n  word-wrap: normal;\n  word-spacing: normal;\n  white-space: nowrap;\n  text-shadow: none;\n  -webkit-user-select: none;\n  user-select: none;\n  width: min-content;\n}\n.ML__mathlive .style-wrap {\n  position: relative;\n}\n.ML__mathlive .mfrac,\n.ML__mathlive .left-right {\n  display: inline-block;\n}\n.ML__mathlive .vlist-t {\n  display: inline-table;\n  table-layout: fixed;\n  border-collapse: collapse;\n}\n.ML__mathlive .vlist-r {\n  display: table-row;\n}\n.ML__mathlive .vlist {\n  display: table-cell;\n  vertical-align: bottom;\n  position: relative;\n}\n.ML__mathlive .vlist > span {\n  display: block;\n  height: 0;\n  position: relative;\n}\n.ML__mathlive .vlist > span > span {\n  display: inline-block;\n}\n.ML__mathlive .vlist > span > .pstrut {\n  overflow: hidden;\n  width: 0;\n}\n.ML__mathlive .vlist-t2 {\n  margin-right: -2px;\n}\n.ML__mathlive .vlist-s {\n  display: table-cell;\n  vertical-align: bottom;\n  font-size: 1px;\n  width: 2px;\n  min-width: 2px;\n}\n.ML__mathlive .msubsup {\n  text-align: left;\n}\n.ML__mathlive .negativethinspace {\n  display: inline-block;\n  margin-left: -0.16667em;\n  height: 0.71em;\n}\n.ML__mathlive .thinspace {\n  display: inline-block;\n  width: 0.16667em;\n  height: 0.71em;\n}\n.ML__mathlive .mediumspace {\n  display: inline-block;\n  width: 0.22222em;\n  height: 0.71em;\n}\n.ML__mathlive .thickspace {\n  display: inline-block;\n  width: 0.27778em;\n  height: 0.71em;\n}\n.ML__mathlive .enspace {\n  display: inline-block;\n  width: 0.5em;\n  height: 0.71em;\n}\n.ML__mathlive .quad {\n  display: inline-block;\n  width: 1em;\n  height: 0.71em;\n}\n.ML__mathlive .qquad {\n  display: inline-block;\n  width: 2em;\n  height: 0.71em;\n}\n.ML__mathlive .llap,\n.ML__mathlive .rlap {\n  width: 0;\n  position: relative;\n  display: inline-block;\n}\n.ML__mathlive .llap > .inner,\n.ML__mathlive .rlap > .inner {\n  position: absolute;\n}\n.ML__mathlive .llap > .fix,\n.ML__mathlive .rlap > .fix {\n  display: inline-block;\n}\n.ML__mathlive .llap > .inner {\n  right: 0;\n}\n.ML__mathlive .rlap > .inner {\n  left: 0;\n}\n.ML__mathlive .rule {\n  display: inline-block;\n  border: solid 0;\n  position: relative;\n  box-sizing: border-box;\n}\n.ML__mathlive .overline .overline-line,\n.ML__mathlive .underline .underline-line {\n  width: 100%;\n}\n.ML__mathlive .overline .overline-line:before,\n.ML__mathlive .underline .underline-line:before {\n  content: '';\n  border-bottom-style: solid;\n  border-bottom-width: max(1px, 0.04em);\n  -webkit-print-color-adjust: exact;\n  print-color-adjust: exact;\n  display: block;\n}\n.ML__mathlive .overline .overline-line:after,\n.ML__mathlive .underline .underline-line:after {\n  border-bottom-style: solid;\n  border-bottom-width: max(1px, 0.04em);\n  -webkit-print-color-adjust: exact;\n  print-color-adjust: exact;\n  content: '';\n  display: block;\n  margin-top: -1px;\n}\n.ML__mathlive .stretchy {\n  display: block;\n  position: absolute;\n  width: 100%;\n  left: 0;\n  overflow: hidden;\n}\n.ML__mathlive .stretchy:before,\n.ML__mathlive .stretchy:after {\n  content: '';\n}\n.ML__mathlive .stretchy svg {\n  display: block;\n  position: absolute;\n  width: 100%;\n  height: inherit;\n  fill: currentColor;\n  stroke: currentColor;\n  fill-rule: nonzero;\n  fill-opacity: 1;\n  stroke-width: 1;\n  stroke-linecap: butt;\n  stroke-linejoin: miter;\n  stroke-miterlimit: 4;\n  stroke-dasharray: none;\n  stroke-dashoffset: 0;\n  stroke-opacity: 1;\n}\n.ML__mathlive .slice-1-of-2 {\n  display: inline-flex;\n  position: absolute;\n  left: 0;\n  width: 50.2%;\n  overflow: hidden;\n}\n.ML__mathlive .slice-2-of-2 {\n  display: inline-flex;\n  position: absolute;\n  right: 0;\n  width: 50.2%;\n  overflow: hidden;\n}\n.ML__mathlive .slice-1-of-3 {\n  display: inline-flex;\n  position: absolute;\n  left: 0;\n  width: 25.1%;\n  overflow: hidden;\n}\n.ML__mathlive .slice-2-of-3 {\n  display: inline-flex;\n  position: absolute;\n  left: 25%;\n  width: 50%;\n  overflow: hidden;\n}\n.ML__mathlive .slice-3-of-3 {\n  display: inline-flex;\n  position: absolute;\n  right: 0;\n  width: 25.1%;\n  overflow: hidden;\n}\n.ML__mathlive .slice-1-of-1 {\n  display: inline-flex;\n  position: absolute;\n  width: 100%;\n  left: 0;\n  overflow: hidden;\n}\n.ML__mathlive .nulldelimiter {\n  display: inline-block;\n}\n.ML__mathlive .op-group {\n  display: inline-block;\n}\n.ML__mathlive .op-symbol {\n  position: relative;\n}\n.ML__mathlive .op-symbol.small-op {\n  font-family: KaTeX_Size1;\n}\n.ML__mathlive .op-symbol.large-op {\n  font-family: KaTeX_Size2;\n}\n.ML__mathlive .mtable .vertical-separator {\n  display: inline-block;\n  min-width: 1px;\n  box-sizing: border-box;\n}\n.ML__mathlive .mtable .arraycolsep {\n  display: inline-block;\n}\n.ML__mathlive .mtable .col-align-m > .vlist-t {\n  text-align: center;\n}\n.ML__mathlive .mtable .col-align-c > .vlist-t {\n  text-align: center;\n}\n.ML__mathlive .mtable .col-align-l > .vlist-t {\n  text-align: left;\n}\n.ML__mathlive .mtable .col-align-r > .vlist-t {\n  text-align: right;\n}\n.ML__error {\n  display: inline-block;\n  background-image: radial-gradient(ellipse at center, hsl(341, 100%, 40%), rgba(0, 0, 0, 0) 70%);\n  background-color: hsla(341, 100%, 40%, 0.1);\n  background-repeat: repeat-x;\n  background-size: 3px 3px;\n  padding-bottom: 3px;\n  background-position: 0 100%;\n}\n.ML__error > .ML__error {\n  background: transparent;\n  padding: 0;\n}\n.ML__placeholder {\n  color: var(--_placeholder-color);\n  opacity: var(--_placeholder-opacity);\n  padding-left: 0.4ex;\n  padding-right: 0.4ex;\n  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;\n}\n.ML__notation {\n  position: absolute;\n  box-sizing: border-box;\n  line-height: 0;\n}\n/* This class is used to implement the `\\mathtip` and `\\texttip` commands\n   For UI elements, see `[data-ML__tooltip]`\n*/\n.ML__tooltip-container {\n  position: relative;\n  transform: scale(0);\n}\n.ML__tooltip-container .ML__tooltip-content {\n  position: fixed;\n  display: inline-table;\n  visibility: hidden;\n  z-index: 2;\n  width: max-content;\n  max-width: 400px;\n  padding: 12px 12px;\n  border-radius: 8px;\n  background: #616161;\n  --_selection-color: #fff;\n  color: #fff;\n  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);\n  opacity: 0;\n  transition: opacity 0.15s cubic-bezier(0.4, 0, 1, 1);\n}\n.ML__tooltip-container .ML__tooltip-content .ML__text {\n  white-space: normal;\n}\n.ML__tooltip-container .ML__tooltip-content .ML__base {\n  display: contents;\n}\n.ML__tooltip-container:hover .ML__tooltip-content {\n  visibility: visible;\n  opacity: 1;\n  font-size: 0.75em;\n  transform: scale(1) translate(0, 3em);\n}\n";
+
+// css/environment-popover.less
+var environment_popover_default = "#mathlive-environment-popover.is-visible {\n  visibility: visible;\n}\n#mathlive-environment-popover {\n  --_environment-panel-height: var(--environment-panel-height, 70px);\n  --_accent-color: var(--accent-color, #0c75d8);\n  --_background: var(--environment-panel-background, #0c75d8);\n  --_button-background: var(--environment-panel-button-background, white);\n  --_button-background-hover: var(--environment-panel-button-background-hover, #f5f5f7);\n  --_button-background-active: var(--environment-panel-button-background-active, #f5f5f7);\n  --_button-text: var(--environment-panel-button-text, #e3e4e8);\n  position: absolute;\n  width: calc(var(--_environment-panel-height) * 2);\n  height: var(--_environment-panel-height);\n  border-radius: 4px;\n  border: 1.5px solid var(--_accent-color);\n  background-color: var(--_background);\n  box-shadow: 0 0 30px 0 var(--environment-shadow, rgba(0, 0, 0, 0.4));\n  pointer-events: all;\n  visibility: hidden;\n}\n#mathlive-environment-popover .MLEP__array-buttons {\n  height: calc(var(--_environment-panel-height) * 5/4);\n  width: calc(var(--_environment-panel-height) * 5/4);\n  margin-left: calc(0px - var(--_environment-panel-height) * 0.16);\n  margin-top: calc(0px - var(--_environment-panel-height) * 0.19);\n}\n#mathlive-environment-popover .MLEP__array-buttons .font {\n  fill: white;\n}\n#mathlive-environment-popover .MLEP__array-buttons circle {\n  fill: #7f7f7f;\n  transition: fill 300ms;\n}\n#mathlive-environment-popover .MLEP__array-buttons .MLEP__array-insert-background {\n  fill-opacity: 1;\n  fill: var(--_background);\n  stroke: var(--_accent-color);\n  stroke-width: 3px;\n}\n#mathlive-environment-popover .MLEP__array-buttons line {\n  stroke: var(--_accent-color);\n  stroke-opacity: 0;\n  stroke-width: 40;\n  pointer-events: none;\n  transition: stroke-opacity 300ms;\n  stroke-linecap: round;\n}\n#mathlive-environment-popover .MLEP__array-buttons g[data-command]:hover circle {\n  fill: var(--_accent-color);\n}\n#mathlive-environment-popover .MLEP__array-buttons g[data-command]:hover line {\n  stroke-opacity: 1;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls {\n  height: 100%;\n  width: 50%;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options {\n  width: var(--_environment-panel-height);\n  height: var(--_environment-panel-height);\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: space-around;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg {\n  pointer-events: all;\n  margin-top: 2px;\n  width: calc(var(--_environment-panel-height) / 3 * 28 / 24);\n  height: calc(var(--_environment-panel-height) / 3 - 2px);\n  border-radius: calc(var(--_environment-panel-height) / 25);\n  background-color: var(--_button-background);\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg:hover {\n  background-color: var(--_button-background-hover);\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg path,\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg line {\n  stroke: var(--_button-text);\n  stroke-width: 2;\n  stroke-linecap: round;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg rect,\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg path {\n  fill-opacity: 0;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg.active {\n  pointer-events: none;\n  background-color: var(--_button-background-active);\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg.active path,\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg.active line {\n  stroke: var(--_accent-color);\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg.active circle {\n  fill: var(--_accent-color);\n}\n";
+
+// css/suggestion-popover.less
+var suggestion_popover_default = `/* The element that display info while in latex mode */
+#mathlive-suggestion-popover {
+  background-color: rgba(97, 97, 97);
+  color: #fff;
+  text-align: center;
+  border-radius: 8px;
+  position: fixed;
+  z-index: 1;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+}
+#mathlive-suggestion-popover.top-tip::after {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: calc(50% - 15px);
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 15px solid rgba(97, 97, 97);
+  font-size: 1rem;
+}
+#mathlive-suggestion-popover.bottom-tip::after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: calc(50% - 15px);
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-top: 15px solid rgba(97, 97, 97);
+  font-size: 1rem;
+}
+#mathlive-suggestion-popover.is-animated {
+  transition: all 0.2s cubic-bezier(0.64, 0.09, 0.08, 1);
+  animation: ML__fade-in cubic-bezier(0, 0, 0.2, 1) 0.15s;
+}
+#mathlive-suggestion-popover.is-visible {
+  display: flex;
+}
+@keyframes ML__fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* The wrapper class for the entire content of the popover panel */
+#mathlive-suggestion-popover ul {
+  display: flex;
+  flex-flow: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-items: flex-start;
+  max-height: 400px;
+  overflow-y: auto;
+}
+#mathlive-suggestion-popover li {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 8px;
+  padding: 8px;
+  width: calc(100% - 16px - 16px);
+  column-gap: 1em;
+  border-radius: 8px;
+  cursor: pointer;
+  /* Since the content can be clicked on, provide feedback on hover */
+}
+#mathlive-suggestion-popover li a {
+  color: #5ea6fd;
+  padding-top: 0.3em;
+  margin-top: 0.4em;
+  display: block;
+}
+#mathlive-suggestion-popover li a:hover {
+  color: #5ea6fd;
+  text-decoration: underline;
+}
+#mathlive-suggestion-popover li:hover,
+#mathlive-suggestion-popover li.is-pressed,
+#mathlive-suggestion-popover li.is-active {
+  background: rgba(255, 255, 255, 0.1);
+}
+/* The command inside a popover (inside a #mathlive-suggestion-popover) */
+.ML__popover__command {
+  font-size: 1.6rem;
+  font-family: KaTeX_Main;
+}
+.ML__popover__current {
+  background: #5ea6fd;
+  color: #fff;
+}
+.ML__popover__latex {
+  font-family: 'IBM Plex Mono', 'Source Code Pro', Consolas, 'Roboto Mono', Menlo, 'Bitstream Vera Sans Mono', 'DejaVu Sans Mono', Monaco, Courier, monospace;
+  align-self: center;
+}
+/* The keyboard shortcuts for a symbol as displayed in the popover */
+.ML__popover__keybinding {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+/* Style for the character that joins the modifiers of a keyboard shortcut 
+(usually a "+" sign)*/
+.ML__shortcut-join {
+  opacity: 0.5;
+}
+`;
+
+// css/keystroke-caption.less
+var keystroke_caption_default = "/* The element that displays the keys as the user type them */\n#mathlive-keystroke-caption-panel {\n  visibility: hidden;\n  /*min-width: 160px;*/\n  /*background-color: rgba(97, 97, 200, .95);*/\n  background: var(--secondary, hsl(var(--_hue), 19%, 26%));\n  border-color: var(--secondary-border, hsl(0, 0%, 91%));\n  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);\n  text-align: center;\n  border-radius: 6px;\n  padding: 16px;\n  position: absolute;\n  z-index: 1;\n  display: flex;\n  flex-direction: row-reverse;\n  justify-content: center;\n  --keystroke: white;\n  --on-keystroke: #555;\n  --keystroke-border: #f7f7f7;\n}\n@media (prefers-color-scheme: dark) {\n  body:not([theme='light']) #mathlive-keystroke-caption-panel {\n    --keystroke: hsl(var(--_hue), 50%, 30%);\n    --on-keystroke: hsl(0, 0%, 98%);\n    --keystroke-border: hsl(var(--_hue), 50%, 25%);\n  }\n}\nbody[theme='dark'] #mathlive-keystroke-caption-panel {\n  --keystroke: hsl(var(--_hue), 50%, 30%);\n  --on-keystroke: hsl(0, 0%, 98%);\n  --keystroke-border: hsl(var(--_hue), 50%, 25%);\n}\n#mathlive-keystroke-caption-panel > span {\n  min-width: 14px;\n  /*height: 8px;*/\n  margin: 0 8px 0 0;\n  padding: 4px;\n  background-color: var(--keystroke);\n  color: var(--on-keystroke);\n  fill: currentColor;\n  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;\n  font-size: 1em;\n  border-radius: 6px;\n  border: 2px solid var(--keystroke-border);\n  /*box-shadow: 0 7px 14px rgba(0,0,0,0.25), 0 5px 5px rgba(0,0,0,0.22);*/\n}\n";
+
+// css/virtual-keyboard.less
+var virtual_keyboard_default = `.ML__keyboard {
+  --_keyboard-height: 0;
+  --_keyboard-zindex: var(--keyboard-zindex, 105);
+  --_accent-color: var(--keyboard-accent-color, #0c75d8);
+  --_background: var(--keyboard-background, #cacfd7);
+  --_border: var(--keyboard-border, #ddd);
+  --_padding-horizontal: var(--keyboard-padding-horizontal, 0px);
+  --_padding-top: var(--keyboard-padding-top, 5px);
+  --_padding-bottom: var(--keyboard-padding-bottom, 0px);
+  --_row-padding-left: var(--keyboard-row-padding-left, 0px);
+  --_row-padding-left: var(--keyboard-row-padding-right, 0px);
+  --_toolbar-text: var(--keyboard-toolbar-text, #2c2e2f);
+  --_toolbar-text-active: var(--keyboard-toolbar-text-active, var(--_accent-color));
+  --_toolbar-background: var(--keyboard-toolbar-background, transparent);
+  --_toolbar-background-hover: var(--keyboard-toolbar-background-hover, #eee);
+  --_toolbar-background-selected: var(--keyboard-toolbar-background-selected, transparent);
+  --_horizontal-rule: var(--keyboard-horizontal-rule, 1px solid #fff);
+  --_keycap-background: var(--keycap-background, white);
+  --_keycap-background-hover: var(--keycap-background, #f5f5f7);
+  --_keycap-background-active: var(--keycap-background-active, var(--_accent-color));
+  --_keycap-background-pressed: var(--keycap-background-pressed, var(--_accent-color));
+  --_keycap-border: var(--keycap-border, #e5e6e9);
+  --_keycap-border-bottom: var(--keycap-border-bottom, #8d8f92);
+  --_keycap-text: var(--keycap-text, #000);
+  --_keycap-text-active: var(--keycap-text-active, #fff);
+  --_keycap-text-hover: var(--keycap-text-hover, var(--_keycap-text));
+  --_keycap-text-pressed: var(--keycap-text-pressed, #fff);
+  --_keycap-shift-text: var(--keycap-shift-text, var(--_accent-color));
+  --_keycap-primary-background: var(--keycap-primary-background, var(--_accent-color));
+  --_keycap-primary-text: var(--keycap-primary-text, #ddd);
+  --_keycap-primary-background-hover: var(--keycap-primary-background-hover, #0d80f2);
+  --_keycap-secondary-background: var(--keycap-secondary-background, #a0a9b8);
+  --_keycap-secondary-background-hover: var(--keycap-secondary-background-hover, #7d8795);
+  --_keycap-secondary-text: var(--keycap-secondary-text, #060707);
+  --_keycap-secondary-border: var(--keycap-secondary-border, #c5c9d0);
+  --_keycap-secondary-border-bottom: var(--keycap-secondary-border-bottom, #989da6);
+  --_keycap-height: var(--keycap-height, 60px);
+  /* Keycap width (incl. margin) */
+  --_keycap-max-width: var(--keycap-max-width, 100px);
+  --_keycap-gap: var(--keycap-gap, 8px);
+  --_keycap-font-size: var(--keycap-font-size, clamp(16px, 4cqw, 24px));
+  --_keycap-small-font-size: var(--keycap-small-font-size, calc(var(--keycap-font-size) * 0.8));
+  --_keycap-extra-small-font-size: var(--keycap-extra-small-font-size, calc(var(--keycap-font-size) / 1.42));
+  --_variant-panel-background: var(--variant-panel-background, #fff);
+  --_variant-keycap-text: var(--variant-keycap-textvar, var(--_keycap-text));
+  --_variant-keycap-text-active: var(--variant-keycap-text-active, var(--_keycap-text-active));
+  --_variant-keycap-background-active: var(--variant-keycap-background-active, var(--_accent-color));
+  --_variant-keycap-length: var(--variant-keycap-length, 70px);
+  --_variant-keycap-font-size: var(--variant-keycap-font-size, 30px);
+  --_variant-keycap-aside-font-size: var(--variant-keycap-aside-font-size, 12px);
+  --_keycap-shift-font-size: var(--variant-keycap-font-size, 16px);
+  --_keycap-shift-color: var(--keycap-shift-color, var(--_accent-color));
+  --_box-placeholder-color: var(--box-placeholder-color, var(--_accent-color));
+}
+.if-can-undo,
+.if-can-redo,
+.if-can-copy,
+.if-can-cut,
+.if-can-paste {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.can-undo .if-can-undo,
+.can-redo .if-can-redo,
+.can-copy .if-can-copy,
+.can-cut .if-can-cut,
+.can-paste .if-can-paste {
+  opacity: 1;
+  pointer-events: all;
+}
+body > .ML__keyboard {
+  position: fixed;
+  --_padding-bottom: calc(var(--_padding-bottom) + env(safe-area-inset-bottom, 0));
+}
+body > .ML__keyboard.is-visible > .MLK__backdrop {
+  box-shadow: 0 -5px 6px rgba(0, 0, 0, 0.08);
+  border-top: 1px solid var(--_border);
+}
+body > .ML__keyboard.backdrop-is-transparent.is-visible > .MLK__backdrop {
+  box-shadow: none;
+  border: none;
+}
+body > .ML__keyboard.is-visible.animate > .MLK__backdrop {
+  transition: 0.28s cubic-bezier(0, 0, 0.2, 1);
+  transition-property: transform, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+}
+.ML__keyboard {
+  position: relative;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: var(--_keyboard-zindex);
+  box-sizing: border-box;
+  outline: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  overflow-wrap: unset;
+  text-align: left;
+  vertical-align: baseline;
+  cursor: auto;
+  white-space: pre;
+  box-shadow: none;
+  opacity: 1;
+  transform: none;
+  pointer-events: none;
+}
+.ML__keyboard :where(div) {
+  box-sizing: border-box;
+  outline: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  overflow-wrap: unset;
+  text-align: left;
+  vertical-align: baseline;
+  cursor: auto;
+  white-space: pre;
+  box-shadow: none;
+  transform: none;
+}
+.MLK__backdrop {
+  position: absolute;
+  bottom: calc(-1 * var(--_keyboard-height));
+  width: 100%;
+  height: var(--_keyboard-height);
+  box-sizing: border-box;
+  padding-top: var(--_padding-top);
+  padding-bottom: var(--_padding-bottom);
+  padding-left: var(--_padding-horizontal);
+  padding-right: var(--_padding-horizontal);
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(0, 0);
+  background: var(--_background);
+}
+.backdrop-is-transparent .MLK__backdrop {
+  background: transparent;
+}
+/* If a custom layout has a custom container/backdrop
+  (backdrop-is-transparent), make sure to let pointer event go through. */
+.backdrop-is-transparent .MLK__plate {
+  background: transparent;
+  pointer-events: none;
+}
+/* If a custom layout has a custom container/backdrop, make sure to 
+   allow pointer events on it. */
+.backdrop-is-transparent .MLK__layer > div > div {
+  pointer-events: all;
+}
+.ML__keyboard.is-visible > .MLK__backdrop {
+  transform: translate(0, calc(-1 * var(--_keyboard-height)));
+  opacity: 1;
+  visibility: visible;
+}
+.caps-lock-indicator {
+  display: none;
+  width: 8px;
+  height: 8px;
+  background: #0cbc0c;
+  box-shadow: inset 0 0 4px 0 #13ca13, 0 0 4px 0 #a9ef48;
+  border-radius: 8px;
+  right: 8px;
+  top: 8px;
+  position: absolute;
+}
+.ML__keyboard.is-caps-lock .caps-lock-indicator {
+  display: block;
+}
+.ML__keyboard.is-caps-lock .shift {
+  background: var(--_keycap-background-active);
+  color: var(--_keycap-text-active);
+}
+.MLK__plate {
+  position: absolute;
+  top: 0;
+  left: var(--_padding-horizontal);
+  width: calc(100% - 2 * var(--_padding-horizontal));
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  container-type: inline-size;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  pointer-events: all;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-size: 16px;
+  /* Size of toolbar labels */
+  font-weight: 400;
+  text-shadow: none;
+}
+.ML__box-placeholder {
+  color: var(--_box-placeholder-color);
+}
+.MLK__tex {
+  font-family: KaTeX_Main, KaTeX_Math, 'Cambria Math', 'Asana Math', OpenSymbol, Symbola, STIX, Times, serif !important;
+}
+.MLK__tex-math {
+  font-family: KaTeX_Math, KaTeX_Main, 'Cambria Math', 'Asana Math', OpenSymbol, Symbola, STIX, Times, serif !important;
+  font-style: italic;
+}
+.MLK__layer {
+  display: none;
+  outline: none;
+}
+.MLK__layer.is-visible {
+  display: flex;
+  flex-flow: column;
+}
+/* Keyboard layouts are made or rows of keys... */
+.MLK__rows {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  border-collapse: separate;
+  clear: both;
+  border: 0;
+  margin: 0;
+  margin-bottom: var(--_keycap-gap);
+  gap: var(--_keycap-gap);
+  /* If the styling include, e.g., some shadows, they will be
+  cut off by the overflow. In that case, set the padding to 
+  compensate. */
+  padding-left: var(--_row-padding-left);
+  padding-right: var(--_row-padding-right);
+  overflow-x: auto;
+  touch-action: none;
+}
+.MLK__rows > .row {
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+  width: 100%;
+  gap: var(--_keycap-gap);
+  margin: 0;
+  padding: 0;
+  /* For the alignment of the text on some modifiers (e.g. shift) */
+  /* Extra spacing between two adjacent keys */
+  /** A regular keycap */
+}
+.MLK__rows > .row .tex {
+  font-family: KaTeX_Math, KaTeX_Main, 'Cambria Math', 'Asana Math', OpenSymbol, Symbola, STIX, Times, serif !important;
+}
+.MLK__rows > .row .tex-math {
+  font-family: KaTeX_Math, 'Cambria Math', 'Asana Math', OpenSymbol, Symbola, STIX, Times, serif !important;
+}
+.MLK__rows > .row .big-op {
+  font-size: calc(1.25 * var(--_keycap-font-size));
+}
+.MLK__rows > .row .small {
+  font-size: var(--_keycap-small-font-size);
+}
+.MLK__rows > .row .bottom {
+  justify-content: flex-end;
+}
+.MLK__rows > .row .left {
+  align-items: flex-start;
+  padding-left: 12px;
+}
+.MLK__rows > .row .right {
+  align-items: flex-end;
+  padding-right: 12px;
+}
+.MLK__rows > .row .w0 {
+  width: 0;
+}
+.MLK__rows > .row .w5 {
+  width: calc(min(var(--_keycap-max-width, 100px), 10cqw) / 2 - var(--_keycap-gap));
+}
+.MLK__rows > .row .w15 {
+  width: calc(1.5 * min(var(--_keycap-max-width, 100px), 10cqw) - var(--_keycap-gap));
+}
+.MLK__rows > .row .w20 {
+  width: calc(2 * min(var(--_keycap-max-width, 100px), 10cqw) - var(--_keycap-gap));
+}
+.MLK__rows > .row .w40 {
+  width: calc(4 * min(var(--private-keycap-max-width, 100px), 10cqw) - var(--private-keycap-gap));
+}
+.MLK__rows > .row .w50 {
+  width: calc(5 * min(var(--_keycap-max-width, 100px), 10cqw) - var(--_keycap-gap));
+}
+.MLK__rows > .row .MLK__keycap.w50 {
+  font-size: 80%;
+  padding-top: 10px;
+  font-weight: 100;
+}
+.MLK__rows > .row .separator {
+  background: transparent;
+  border: none;
+  pointer-events: none;
+}
+.MLK__rows > .row .horizontal-rule {
+  height: 6px;
+  margin-top: 3px;
+  margin-bottom: 0;
+  width: 100%;
+  border-radius: 0;
+  border-top: var(--_horizontal-rule);
+}
+.MLK__rows > .row .ghost {
+  background: var(--_toolbar-background);
+  border: none;
+  color: var(--_toolbar-text);
+}
+.MLK__rows > .row .ghost:hover {
+  background: var(--_toolbar-background-hover);
+}
+.MLK__rows > .row .bigfnbutton {
+  font-size: var(--_keycap-extra-small-font-size);
+}
+.MLK__rows > .row .shift,
+.MLK__rows > .row .action {
+  color: var(--_keycap-secondary-text);
+  background: var(--_keycap-secondary-background);
+  border-color: var(--_keycap-secondary-border);
+  border-bottom-color: var(--_keycap-secondary-border-bottom);
+  line-height: 0.8;
+  font-size: min(1rem, var(--_keycap-small-font-size));
+  font-weight: 600;
+  padding: 8px 12px 8px 12px;
+}
+.MLK__rows > .row .shift:hover,
+.MLK__rows > .row .action:hover {
+  background: var(--_keycap-secondary-background-hover);
+}
+.MLK__rows > .row .action.primary {
+  background: var(--_keycap-primary-background);
+  color: var(--_keycap-primary-text);
+}
+.MLK__rows > .row .action.primary:hover {
+  background: var(--_keycap-primary-background-hover);
+  color: var(--_keycap-primary-text);
+}
+.MLK__rows > .row .shift.selected,
+.MLK__rows > .row .action.selected {
+  color: var(--_toolbar-text-active);
+}
+.MLK__rows > .row .shift.selected.is-pressed,
+.MLK__rows > .row .action.selected.is-pressed,
+.MLK__rows > .row .shift.selected.is-active,
+.MLK__rows > .row .action.selected.is-active {
+  color: white;
+}
+.MLK__rows > .row .warning {
+  background: #cd0030;
+  color: white;
+}
+.MLK__rows > .row .warning svg.svg-glyph {
+  width: 24px;
+  height: 24px;
+  min-height: 24px;
+}
+.MLK__rows > .row div {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: space-evenly;
+  width: calc(min(var(--_keycap-max-width), 10cqw) - var(--_keycap-gap));
+  height: var(--_keycap-height);
+  box-sizing: border-box;
+  padding: 0;
+  vertical-align: top;
+  text-align: center;
+  float: left;
+  color: var(--_keycap-text);
+  fill: currentColor;
+  font-size: var(--_keycap-font-size);
+  background: var(--_keycap-background);
+  border: 1px solid var(--_keycap-border);
+  border-bottom-color: var(--_keycap-border-bottom);
+  border-radius: 6px;
+  cursor: pointer;
+  touch-action: none;
+  /* Keys with a variants panel */
+  position: relative;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.MLK__rows > .row div:hover {
+  background: var(--_keycap-background-hover);
+}
+.MLK__rows > .row div .ML__mathlive {
+  pointer-events: none;
+  touch-action: none;
+}
+.MLK__rows > .row div svg.svg-glyph {
+  margin: 8px 0;
+  width: 20px;
+  height: 20px;
+  min-height: 20px;
+}
+.MLK__rows > .row div svg.svg-glyph-lg {
+  margin: 8px 0;
+  width: 24px;
+  height: 24px;
+  min-height: 24px;
+}
+.MLK__rows > .row div.MLK__tex-math {
+  font-size: 25px;
+}
+.MLK__rows > .row div.is-pressed {
+  background: var(--_keycap-background-pressed);
+  color: var(--_keycap-text-pressed);
+}
+.MLK__rows > .row div.MLK__keycap.is-active,
+.MLK__rows > .row div.action.is-active,
+.MLK__rows > .row div.MLK__keycap.is-pressed,
+.MLK__rows > .row div.action.is-pressed {
+  z-index: calc(var(--_keyboard-zindex) - 5);
+}
+.MLK__rows > .row div.MLK__keycap.is-active aside,
+.MLK__rows > .row div.action.is-active aside,
+.MLK__rows > .row div.MLK__keycap.is-pressed aside,
+.MLK__rows > .row div.action.is-pressed aside {
+  display: none;
+}
+.MLK__rows > .row div.MLK__keycap.is-active .MLK__shift,
+.MLK__rows > .row div.action.is-active .MLK__shift,
+.MLK__rows > .row div.MLK__keycap.is-pressed .MLK__shift,
+.MLK__rows > .row div.action.is-pressed .MLK__shift {
+  display: none;
+}
+.MLK__rows > .row div.shift.is-pressed,
+.MLK__rows > .row div.MLK__keycap.is-pressed,
+.MLK__rows > .row div.action.is-pressed {
+  background: var(--_keycap-background-pressed);
+  color: var(--_keycap-text-pressed);
+}
+.MLK__rows > .row div.shift.is-active,
+.MLK__rows > .row div.MLK__keycap.is-active,
+.MLK__rows > .row div.action.is-active {
+  background: var(--_keycap-background-active);
+  color: var(--_keycap-text-active);
+}
+.MLK__rows > .row div small {
+  color: var(--_keycap-secondary-text);
+}
+.MLK__rows > .row div aside {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  line-height: 10px;
+  color: var(--_keycap-secondary-text);
+}
+/* Add an attribute 'data-tooltip' to display a tooltip on hover.
+Note there are a different set of tooltip rules for the keyboard toggle
+(it's in a different CSS tree) */
+.MLK__tooltip {
+  position: relative;
+}
+.MLK__tooltip::after {
+  position: absolute;
+  display: inline-table;
+  content: attr(data-tooltip);
+  top: inherit;
+  bottom: 100%;
+  width: max-content;
+  max-width: 200px;
+  padding: 8px 8px;
+  background: #616161;
+  color: #fff;
+  text-align: center;
+  z-index: 2;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 1, 1) 1s;
+  opacity: 0;
+  transform: scale(0.5);
+}
+.MLK__tooltip:hover {
+  position: relative;
+}
+.MLK__tooltip:hover::after {
+  opacity: 1;
+  transform: scale(1);
+}
+.MLK__toolbar {
+  align-self: center;
+  display: flex;
+  flex-flow: row;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 996px;
+  min-height: 32px;
+  /* Icons for undo/redo, etc. */
+}
+.MLK__toolbar svg {
+  height: 20px;
+  width: 20px;
+}
+.MLK__toolbar > .left {
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+  flex-flow: row;
+}
+.MLK__toolbar > .right {
+  display: flex;
+  justify-content: flex-end;
+  flex-flow: row;
+}
+.MLK__toolbar > div > div {
+  /* "button" in the toolbar */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--_toolbar-text);
+  fill: currentColor;
+  background: var(--_toolbar-background);
+  font-size: 135%;
+  padding: 4px 15px;
+  cursor: pointer;
+  width: max-content;
+  min-width: 42px;
+  min-height: 22px;
+  border: none;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 8px;
+  padding-top: 8px;
+  margin-top: 7px;
+  margin-bottom: 8px;
+  margin-left: 4px;
+  margin-right: 4px;
+  border-radius: 8px;
+  box-shadow: none;
+  border-bottom: 2px solid transparent;
+}
+.MLK__toolbar > div > div:not(.disabled):not(.selected):hover {
+  background: var(--_toolbar-background-hover);
+}
+.MLK__toolbar > div > div.disabled svg,
+.MLK__toolbar > div > div.disabled:hover svg,
+.MLK__toolbar > div > div.disabled.is-pressed svg {
+  color: var(--_toolbar-text);
+  opacity: 0.2;
+}
+.MLK__toolbar > div > div:hover,
+.MLK__toolbar > div > div:active,
+.MLK__toolbar > div > div.is-pressed,
+.MLK__toolbar > div > div.is-active {
+  color: var(--_toolbar-text-active);
+}
+.MLK__toolbar > div > div.selected {
+  color: var(--_toolbar-text-active);
+  background: var(--_toolbar-background-selected);
+  border-radius: 0;
+  border-bottom-color: var(--_toolbar-text-active);
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+}
+/* This is the element that displays variants on press+hold */
+.MLK__variant-panel {
+  visibility: hidden;
+  position: fixed;
+  display: flex;
+  flex-flow: row wrap-reverse;
+  justify-content: center;
+  align-content: center;
+  margin: 0;
+  padding: 0;
+  bottom: auto;
+  top: 0;
+  box-sizing: content-box;
+  transform: none;
+  z-index: calc(var(--_keyboard-zindex) + 1);
+  touch-action: none;
+  max-width: 350px;
+  background: var(--_variant-panel-background);
+  text-align: center;
+  border-radius: 6px;
+  padding: 6px;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  transition: none;
+}
+.MLK__variant-panel.is-visible {
+  visibility: visible;
+}
+.MLK__variant-panel.compact {
+  --_variant-keycap-length: var(--variant-keycap-length, 50px);
+  --_variant-keycap-font-size: var(--variant-keycap-font-size, 24px);
+  --_variant-keycap-aside-font-size: var(--variant-keycap-aside-font-size, 10px);
+}
+.MLK__variant-panel .item {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--_variant-keycap-font-size);
+  height: var(--_variant-keycap-length);
+  width: var(--_variant-keycap-length);
+  margin: 0;
+  box-sizing: border-box;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  background: transparent;
+  pointer-events: all;
+  cursor: pointer;
+  color: var(--_variant-keycap-text);
+  fill: currentColor;
+}
+@media (max-height: 412px) {
+  .MLK__variant-panel .item {
+    --_variant-keycap-font-size: var(--variant-keycap-font-size, 24px);
+    --_variant-keycap-length: var(--variant-keycap-length, 50px);
+  }
+}
+.MLK__variant-panel .item .ML__mathlive {
+  pointer-events: none;
+}
+.MLK__variant-panel .item.is-active {
+  background: var(--_variant-keycap-background-active);
+  color: var(--_variant-keycap-text-active);
+}
+.MLK__variant-panel .item.is-pressed {
+  background: var(--_variant-keycap-background-pressed);
+  color: var(--_variant-keycap-text-pressed);
+}
+.MLK__variant-panel .item.small {
+  font-size: var(--_keycap-small-font-size);
+}
+.MLK__variant-panel .item.swatch-button {
+  box-sizing: border-box;
+  background: #fbfbfb;
+}
+.MLK__variant-panel .item.swatch-button > span {
+  display: inline-block;
+  margin: 6px;
+  width: calc(100% - 12px);
+  height: calc(100% - 12px);
+  border-radius: 50%;
+}
+.MLK__variant-panel .item.swatch-button:hover {
+  background: #f0f0f0;
+}
+.MLK__variant-panel .item.swatch-button:hover > span {
+  border-radius: 2px;
+}
+.MLK__variant-panel .item.box > div,
+.MLK__variant-panel .item.box > span {
+  border: 1px dashed rgba(0, 0, 0, 0.24);
+}
+.MLK__variant-panel .item .warning {
+  min-height: 60px;
+  min-width: 60px;
+  background: #cd0030;
+  color: white;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+}
+.MLK__variant-panel .item .warning.is-pressed,
+.MLK__variant-panel .item .warning.is-active {
+  background: red;
+}
+.MLK__variant-panel .item .warning svg.svg-glyph {
+  width: 50px;
+  height: 50px;
+}
+.MLK__variant-panel .item aside {
+  font-size: var(--_variant-keycap-aside-font-size);
+  line-height: 12px;
+  opacity: 0.78;
+  padding-top: 2px;
+}
+.MLK__keycap {
+  position: relative;
+}
+.MLK__shift {
+  display: block;
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  font-size: var(--_keycap-shift-font-size);
+  color: var(--_keycap-shift-color);
+}
+.hide-shift .MLK__shift {
+  display: none;
+}
+@media (max-width: 414px) {
+  .MLK__variant-panel {
+    max-width: 350px;
+    --_variant-keycap-font-size: var(--variant-keycap-font-size, 24px);
+    --_variant-keycap-length: var(--variant-keycap-length, 50px);
+  }
+}
+/* @xs breakpoint: iPhone 5 */
+@container (max-width: 414px) {
+  .MLK__rows {
+    --_keycap-gap: min(var(--_keycap-gap, 2px), 2px);
+    --_keycap-height: min(var(--_keycap-height, 42px), 42px);
+    --_keycap-max-width: min(var(--_keycap-max-width, 62px), 62px);
+  }
+  .MLK__toolbar > div > div {
+    font-size: 100%;
+    padding: 0;
+    margin-left: 2px;
+    margin-right: 2px;
+  }
+  .MLK__rows .shift,
+  .MLK__rows .action {
+    font-size: 65%;
+  }
+  .MLK__rows .warning svg.svg-glyph {
+    width: 14px;
+    height: 14px;
+    min-height: 14px;
+  }
+}
+@container (max-width: 744px) {
+  .MLK__rows {
+    --_keycap-gap: min(var(--keycap-gap, 2px), 2px);
+    --_keycap-height: min(var(--keycap-height, 52px), 52px);
+    --_keycap-max-width: min(var(--keycap-max-width, 62px), 62px);
+  }
+  .MLK__toolbar > div > div {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .MLK__tooltip::after {
+    padding: 8px 16px;
+    font-size: 16px;
+  }
+  .MLK__rows > .row > div.fnbutton {
+    font-size: 16px;
+  }
+  .MLK__rows > .row > div.bigfnbutton {
+    font-size: calc(var(--_keycap-extra-small-font-size) / 1.55);
+  }
+  .MLK__rows > .row > div.small {
+    font-size: 13px;
+  }
+  .MLK__rows > .row > div > aside {
+    display: none;
+  }
+  .MLK__shift {
+    display: none;
+  }
+}
+/* Medium breakpoint: larger phones */
+@container (max-width: 768px) {
+  .MLK__rows {
+    --_keycap-height: min(var(--keycap-height, 42px), 42px);
+  }
+  .MLK__rows > .row > div > small {
+    font-size: 14px;
+  }
+}
+@container (max-width: 1444px) {
+  .MLK__rows .if-wide {
+    display: none;
+  }
+}
+`;
+
 // src/common/stylesheet.ts
-function injectStylesheet(id, css) {
+var gStylesheets;
+function getStylesheet(id) {
+  if (!gStylesheets)
+    gStylesheets = {};
+  if (gStylesheets[id])
+    return gStylesheets[id];
+  gStylesheets[id] = new CSSStyleSheet();
+  let content = "";
+  switch (id) {
+    case "mathfield-element":
+      content = `
+    :host { display: inline-block; background-color: field; color: fieldtext; border-width: 1px; border-style: solid; border-color: #acacac; border-radius: 2px; padding:4px; pointer-events: none;}
+    :host([hidden]) { display: none; }
+    :host([disabled]), :host([disabled]:focus), :host([disabled]:focus-within) { outline: none; opacity:  .5; }
+    :host(:focus), :host(:focus-within) {
+      outline: Highlight auto 1px;    /* For Firefox */
+      outline: -webkit-focus-ring-color auto 1px;
+    }
+    :host([readonly]:focus), :host([readonly]:focus-within),
+    :host([read-only]:focus), :host([read-only]:focus-within) {
+      outline: none;
+    }`;
+      break;
+    case "core":
+      content = core_default;
+      break;
+    case "mathfield":
+      content = mathfield_default;
+      break;
+    case "environment-popover":
+      content = environment_popover_default;
+      break;
+    case "suggestion-popover":
+      content = suggestion_popover_default;
+      break;
+    case "keystroke-caption":
+      content = keystroke_caption_default;
+      break;
+    case "virtual-keyboard":
+      content = virtual_keyboard_default;
+      break;
+    default:
+      debugger;
+  }
+  gStylesheets[id].replaceSync(content);
+  return gStylesheets[id];
+}
+var gInjectedStylesheets;
+function injectStylesheet(id) {
   var _a3;
-  if (!css)
-    return;
-  const element_ = document.getElementById(id);
-  if (element_) {
-    const refCount = Number.parseInt((_a3 = element_.dataset.refcount) != null ? _a3 : "0");
-    element_.dataset.refcount = Number(refCount + 1).toString();
-  } else {
-    const styleNode = document.createElement("style");
-    styleNode.id = id;
-    styleNode.dataset.refcount = "1";
-    styleNode.append(document.createTextNode(css));
-    document.head.appendChild(styleNode);
+  if (!gInjectedStylesheets)
+    gInjectedStylesheets = {};
+  if (((_a3 = gInjectedStylesheets[id]) != null ? _a3 : 0) !== 0)
+    gInjectedStylesheets[id] += 1;
+  else {
+    const stylesheet = getStylesheet(id);
+    document.adoptedStyleSheets = [...document.adoptedStyleSheets, stylesheet];
+    gInjectedStylesheets[id] = 1;
   }
 }
 function releaseStylesheet(id) {
-  var _a3;
-  const element_ = document.getElementById(id);
-  if (!element_)
+  if (!(gInjectedStylesheets == null ? void 0 : gInjectedStylesheets[id]))
     return;
-  const refCount = Number.parseInt((_a3 = element_.dataset.refcount) != null ? _a3 : "0");
-  if (refCount <= 1)
-    element_.remove();
-  else
-    element_.dataset.refcount = Number(refCount - 1).toString();
+  gInjectedStylesheets[id] -= 1;
+  if (gInjectedStylesheets[id] <= 0) {
+    console.log("releasign stylesheet ", id);
+    const stylesheet = gStylesheets[id];
+    document.adoptedStyleSheets = document.adoptedStyleSheets.filter(
+      (x) => x !== stylesheet
+    );
+  }
 }
 
 // src/core-atoms/accent.ts
 var AccentAtom = class extends Atom {
-  constructor(command, body, options) {
-    super({ type: "accent", command, style: options.style });
+  constructor(options) {
+    var _a3;
+    super(__spreadProps(__spreadValues({}, options), { type: "accent", body: (_a3 = options.body) != null ? _a3 : void 0 }));
     if (options.accentChar)
       this.accent = options.accentChar;
     else
       this.svgAccent = options == null ? void 0 : options.svgAccent;
-    this.body = body;
     this.skipBoundary = true;
     this.captureSelection = true;
   }
   static fromJson(json) {
-    return new AccentAtom(json.command, json.body, {
-      accentChar: json.accentChar,
-      svgAccent: json.svgAccent,
-      style: json.style
-    });
+    return new AccentAtom(json);
   }
   toJson() {
     return __spreadProps(__spreadValues({}, super.toJson()), {
@@ -9349,7 +12973,7 @@ var AccentAtom = class extends Atom {
       { parent: parentContext, mathstyle: "cramp" },
       this.style
     );
-    const base = (_a3 = Atom.createBox(context, this.body)) != null ? _a3 : new Box(null);
+    const base = (_a3 = Atom.createBox(context, this.body)) != null ? _a3 : new Box("\u25A2", { style: this.style });
     let skew = 0;
     if (!this.hasEmptyBranch("body") && this.body.length === 2 && this.body[1].isCharacterBox())
       skew = base.skew;
@@ -9479,12 +13103,10 @@ function makeSmallDelim(delim, context, center, options) {
   var _a3;
   const text = new Box(getSymbolValue(delim), {
     fontFamily: "Main-Regular",
-    isSelected: options.isSelected
-  });
-  const box = text.wrap(context, {
-    type: options.type,
+    isSelected: options.isSelected,
     classes: "ML__small-delim " + ((_a3 = options.classes) != null ? _a3 : "")
   });
+  const box = text.wrap(context);
   if (center)
     box.setTop((1 - context.scalingFactor) * AXIS_HEIGHT);
   return box;
@@ -9872,9 +13494,9 @@ function makeLeftRightDelim(type, delim, height, depth, context, options) {
 function makeNullDelimiter(parent, classes) {
   const box = new Box(null, {
     classes: " nulldelimiter " + (classes != null ? classes : ""),
-    type: "ignore"
+    type: "ignore",
+    width: parent.getRegisterAsEm("nulldelimiterspace")
   });
-  box.width = parent.getRegisterAsEm("nulldelimiterspace");
   return box.wrap(new Context({ parent, mathstyle: "textstyle" }));
 }
 
@@ -9907,7 +13529,7 @@ var PlaceholderAtom = class extends Atom {
       result.classes += " ML__placeholder-selected";
     return result;
   }
-  serialize() {
+  _serialize() {
     return "\\placeholder{}";
   }
 };
@@ -10301,7 +13923,7 @@ var ArrayAtom = class extends Atom {
       result.caret = this.caret;
     return this.attachSupsub(context, { base: result });
   }
-  serialize(options) {
+  _serialize(options) {
     var _a3;
     const result = [`\\begin{${this.environmentName}}`];
     if (this.environmentName === "array") {
@@ -10487,9 +14109,7 @@ function makePlaceholderCell(parent) {
   return [first, placeholder];
 }
 function makeColGap(width) {
-  const separator = new Box(null, { classes: "arraycolsep" });
-  separator.width = width;
-  return separator;
+  return new Box(null, { classes: "arraycolsep", width });
 }
 function makeColOfRepeatingElements(context, rows, offset, element) {
   if (!element)
@@ -10508,65 +14128,60 @@ function makeColOfRepeatingElements(context, rows, offset, element) {
 
 // src/core-atoms/box.ts
 var BoxAtom = class extends Atom {
-  constructor(command, body, options) {
-    super({ type: "box", command, style: options.style });
-    this.body = body;
+  constructor(options) {
+    super({
+      mode: options.mode,
+      command: options.command,
+      style: options.style,
+      body: options.body,
+      type: "box"
+    });
     this.framecolor = options.framecolor;
     this.backgroundcolor = options.backgroundcolor;
     this.padding = options.padding;
+    this.offset = options.offset;
     this.border = options.border;
   }
   static fromJson(json) {
-    return new BoxAtom(json.command, json.body, json);
+    return new BoxAtom(json);
   }
   toJson() {
     return __spreadProps(__spreadValues({}, super.toJson()), {
       framecolor: this.framecolor,
       backgroundcolor: this.backgroundcolor,
       padding: this.padding,
-      raise: this.raise,
+      offset: this.offset,
       border: this.border
     });
   }
   render(parentContext) {
-    var _a3, _b3;
-    const context = new Context({ parent: parentContext }, this.style);
-    const fboxsep = context.getRegisterAsEm("fboxsep");
-    const padding2 = this.padding ? context.toEm(this.padding) : fboxsep;
-    const base = Atom.createBox(parentContext, this.body, { type: "ord" });
+    var _a3, _b3, _c2, _d2;
+    const base = Atom.createBox(parentContext, this.body, { type: "lift" });
     if (!base)
       return null;
-    let borderWidth = "";
-    if (this.framecolor)
-      borderWidth = `${context.getRegisterAsEm("fboxrule")}em`;
-    else if (this.border)
-      borderWidth = lineWidth(this.border);
+    const offset = parentContext.toEm((_a3 = this.offset) != null ? _a3 : { dimension: 0 });
+    base.depth += offset;
+    const context = new Context({ parent: parentContext }, this.style);
+    const padding2 = context.toEm((_b3 = this.padding) != null ? _b3 : { register: "fboxsep" });
     const box = new Box(null, { classes: "ML__box" });
     box.height = base.height + padding2;
     box.depth = base.depth + padding2;
     box.setStyle("box-sizing", "border-box");
     box.setStyle("position", "absolute");
-    if (!borderWidth)
-      box.setStyle("bottom", padding2, "em");
-    else
-      box.setStyle("bottom", `calc(${padding2}em - 2 * ${borderWidth})`);
+    box.setStyle("top", -padding2 + 0.3, "em");
     box.setStyle("height", box.height + box.depth, "em");
-    if (padding2 === 0)
-      box.setStyle("width", "100%");
-    else {
-      box.setStyle("width", `calc(100% + ${2 * padding2}em)`);
-      box.setStyle("left", -padding2, "em");
-    }
+    box.setStyle("left", 0);
+    box.setStyle("width", "100%");
     if (this.backgroundcolor) {
       box.setStyle(
         "background-color",
-        (_a3 = context.toColor(this.backgroundcolor)) != null ? _a3 : "transparent"
+        (_c2 = context.toColor(this.backgroundcolor)) != null ? _c2 : "transparent"
       );
     }
     if (this.framecolor) {
       box.setStyle(
         "border",
-        `${context.getRegisterAsEm("fboxrule", 2)}em solid ${(_b3 = context.toColor(this.framecolor)) != null ? _b3 : "black"}`
+        `${context.getRegisterAsEm("fboxrule", 2)}em solid ${(_d2 = context.toColor(this.framecolor)) != null ? _d2 : "black"}`
       );
     }
     if (this.border)
@@ -10575,29 +14190,36 @@ var BoxAtom = class extends Atom {
     base.setStyle("position", "relative");
     base.setStyle("height", base.height + base.depth, "em");
     base.setStyle("vertical-align", -base.height, "em");
-    const result = new Box([box, base]);
+    const result = new Box([box, base], { type: "lift" });
     result.setStyle("display", "inline-block");
     result.setStyle("position", "relative");
     result.setStyle("line-height", 0);
-    result.height = base.height + padding2;
-    result.depth = base.depth + padding2;
-    result.left = padding2;
-    result.right = padding2;
-    result.setStyle("height", base.height + base.depth + 2 * padding2, "em");
+    result.height = base.height + padding2 + (offset > 0 ? offset : 0);
+    result.depth = base.depth + padding2 + (offset < 0 ? -offset : 0);
+    result.setStyle("padding-left", padding2, "em");
+    result.setStyle("padding-right", padding2, "em");
+    result.setStyle(
+      "height",
+      base.height + base.depth + 2 * padding2 + Math.abs(offset),
+      "em"
+    );
     result.setStyle("margin-top", -padding2, "em");
-    result.setStyle("top", base.depth - base.height + 2 * padding2, "em");
+    result.setStyle(
+      "top",
+      base.depth - base.height + 2 * padding2 - offset,
+      "em"
+    );
     result.setStyle("vertical-align", base.depth + 2 * padding2, "em");
     if (this.caret)
       result.caret = this.caret;
     return this.attachSupsub(parentContext, { base: result });
   }
+  _serialize(options) {
+    if (!options.skipStyles)
+      return super._serialize(options);
+    return joinLatex([this.bodyToLatex(options), this.supsubToLatex(options)]);
+  }
 };
-function lineWidth(s) {
-  const m = s.match(/[\d]+(\.[\d]+)?[a-zA-Z]+/);
-  if (m)
-    return m[0];
-  return "";
-}
 
 // src/core-atoms/composition.ts
 var CompositionAtom = class extends Atom {
@@ -10624,7 +14246,7 @@ var CompositionAtom = class extends Atom {
       result.caret = this.caret;
     return result;
   }
-  serialize(_options) {
+  _serialize(_options) {
     return "";
   }
 };
@@ -10651,64 +14273,33 @@ var ErrorAtom = class extends Atom {
 
 // src/core-atoms/group.ts
 var GroupAtom = class extends Atom {
-  constructor(arg, options) {
-    var _a3;
-    super({
-      type: "group",
-      mode: (_a3 = options == null ? void 0 : options.mode) != null ? _a3 : "math",
-      style: options == null ? void 0 : options.style
-    });
+  constructor(arg, mode, style) {
+    super({ type: "group", mode, style });
     this.body = arg;
-    this.mathstyleName = options == null ? void 0 : options.mathstyleName;
-    this.latexOpen = options == null ? void 0 : options.latexOpen;
-    this.latexClose = options == null ? void 0 : options.latexClose;
-    this.boxType = options == null ? void 0 : options.boxType;
+    this.boxType = arg.length > 1 ? "ord" : "ignore";
     this.skipBoundary = true;
     this.displayContainsHighlight = false;
     if (arg && arg.length === 1 && arg[0].command === ",")
       this.captureSelection = true;
   }
   static fromJson(json) {
-    return new GroupAtom(json.body, json);
-  }
-  toJson() {
-    const result = {};
-    if (this.mathstyleName)
-      result.mathstyleName = this.mathstyleName;
-    if (this.latexOpen)
-      result.latexOpen = this.latexOpen;
-    if (this.latexClose)
-      result.latexClose = this.latexClose;
-    if (this.boxType)
-      result.boxType = this.boxType;
-    return __spreadValues(__spreadValues({}, super.toJson()), result);
+    return new GroupAtom(json.body, json.mode, json.style);
   }
   render(context) {
-    const localContext = new Context(
-      { parent: context, mathstyle: this.mathstyleName },
-      this.style
-    );
-    const box = Atom.createBox(localContext, this.body, {
-      type: this.boxType,
-      mode: this.mode,
-      style: { backgroundColor: this.style.backgroundColor }
-    });
+    const box = Atom.createBox(context, this.body, { type: this.boxType });
     if (!box)
       return null;
     if (this.caret)
       box.caret = this.caret;
     return this.bind(context, box);
   }
-  serialize(options) {
-    if (!options.expandMacro && typeof this.verbatimLatex === "string")
+  _serialize(options) {
+    if (!(options.expandMacro || options.skipStyles) && typeof this.verbatimLatex === "string")
       return this.verbatimLatex;
     const def = getDefinition(this.command, this.mode);
     if (def == null ? void 0 : def.serialize)
       return def.serialize(this, options);
-    const body = this.bodyToLatex(options);
-    if (typeof this.latexOpen === "string")
-      return this.latexOpen + body + this.latexClose;
-    return body;
+    return `{${this.bodyToLatex(options)}}`;
   }
 };
 
@@ -10739,7 +14330,7 @@ var LeftRightAtom = class extends Atom {
       result.rightDelim = this.rightDelim;
     return result;
   }
-  serialize(options) {
+  _serialize(options) {
     var _a3, _b3;
     const rightDelim = this.matchingRightDelim();
     if (this.variant === "left...right") {
@@ -10902,7 +14493,7 @@ var MacroAtom = class extends Atom {
       options.args = this.macroArgs;
     return options;
   }
-  serialize(options) {
+  _serialize(options) {
     var _a3;
     return options.expandMacro && this.expand ? this.bodyToLatex(options) : this.command + ((_a3 = this.macroArgs) != null ? _a3 : "");
   }
@@ -10926,7 +14517,7 @@ var MacroArgumentAtom = class extends Atom {
     const options = super.toJson();
     return options;
   }
-  serialize(options) {
+  _serialize(options) {
     return "";
   }
   render(context) {
@@ -10975,9 +14566,7 @@ var PromptAtom = class extends Atom {
   }
   render(parentContext) {
     const context = new Context({ parent: parentContext });
-    const fboxsep = convertDimensionToEm(
-      context.getRegisterAsDimension("fboxsep")
-    );
+    const fboxsep = context.getRegisterAsEm("fboxsep");
     const padding2 = fboxsep;
     const content = Atom.createBox(parentContext, this.body);
     if (!content)
@@ -11056,7 +14645,7 @@ var PromptAtom = class extends Atom {
       this.attachSupsub(parentContext, { base: result })
     );
   }
-  serialize(options) {
+  _serialize(options) {
     var _a3;
     const value = (_a3 = this.bodyToLatex(options)) != null ? _a3 : "";
     let command = "\\placeholder";
@@ -11099,7 +14688,7 @@ var SubsupAtom = class extends Atom {
       type: "ignore"
     });
   }
-  serialize(options) {
+  _serialize(options) {
     return this.supsubToLatex(options);
   }
 };
@@ -11538,16 +15127,17 @@ var Parser = class {
       return null;
     }
     register3 = register3.substring(1);
-    if (this.context.registers[register3]) {
-      if (!negative || number !== null) {
-        return {
-          register: register3,
-          factor: (negative ? -1 : 1) * ((_a3 = number == null ? void 0 : number.number) != null ? _a3 : 1)
-        };
-      }
-      return { register: register3 };
+    if (!this.context.registers[register3]) {
+      this.index = index;
+      return null;
     }
-    return null;
+    if (!negative || number !== null) {
+      return {
+        register: register3,
+        factor: (negative ? -1 : 1) * ((_a3 = number == null ? void 0 : number.number) != null ? _a3 : 1)
+      };
+    }
+    return { register: register3 };
   }
   scanValue() {
     const register3 = this.scanRegister();
@@ -11674,23 +15264,12 @@ var Parser = class {
     if (!mathstyle)
       return null;
     this.beginContext({ mode: "math", mathstyle });
-    const result = new GroupAtom(
-      this.scan(
-        (token) => token === (mathstyle === "displaystyle" ? "\\]" : "\\)")
-      ),
-      {
-        mathstyleName: mathstyle,
-        latexOpen: mathstyle === "displaystyle" ? "\\[" : "\\(",
-        latexClose: mathstyle === "displaystyle" ? "\\]" : "\\)",
-        boxType: "lift",
-        style: this.style
-      }
+    const result = this.scan(
+      (token) => token === (mathstyle === "displaystyle" ? "\\]" : "\\)")
     );
     if (!this.match(mathstyle === "displaystyle" ? "\\]" : "\\)"))
       this.onError({ code: "unbalanced-mode-shift" });
     this.endContext();
-    if (result.hasEmptyBranch("body"))
-      return null;
     return result;
   }
   /**
@@ -11708,21 +15287,10 @@ var Parser = class {
       mode: "math",
       mathstyle: "<$>" ? "textstyle" : "displaystyle"
     });
-    const result = new GroupAtom(
-      this.scan((token) => token === final),
-      {
-        mathstyleName: final === "<$>" ? "textstyle" : "displaystyle",
-        latexOpen: final === "<$>" ? "$ " : "$$ ",
-        latexClose: final === "<$>" ? " $" : " $$",
-        boxType: "lift",
-        style: this.style
-      }
-    );
+    const result = this.scan((token) => token === final);
     if (!this.match(final))
       this.onError({ code: "unbalanced-mode-shift" });
     this.endContext();
-    if (result.hasEmptyBranch("body"))
-      return null;
     return result;
   }
   /**
@@ -11838,7 +15406,6 @@ var Parser = class {
    * group
    */
   scan(done) {
-    var _a3;
     this.beginContext();
     if (!done)
       done = (token) => token === "<}>";
@@ -11846,10 +15413,7 @@ var Parser = class {
     let infixInfo = null;
     let infixArgs = [];
     let prefix = null;
-    console.assert(this.mathlist.length === 0);
-    const saveAtoms = this.mathlist;
-    this.mathlist = [];
-    while (!this.end() && !done((_a3 = this.peek()) != null ? _a3 : "")) {
+    while (!this.end() && !done(this.peek())) {
       if (this.hasInfixCommand() && !infix) {
         infix = this.get();
         infixInfo = getDefinition(infix, "math");
@@ -11864,14 +15428,18 @@ var Parser = class {
     if (infix) {
       console.assert(Boolean(infixInfo));
       infixArgs.unshift(this.mathlist);
-      this.mathlist = saveAtoms;
       if (prefix)
         infixArgs.unshift(prefix);
-      result = [infixInfo.createAtom(infix, infixArgs, this.style)];
-    } else {
+      result = [
+        infixInfo.createAtom({
+          command: infix,
+          args: infixArgs,
+          style: this.style,
+          mode: this.parseMode
+        })
+      ];
+    } else
       result = this.mathlist;
-      this.mathlist = saveAtoms;
-    }
     this.endContext();
     return result;
   }
@@ -11885,36 +15453,12 @@ var Parser = class {
    */
   scanGroup() {
     const initialIndex = this.index;
-    if (this.parseMode === "text") {
-      if (this.match("<{>")) {
-        return new Atom({
-          type: "text",
-          value: "{",
-          mode: "text",
-          style: this.style
-        });
-      }
-      if (this.match("<}>")) {
-        return new Atom({
-          type: "text",
-          value: "}",
-          mode: "text",
-          style: this.style
-        });
-      }
-      return null;
-    }
     if (!this.match("<{>"))
       return null;
     const body = this.scan((token) => token === "<}>");
     if (!this.match("<}>"))
       this.onError({ code: "unbalanced-braces" });
-    const result = new GroupAtom(body, {
-      boxType: body.length > 1 ? "ord" : "ignore",
-      mode: this.parseMode,
-      latexOpen: "{",
-      latexClose: "}"
-    });
+    const result = new GroupAtom(body, this.parseMode, this.style);
     result.verbatimLatex = tokensToString(
       this.tokens.slice(initialIndex, this.index)
     );
@@ -12033,10 +15577,11 @@ var Parser = class {
     let token = this.peek();
     if (token !== "^" && token !== "_" && token !== "'")
       return false;
+    const target = this.lastSubsupAtom();
     while (token === "^" || token === "_" || token === "'") {
       if (this.match("'")) {
         if (this.match("'")) {
-          this.lastSubsupAtom().addChild(
+          target.addChild(
             new Atom({
               type: "mord",
               command: "\\doubleprime",
@@ -12047,7 +15592,7 @@ var Parser = class {
             "superscript"
           );
         } else {
-          this.lastSubsupAtom().addChild(
+          target.addChild(
             new Atom({
               type: "mord",
               command: "\\prime",
@@ -12058,7 +15603,7 @@ var Parser = class {
           );
         }
       } else if (this.match("^") || this.match("_")) {
-        this.lastSubsupAtom().addChildren(
+        target.addChildren(
           argAtoms(this.scanArgument("expression")),
           token === "_" ? "subscript" : "superscript"
         );
@@ -12078,6 +15623,8 @@ var Parser = class {
    * `displaystyle` prefers `\limits`).
    */
   parseLimits() {
+    if (this.parseMode !== "math")
+      return false;
     const isLimits = this.match("\\limits");
     const isNoLimits = !isLimits && this.match("\\nolimits");
     const isDisplayLimits = !isNoLimits && !isLimits && this.match("\\displaylimits");
@@ -12086,22 +15633,14 @@ var Parser = class {
     const opAtom = this.mathlist.length > 0 ? this.mathlist[this.mathlist.length - 1] : null;
     if (opAtom === null || opAtom.type !== "mop")
       return false;
-    if (isLimits) {
+    opAtom.explicitSubsupPlacement = true;
+    if (isLimits)
       opAtom.subsupPlacement = "over-under";
-      opAtom.explicitSubsupPlacement = true;
-      return true;
-    }
-    if (isNoLimits) {
+    if (isNoLimits)
       opAtom.subsupPlacement = "adjacent";
-      opAtom.explicitSubsupPlacement = true;
-      return true;
-    }
-    if (isDisplayLimits) {
+    if (isDisplayLimits)
       opAtom.subsupPlacement = "auto";
-      opAtom.explicitSubsupPlacement = true;
-      return true;
-    }
-    return false;
+    return true;
   }
   scanArguments(info) {
     if (!(info == null ? void 0 : info.params))
@@ -12163,8 +15702,14 @@ var Parser = class {
       } else if (info.applyMode || info.applyStyle || info.infix) {
         this.onError({ code: "invalid-command", arg: token });
         return [new ErrorAtom(token)];
-      } else if (info.createAtom)
-        result = info.createAtom(token, [], this.style);
+      } else if (info.createAtom) {
+        result = info.createAtom({
+          command: token,
+          args: [],
+          style: this.style,
+          mode: this.parseMode
+        });
+      }
     }
     return result ? [result] : null;
   }
@@ -12205,19 +15750,16 @@ var Parser = class {
       return null;
     }
     if (type === "text") {
-      this.beginContext({ mode: type });
-      this.index -= 1;
-      const s = this.scanLiteralGroup();
-      const atoms = parseLatex(s, {
-        context: this.context,
-        parseMode: "text",
-        style: this.parsingContext.style
-      });
+      this.beginContext({ mode: "text" });
+      do
+        this.mathlist.push(...this.scan());
+      while (!this.match("<}>") && !this.end());
+      const atoms = this.mathlist;
       this.endContext();
       return { group: atoms };
     }
     if (type === "math") {
-      this.beginContext({ mode: type });
+      this.beginContext({ mode: "math" });
       do
         this.mathlist.push(...this.scan());
       while (!this.match("<}>") && !this.end());
@@ -12288,7 +15830,7 @@ var Parser = class {
   }
   /** Parse a symbol or a command and its arguments */
   scanSymbolOrCommand(command) {
-    var _a3, _b3, _c2, _d2;
+    var _a3, _b3;
     if (command === "\\placeholder") {
       const id = this.scanOptionalArgument("string");
       const defaultValue = this.scanOptionalArgument("math");
@@ -12328,21 +15870,6 @@ var Parser = class {
         ];
       }
       return [new PlaceholderAtom({ mode: this.parseMode, style: this.style })];
-    }
-    if (command === "\\char") {
-      const initialIndex2 = this.index;
-      let codepoint = (_b3 = (_a3 = this.scanNumber(true)) == null ? void 0 : _a3.number) != null ? _b3 : NaN;
-      if (!Number.isFinite(codepoint) || codepoint < 0 || codepoint > 1114111)
-        codepoint = 10067;
-      return [
-        new Atom({
-          type: this.parseMode === "math" ? "mord" : "text",
-          command: "\\char",
-          mode: this.parseMode,
-          value: String.fromCodePoint(codepoint),
-          verbatimLatex: "\\char" + tokensToString(this.tokens.slice(initialIndex2, this.index))
-        })
-      ];
     }
     let result = this.scanMacro(command);
     if (result)
@@ -12393,7 +15920,12 @@ var Parser = class {
         return null;
       }
       if (typeof info.createAtom === "function") {
-        result = info.createAtom(command, args, this.style);
+        result = info.createAtom({
+          command,
+          args,
+          style: this.style,
+          mode: this.parseMode
+        });
         if (deferredArg)
           result.body = argAtoms(this.scanArgument(deferredArg));
       } else if (typeof info.applyStyle === "function") {
@@ -12413,10 +15945,10 @@ var Parser = class {
       } else {
         result = new Atom({
           type: "mord",
-          command: (_c2 = info.command) != null ? _c2 : command,
+          command: (_a3 = info.command) != null ? _a3 : command,
           style: __spreadValues({}, this.style),
           value: command,
-          mode: (_d2 = info.applyMode) != null ? _d2 : this.parseMode
+          mode: (_b3 = info.applyMode) != null ? _b3 : this.parseMode
         });
       }
     }
@@ -12574,14 +16106,14 @@ var ChemAtom = class extends Atom {
       box.caret = this.caret;
     return this.bind(context, box);
   }
-  serialize(_options) {
+  _serialize(_options) {
     return this.verbatimLatex;
   }
 };
 defineFunction(["ce", "pu"], "{chemformula:balanced-string}", {
-  createAtom: (command, args) => {
+  createAtom: (options) => {
     var _a3;
-    return new ChemAtom(command, (_a3 = args[0]) != null ? _a3 : "");
+    return new ChemAtom(options.command, (_a3 = options.args[0]) != null ? _a3 : "");
   }
 });
 var mhchemParser = {
@@ -14849,61 +18381,15 @@ function assertNever(a) {
 function assertString(a) {
 }
 
-// src/core-atoms/choice.ts
-var ChoiceAtom = class extends Atom {
-  constructor(choices) {
-    super({ type: "choice" });
-    this.choices = choices;
-    this.skipBoundary = true;
-  }
-  static fromJson(json) {
-    return new ChoiceAtom([
-      fromJson(json.choices[0]),
-      fromJson(json.choices[1]),
-      fromJson(json.choices[2]),
-      fromJson(json.choices[3])
-    ]);
-  }
-  toJson() {
-    const choices = [];
-    for (const choice of this.choices) {
-      choices.push(
-        choice.filter((x) => x.type !== "first").map((x) => x.toJson())
-      );
-    }
-    return __spreadProps(__spreadValues({}, super.toJson()), { choices });
-  }
-  render(context) {
-    const box = Atom.createBox(
-      context,
-      this.choices[Math.floor(context.mathstyle.id / 2)]
-    );
-    if (!box)
-      return null;
-    if (this.caret)
-      box.caret = this.caret;
-    return this.bind(context, box);
-  }
-  serialize(options) {
-    return latexCommand(
-      "\\mathchoice",
-      Atom.serialize(this.choices[0], options),
-      Atom.serialize(this.choices[1], options),
-      Atom.serialize(this.choices[2], options),
-      Atom.serialize(this.choices[3], options)
-    );
-  }
-};
-
 // src/core-atoms/delim.ts
-var DelimAtom = class extends Atom {
-  constructor(command, delim, options) {
-    super({ type: "delim", command, style: options == null ? void 0 : options.style });
-    this.value = delim;
-    this.size = options == null ? void 0 : options.size;
+var MiddleDelimAtom = class extends Atom {
+  constructor(options) {
+    super(__spreadProps(__spreadValues({}, options), { type: "delim" }));
+    this.value = options.delim;
+    this.size = options.size;
   }
   static fromJson(json) {
-    return new DelimAtom(json.command, json.delim, json);
+    return new MiddleDelimAtom(json);
   }
   toJson() {
     return __spreadProps(__spreadValues({}, super.toJson()), { delim: this.value, size: this.size });
@@ -14911,8 +18397,8 @@ var DelimAtom = class extends Atom {
   render(_context) {
     return new Box(this.value, { type: "middle" });
   }
-  serialize(options) {
-    if (!options.expandMacro && typeof this.verbatimLatex === "string")
+  _serialize(options) {
+    if (!(options.expandMacro || options.skipStyles) && typeof this.verbatimLatex === "string")
       return this.verbatimLatex;
     const def = getDefinition(this.command, this.mode);
     if (def == null ? void 0 : def.serialize)
@@ -14921,14 +18407,13 @@ var DelimAtom = class extends Atom {
   }
 };
 var SizedDelimAtom = class extends Atom {
-  constructor(command, delim, options) {
-    super({ type: "sizeddelim", command, style: options.style });
-    this.value = delim;
+  constructor(options) {
+    super(__spreadProps(__spreadValues({}, options), { type: "sizeddelim", value: options.delim }));
     this.delimType = options.delimType;
     this.size = options.size;
   }
   static fromJson(json) {
-    return new SizedDelimAtom(json.command, json.delim, json);
+    return new SizedDelimAtom(json);
   }
   toJson() {
     return __spreadProps(__spreadValues({}, super.toJson()), {
@@ -14950,8 +18435,8 @@ var SizedDelimAtom = class extends Atom {
       result.caret = this.caret;
     return result;
   }
-  serialize(options) {
-    if (!options.expandMacro && typeof this.verbatimLatex === "string")
+  _serialize(options) {
+    if (!(options.expandMacro || options.skipStyles) && typeof this.verbatimLatex === "string")
       return this.verbatimLatex;
     const def = getDefinition(this.command, this.mode);
     if (def == null ? void 0 : def.serialize)
@@ -15004,9 +18489,9 @@ var EncloseAtom = class extends Atom {
       padding: this.padding
     });
   }
-  serialize(options) {
+  _serialize(options) {
     var _a3;
-    if (!options.expandMacro && typeof this.verbatimLatex === "string")
+    if (!(options.expandMacro || options.skipStyles) && typeof this.verbatimLatex === "string")
       return this.verbatimLatex;
     const def = getDefinition(this.command, this.mode);
     if (def == null ? void 0 : def.serialize)
@@ -15154,14 +18639,12 @@ function borderDim(s) {
 
 // src/core-atoms/genfrac.ts
 var GenfracAtom = class extends Atom {
-  constructor(command, above, below, options) {
+  constructor(above, below, options) {
     var _a3, _b3;
-    super({
+    super(__spreadProps(__spreadValues({}, options), {
       type: "genfrac",
-      style: options.style,
-      command,
       displayContainsHighlight: true
-    });
+    }));
     this.above = above;
     this.below = below;
     this.hasBarLine = (_a3 = options == null ? void 0 : options.hasBarLine) != null ? _a3 : true;
@@ -15175,7 +18658,6 @@ var GenfracAtom = class extends Atom {
   }
   static fromJson(json) {
     return new GenfracAtom(
-      json.command,
       json.above,
       json.below,
       json
@@ -15263,18 +18745,18 @@ var GenfracAtom = class extends Atom {
     let clearance = 0;
     let denomShift;
     if (fracContext.isDisplayStyle) {
-      numerShift = metrics.num1;
+      numerShift = numContext.metrics.num1;
       clearance = ruleWidth > 0 ? 3 * ruleWidth : 7 * ruleWidth;
-      denomShift = metrics.denom1;
+      denomShift = denomContext.metrics.denom1;
     } else {
       if (ruleWidth > 0) {
-        numerShift = metrics.num2;
+        numerShift = numContext.metrics.num2;
         clearance = ruleWidth;
       } else {
-        numerShift = metrics.num3;
-        clearance = 3 * ruleWidth;
+        numerShift = numContext.metrics.num3;
+        clearance = 3 * metrics.defaultRuleThickness;
       }
-      denomShift = metrics.denom2;
+      denomShift = denomContext.metrics.denom2;
     }
     const classes = [];
     if (this.isSelected)
@@ -15323,7 +18805,7 @@ var GenfracAtom = class extends Atom {
             shift: denomShift,
             classes: [...classes, "ML__center"]
           },
-          { box: fracLine, shift: -denomLine + ruleWidth / 2, classes },
+          { box: fracLine, shift: -denomLine, classes },
           {
             box: numerBox,
             shift: -numerShift,
@@ -15407,6 +18889,8 @@ var LatexAtom = class extends Atom {
     return {};
   }
   render(context) {
+    if (this.isError)
+      return null;
     const result = new Box(this.value, {
       classes: this.isSuggestion ? "ML__suggestion" : this.isError ? "ML__error" : "",
       type: "latex",
@@ -15439,72 +18923,21 @@ var LatexGroupAtom = class extends Atom {
       box.caret = this.caret;
     return this.bind(context, box);
   }
-  serialize(_options) {
+  _serialize(_options) {
     var _a3, _b3;
     return (_b3 = (_a3 = this.body) == null ? void 0 : _a3.map((x) => x.value).join("")) != null ? _b3 : "";
   }
 };
 
-// src/core-atoms/line.ts
-var LineAtom = class extends Atom {
-  constructor(command, body, options) {
-    super({ type: "line", command, style: options.style });
-    this.skipBoundary = true;
-    this.body = body;
-    this.position = options.position;
-  }
-  static fromJson(json) {
-    return new LineAtom(json.command, json.body, json);
-  }
-  toJson() {
-    return __spreadProps(__spreadValues({}, super.toJson()), { position: this.position });
-  }
-  render(parentContext) {
-    const context = new Context(
-      { parent: parentContext, mathstyle: "cramp" },
-      this.style
-    );
-    const inner = Atom.createBox(context, this.body);
-    if (!inner)
-      return null;
-    const ruleWidth = context.metrics.defaultRuleThickness / context.scalingFactor;
-    const line = new Box(null, { classes: this.position + "-line" });
-    line.height = ruleWidth;
-    line.maxFontSize = ruleWidth * 1.125 * context.scalingFactor;
-    let stack;
-    if (this.position === "overline") {
-      stack = new VBox({
-        shift: 0,
-        children: [{ box: inner }, 3 * ruleWidth, { box: line }, ruleWidth]
-      });
-    } else {
-      stack = new VBox({
-        top: inner.height,
-        children: [ruleWidth, { box: line }, 3 * ruleWidth, { box: inner }]
-      });
-    }
-    if (this.caret)
-      stack.caret = this.caret;
-    return new Box(stack, { classes: this.position, type: "ignore" });
-  }
-};
-
 // src/core-atoms/operator.ts
 var OperatorAtom = class extends Atom {
-  constructor(command, symbol, options) {
+  constructor(symbol, options) {
     var _a3, _b3, _c2;
-    super({
+    super(__spreadProps(__spreadValues({}, options), {
       type: (_a3 = options.type) != null ? _a3 : "mop",
-      command,
-      style: options.style,
       isFunction: options == null ? void 0 : options.isFunction
-    });
-    if (typeof symbol === "string")
-      this.value = symbol;
-    else {
-      this.body = symbol;
-      this.captureSelection = true;
-    }
+    }));
+    this.value = symbol;
     this.hasArgument = (_b3 = options.hasArgument) != null ? _b3 : false;
     this.variant = options == null ? void 0 : options.variant;
     this.variantStyle = options == null ? void 0 : options.variantStyle;
@@ -15512,11 +18945,7 @@ var OperatorAtom = class extends Atom {
     this.isExtensibleSymbol = (_c2 = options == null ? void 0 : options.isExtensibleSymbol) != null ? _c2 : false;
   }
   static fromJson(json) {
-    return new OperatorAtom(
-      json.command,
-      json.body ? json.body : json.value,
-      json
-    );
+    return new OperatorAtom(json.symbol, json);
   }
   toJson() {
     const result = super.toJson();
@@ -15545,39 +18974,29 @@ var OperatorAtom = class extends Atom {
         fontFamily: large ? "Size2-Regular" : "Size1-Regular",
         classes: "op-symbol " + (large ? "large-op" : "small-op"),
         type: "op",
-        maxFontSize: context.scalingFactor
+        maxFontSize: context.scalingFactor,
+        isSelected: this.isSelected
       });
       if (!base)
         return null;
       base.right = base.italic;
       baseShift = (base.height - base.depth) / 2 - AXIS_HEIGHT * context.scalingFactor;
       slant = base.italic;
-      base.setStyle("color", this.style.color);
-      base.setStyle("background-color", this.style.backgroundColor);
-    } else if (this.body) {
-      base = Atom.createBox(context, this.body, { type: "inner" });
-      if (!base)
-        return null;
-      base.setStyle("color", this.style.color);
-      base.setStyle("background-color", this.style.backgroundColor);
+      base.setTop(baseShift);
     } else {
       console.assert(this.type === "mop");
       base = new Box(this.value, {
         type: "op",
         mode: "math",
-        caret: this.caret,
         maxFontSize: context.scalingFactor,
         style: {
-          color: this.style.color,
-          backgroundColor: this.style.backgroundColor,
           variant: this.variant,
           variantStyle: this.variantStyle
         },
+        isSelected: this.isSelected,
         letterShapeStyle: context.letterShapeStyle
       });
     }
-    if (this.isExtensibleSymbol)
-      base.setTop(baseShift);
     let result = base;
     if (this.superscript || this.subscript) {
       const limits = (_a3 = this.subsupPlacement) != null ? _a3 : "auto";
@@ -15585,12 +19004,13 @@ var OperatorAtom = class extends Atom {
     }
     return new Box(this.bind(context, result), {
       type: "op",
+      caret: this.caret,
       isSelected: this.isSelected,
       classes: "op-group"
-    });
+    }).wrap(context);
   }
-  serialize(options) {
-    if (!options.expandMacro && typeof this.verbatimLatex === "string")
+  _serialize(options) {
+    if (!(options.expandMacro || options.skipStyles) && typeof this.verbatimLatex === "string")
       return this.verbatimLatex;
     const def = getDefinition(this.command, this.mode);
     if (def == null ? void 0 : def.serialize)
@@ -15617,19 +19037,19 @@ var OperatorAtom = class extends Atom {
 
 // src/core-atoms/overlap.ts
 var OverlapAtom = class extends Atom {
-  constructor(command, body, options) {
-    super({
+  constructor(options) {
+    const body = options.body;
+    super(__spreadProps(__spreadValues({}, options), {
       type: "overlap",
-      command,
       body: typeof body === "string" ? [new Atom({ value: body })] : body,
       style: options == null ? void 0 : options.style
-    });
+    }));
     this.skipBoundary = true;
     this.align = options == null ? void 0 : options.align;
     this.boxType = options == null ? void 0 : options.boxType;
   }
   static fromJson(json) {
-    return new OverlapAtom(json.command, json.body, json);
+    return new OverlapAtom(json);
   }
   toJson() {
     const options = {};
@@ -15657,12 +19077,17 @@ var OverlapAtom = class extends Atom {
 
 // src/core-atoms/overunder.ts
 var OverunderAtom = class extends Atom {
-  constructor(command, options) {
+  constructor(options) {
     var _a3, _b3, _c2, _d2;
-    super({ type: "overunder", command, style: options.style });
-    this.skipBoundary = (_a3 = options.skipBoundary) != null ? _a3 : true;
+    super({
+      type: "overunder",
+      command: options.command,
+      style: options.style,
+      mode: options.mode,
+      body: options.body,
+      skipBoundary: (_a3 = options.skipBoundary) != null ? _a3 : true
+    });
     this.subsupPlacement = options.supsubPlacement;
-    this.body = options.body;
     this.svgAbove = options.svgAbove;
     this.svgBelow = options.svgBelow;
     this.svgBody = options.svgBody;
@@ -15673,27 +19098,27 @@ var OverunderAtom = class extends Atom {
     this.paddedLabels = (_d2 = options.paddedLabels) != null ? _d2 : false;
   }
   static fromJson(json) {
-    return new OverunderAtom(json.command, json);
+    return new OverunderAtom(json);
   }
   toJson() {
-    const options = {};
+    const json = super.toJson();
     if (!this.skipBoundary)
-      options.skipBoundary = false;
+      json.skipBoundary = false;
     if (this.subsupPlacement)
-      options.subsupPlacement = this.subsupPlacement;
+      json.subsupPlacement = this.subsupPlacement;
     if (this.svgAbove)
-      options.svgAbove = this.svgAbove;
+      json.svgAbove = this.svgAbove;
     if (this.svgBelow)
-      options.svgBelow = this.svgBelow;
+      json.svgBelow = this.svgBelow;
     if (this.svgBody)
-      options.svgBody = this.svgBody;
+      json.svgBody = this.svgBody;
     if (this.boxType !== "ord")
-      options.boxType = this.boxType;
+      json.boxType = this.boxType;
     if (this.paddedBody)
-      options.paddedBody = true;
+      json.paddedBody = true;
     if (this.paddedLabels)
-      options.paddedLabels = true;
-    return __spreadValues(__spreadValues({}, super.toJson()), options);
+      json.paddedLabels = true;
+    return json;
   }
   /**
    * Combine a base with an atom above and an atom below.
@@ -15804,18 +19229,17 @@ function makeOverunderStack(context, options) {
 
 // src/core-atoms/phantom.ts
 var PhantomAtom = class extends Atom {
-  constructor(command, body, options) {
+  constructor(options) {
     var _a3, _b3, _c2, _d2;
-    super({ type: "phantom", command, style: options.style });
+    super(__spreadProps(__spreadValues({}, options), { type: "phantom" }));
     this.captureSelection = true;
-    this.body = body;
     this.isInvisible = (_a3 = options.isInvisible) != null ? _a3 : false;
     this.smashDepth = (_b3 = options.smashDepth) != null ? _b3 : false;
     this.smashHeight = (_c2 = options.smashHeight) != null ? _c2 : false;
     this.smashWidth = (_d2 = options.smashWidth) != null ? _d2 : false;
   }
   static fromJson(json) {
-    return new PhantomAtom(json.command, json.body, json);
+    return new PhantomAtom(json);
   }
   toJson() {
     const options = {};
@@ -15866,98 +19290,35 @@ var PhantomAtom = class extends Atom {
   }
 };
 
-// src/core-atoms/rule.ts
-var RuleAtom = class extends Atom {
-  constructor(command, options) {
-    var _a3;
-    super({ type: "rule", command, style: options.style });
-    this.shift = (_a3 = options.shift) != null ? _a3 : { dimension: 0 };
-    this.height = options.height;
-    this.width = options.width;
-  }
-  static fromJson(json) {
-    return new RuleAtom(json.command, json);
-  }
-  toJson() {
-    const options = {
-      height: this.height,
-      width: this.width
-    };
-    if (this.shift)
-      options.shift = this.shift;
-    return __spreadValues(__spreadValues({}, super.toJson()), options);
-  }
-  render(parentContext) {
-    var _a3, _b3, _c2;
-    const context = new Context(
-      {
-        parent: parentContext,
-        mathstyle: "textstyle"
-      },
-      this.style
-    );
-    const shift = (_a3 = context.toEm(this.shift)) != null ? _a3 : 1;
-    const width = (_b3 = context.toEm(this.width)) != null ? _b3 : 1;
-    const height = (_c2 = context.toEm(this.height)) != null ? _c2 : 1;
-    const result = new Box(null, { classes: "rule", type: "ord" });
-    result.setStyle("border-right-width", width, "em");
-    result.setStyle("border-top-width", height, "em");
-    result.setStyle("border-color", this.style.color);
-    result.setStyle("vertical-align", shift, "em");
-    if (this.isSelected)
-      result.setStyle("opacity", "50%");
-    result.width = width;
-    result.height = height + shift;
-    result.depth = -shift;
-    this.bind(parentContext, result);
-    if (this.caret)
-      result.caret = this.caret;
-    return result.wrap(context);
-  }
-  serialize(_options) {
-    var _a3, _b3, _c2;
-    let command = (_a3 = this.command) != null ? _a3 : "";
-    if (this.shift)
-      command += `[${serializeLatexValue(this.shift)}]`;
-    return latexCommand(
-      command,
-      (_b3 = serializeLatexValue(this.width)) != null ? _b3 : "",
-      (_c2 = serializeLatexValue(this.height)) != null ? _c2 : ""
-    );
-  }
-};
-
 // src/core-atoms/spacing.ts
 var SpacingAtom = class extends Atom {
-  constructor(command, style, width, options) {
+  constructor(options) {
     var _a3;
-    super({ type: "spacing", command, style });
-    this.width = width;
+    super(__spreadValues({ type: "spacing" }, options));
+    this.width = options == null ? void 0 : options.width;
     this._braced = (_a3 = options == null ? void 0 : options.braced) != null ? _a3 : false;
   }
   static fromJson(json) {
-    return new SpacingAtom(json.command, json.style, json.width, {
-      braced: json.braced
-    });
+    return new SpacingAtom(json);
   }
   toJson() {
-    const options = {};
+    const json = super.toJson();
     if (this.width !== void 0)
-      options.width = this.width;
+      json.width = this.width;
     if (this._braced)
-      options.braced = true;
-    return __spreadValues(__spreadValues({}, super.toJson()), options);
+      json.braced = true;
+    return json;
   }
   render(context) {
-    var _a3, _b3;
+    var _a3;
     if (this.command === "space")
       return new Box(this.mode === "math" ? null : " ");
     let result;
     if (this.width !== void 0) {
       result = new Box(null, { classes: "mspace" });
-      result.left = (_a3 = context.toEm(this.width)) != null ? _a3 : 0;
+      result.left = context.toEm(this.width);
     } else {
-      const spacingCls = (_b3 = {
+      const spacingCls = (_a3 = {
         "\\qquad": "qquad",
         "\\quad": "quad",
         "\\enspace": "enspace",
@@ -15965,7 +19326,7 @@ var SpacingAtom = class extends Atom {
         "\\:": "mediumspace",
         "\\,": "thinspace",
         "\\!": "negativethinspace"
-      }[this.command]) != null ? _b3 : "mediumspace";
+      }[this.command]) != null ? _a3 : "mediumspace";
       result = new Box(null, { classes: spacingCls });
     }
     result = this.bind(context, result);
@@ -15973,7 +19334,7 @@ var SpacingAtom = class extends Atom {
       result.caret = this.caret;
     return result;
   }
-  serialize(options) {
+  _serialize(options) {
     var _a3;
     if (!options.expandMacro && typeof this.verbatimLatex === "string")
       return this.verbatimLatex;
@@ -15991,25 +19352,24 @@ var SpacingAtom = class extends Atom {
 
 // src/core-atoms/surd.ts
 var SurdAtom = class extends Atom {
-  constructor(command, options) {
+  constructor(options) {
     var _a3;
-    super({
+    super(__spreadProps(__spreadValues({}, options), {
       type: "surd",
-      command,
       mode: (_a3 = options.mode) != null ? _a3 : "math",
       style: options.style,
-      displayContainsHighlight: true
-    });
-    this.body = options.body;
+      displayContainsHighlight: true,
+      body: options.body
+    }));
     this.above = options.index;
   }
   static fromJson(json) {
-    return new SurdAtom(json.command, __spreadProps(__spreadValues({}, json), {
+    return new SurdAtom(__spreadProps(__spreadValues({}, json), {
       index: json.above
     }));
   }
-  serialize(options) {
-    if (!options.expandMacro && typeof this.verbatimLatex === "string")
+  _serialize(options) {
+    if (!(options.expandMacro || options.skipStyles) && typeof this.verbatimLatex === "string")
       return this.verbatimLatex;
     const def = getDefinition(this.command, this.mode);
     if (def == null ? void 0 : def.serialize)
@@ -16022,20 +19382,16 @@ var SurdAtom = class extends Atom {
       return `${command}${body}`;
     return latexCommand(command, body);
   }
-  render(parentContext) {
+  render(context) {
     var _a3;
     const innerContext = new Context(
-      { parent: parentContext, mathstyle: "cramp" },
+      { parent: context, mathstyle: "cramp" },
       this.style
     );
-    const innerBox = (_a3 = Atom.createBox(innerContext, this.body, {
-      style: this.style,
-      type: "inner"
-      // In TeX, 'rac'
-    })) != null ? _a3 : new Box(null);
+    const innerBox = (_a3 = Atom.createBox(innerContext, this.body, { type: "inner" })) != null ? _a3 : new Box(null);
     const factor = innerContext.scalingFactor;
     const ruleWidth = innerContext.metrics.defaultRuleThickness / factor;
-    const phi = parentContext.isDisplayStyle ? X_HEIGHT : ruleWidth;
+    const phi = context.isDisplayStyle ? X_HEIGHT : ruleWidth;
     const line = new Box(null, {
       classes: "ML__sqrt-line",
       style: this.style,
@@ -16047,7 +19403,7 @@ var SurdAtom = class extends Atom {
       innerBox.height + innerBox.depth
     );
     const minDelimiterHeight = innerTotalHeight + lineClearance + ruleWidth;
-    const delimContext = new Context({ parent: parentContext }, this.style);
+    const delimContext = new Context({ parent: context }, this.style);
     const delimBox = this.bind(
       delimContext,
       new Box(
@@ -16075,7 +19431,7 @@ var SurdAtom = class extends Atom {
     }
     delimBox.setTop(delimBox.height - innerBox.height - lineClearance);
     const bodyBox = this.bind(
-      parentContext,
+      context,
       new VBox({
         firstBaseline: [
           { box: new Box(innerBox) },
@@ -16084,15 +19440,12 @@ var SurdAtom = class extends Atom {
           { box: line },
           ruleWidth
         ]
-      }).wrap(parentContext)
+      })
     );
     const indexBox = Atom.createBox(
-      new Context(
-        { parent: parentContext, mathstyle: "scriptscriptstyle" },
-        this.style
-      ),
+      new Context({ parent: context, mathstyle: "scriptscriptstyle" }),
       this.above,
-      { style: this.style, type: "ignore" }
+      { type: "ignore" }
     );
     if (!indexBox) {
       const result2 = new Box([delimBox, bodyBox], {
@@ -16103,7 +19456,7 @@ var SurdAtom = class extends Atom {
       result2.setStyle("height", result2.height + result2.depth, "em");
       if (this.caret)
         result2.caret = this.caret;
-      return this.bind(parentContext, result2.wrap(parentContext));
+      return this.bind(context, result2);
     }
     const indexStack = new VBox({
       shift: -0.6 * (Math.max(delimBox.height, bodyBox.height) - Math.max(delimBox.depth, bodyBox.depth)),
@@ -16124,18 +19477,17 @@ var SurdAtom = class extends Atom {
     result.depth = delimBox.depth;
     if (this.caret)
       result.caret = this.caret;
-    return this.bind(parentContext, result.wrap(parentContext));
+    return this.bind(context, result);
   }
 };
 
 // src/core/skip-box.ts
 var SkipBox = class extends Box {
   constructor(width) {
-    super(null, { type: "skip" });
-    this.width = width;
+    super(null, { type: "skip", width });
   }
   toMarkup() {
-    return `<span style="display:inline-block;width:${this.cssProperties.width}"></span>`;
+    return `<span style="display:inline-block;width:${Math.round(this.width * 100) / 100}em"></span>`;
   }
 };
 function addSkipBefore(box, width) {
@@ -16213,7 +19565,8 @@ function applyInterBoxSpacing(root, context) {
 }
 function traverseBoxes(boxes, f, prev = void 0) {
   if (!boxes)
-    return void 0;
+    return prev;
+  boxes = [...boxes];
   for (const cur of boxes) {
     if (cur.type === "lift")
       prev = traverseBoxes(cur.children, f, prev);
@@ -16221,8 +19574,7 @@ function traverseBoxes(boxes, f, prev = void 0) {
       traverseBoxes(cur.children, f);
     else {
       f(prev, cur);
-      if (cur.children)
-        traverseBoxes(cur.children, f);
+      traverseBoxes(cur.children, f);
       prev = cur;
     }
   }
@@ -16231,25 +19583,28 @@ function traverseBoxes(boxes, f, prev = void 0) {
 
 // src/core-atoms/tooltip.ts
 var TooltipAtom = class extends Atom {
-  constructor(body, tooltip, options) {
+  constructor(options) {
     super({
       type: "tooltip",
-      command: options == null ? void 0 : options.command,
-      mode: "math",
-      style: options == null ? void 0 : options.style,
+      command: options.command,
+      mode: options.mode,
+      style: options.style,
+      body: options.body,
       displayContainsHighlight: true
     });
-    this.body = body;
-    this.tooltip = new Atom({ type: "root", body: tooltip, style: {} });
+    this.tooltip = new Atom({
+      type: "root",
+      mode: options.content,
+      body: options.tooltip,
+      style: {}
+    });
     this.skipBoundary = true;
     this.captureSelection = false;
   }
   static fromJson(json) {
-    return new TooltipAtom(
-      json.body,
-      fromJson(json.tooltip),
-      json
-    );
+    return new TooltipAtom(__spreadProps(__spreadValues({}, json), {
+      tooltip: fromJson(json.tooltip)
+    }));
   }
   toJson() {
     var _a3;
@@ -16257,9 +19612,7 @@ var TooltipAtom = class extends Atom {
     return __spreadProps(__spreadValues({}, super.toJson()), { tooltip });
   }
   render(context) {
-    const body = Atom.createBox(new Context(), this.body, {
-      style: this.style
-    });
+    const body = Atom.createBox(new Context(), this.body);
     if (!body)
       return null;
     const tooltipContext = new Context(
@@ -16278,13 +19631,6 @@ var TooltipAtom = class extends Atom {
     if (this.caret)
       box.caret = this.caret;
     return this.bind(context, box);
-  }
-  serialize(options) {
-    return latexCommand(
-      this.command,
-      this.bodyToLatex(options),
-      this.tooltip.bodyToLatex(options)
-    );
   }
 };
 
@@ -16312,12 +19658,10 @@ function fromJson(json) {
     result = BoxAtom.fromJson(json);
   if (type === "chem")
     result = ChemAtom.fromJson(json);
-  if (type === "choice")
-    result = ChoiceAtom.fromJson(json);
   if (type === "composition")
     result = CompositionAtom.fromJson(json);
   if (type === "delim")
-    result = DelimAtom.fromJson(json);
+    result = MiddleDelimAtom.fromJson(json);
   if (type === "enclose")
     result = EncloseAtom.fromJson(json);
   if (type === "error")
@@ -16332,8 +19676,6 @@ function fromJson(json) {
     result = LatexGroupAtom.fromJson(json);
   if (type === "leftright")
     result = LeftRightAtom.fromJson(json);
-  if (type === "line")
-    result = LineAtom.fromJson(json);
   if (type === "macro")
     result = MacroAtom.fromJson(json);
   if (type === "macro-argument")
@@ -16350,8 +19692,6 @@ function fromJson(json) {
     result = PromptAtom.fromJson(json);
   if (type === "phantom")
     result = PhantomAtom.fromJson(json);
-  if (type === "rule")
-    result = RuleAtom.fromJson(json);
   if (type === "sizeddelim")
     result = SizedDelimAtom.fromJson(json);
   if (type === "spacing")
@@ -16378,7 +19718,7 @@ function fromJson(json) {
         "root",
         "space"
       ].includes(type),
-      `MathLive 0.93.0: an unexpected atom type "${type}" was encountered. Add new atom constructors to \`fromJson()\` in "atom.ts"`
+      `MathLive 0.94.5: an unexpected atom type "${type}" was encountered. Add new atom constructors to \`fromJson()\` in "atom.ts"`
     );
     result = Atom.fromJson(json);
   }
@@ -16400,6 +19740,21 @@ function fromJson(json) {
   if (json.captureSelection)
     result.captureSelection = true;
   return result;
+}
+function argumentsFromJson(json) {
+  if (!json)
+    return void 0;
+  if (!Array.isArray(json))
+    return void 0;
+  return json.map((arg) => {
+    if (arg === "<null>")
+      return null;
+    if (typeof arg === "object" && "group" in arg)
+      return { group: arg.group.map((x) => fromJson(x)) };
+    if (typeof arg === "object" && "atoms" in arg)
+      return arg.atoms.map((x) => fromJson(x));
+    return arg;
+  });
 }
 
 // src/core/modes-math.ts
@@ -16515,7 +19870,7 @@ var MathMode = class extends Mode {
     return result;
   }
   serialize(run, options) {
-    const result = emitFontSize(run, options);
+    const result = emitVariantRun(run, __spreadProps(__spreadValues({}, options), { defaultMode: "math" }));
     if (result.length === 0 || options.defaultMode !== "text")
       return result;
     return ["$ ", ...result, " $"];
@@ -16554,80 +19909,40 @@ var MathMode = class extends Mode {
 function emitVariantRun(run, options) {
   const { parent } = run[0];
   const contextVariant = variantString(parent);
-  return joinLatex(
-    getPropertyRuns(run, "variant").map((x) => {
-      const variant = variantString(x[0]);
-      let command = "";
-      if (variant && variant !== contextVariant) {
-        command = {
-          "calligraphic": "\\mathcal",
-          "fraktur": "\\mathfrak",
-          "double-struck": "\\mathbb",
-          "script": "\\mathscr",
-          "monospace": "\\mathtt",
-          "sans-serif": "\\mathsf",
-          "normal": "\\mathrm",
-          "normal-italic": "\\mathnormal",
-          "normal-bold": "\\mathbf",
-          "normal-bolditalic": "\\mathbfit",
-          "ams": "",
-          "ams-italic": "\\mathit",
-          "ams-bold": "\\mathbf",
-          "ams-bolditalic": "\\mathbfit",
-          "main": "",
-          "main-italic": "\\mathit",
-          "main-bold": "\\mathbf",
-          "main-bolditalic": "\\mathbfit"
-          // There are a few rare font families possible, which
-          // are not supported:
-          // mathbbm, mathbbmss, mathbbmtt, mathds, swab, goth
-          // In addition, the 'main' and 'math' font technically
-          // map to \mathnormal{}
-        }[variant];
-        console.assert(command !== void 0);
-      }
-      const arg = joinLatex(x.map((x2) => x2.serialize(options)));
-      return !command ? arg : latexCommand(command, arg);
-    })
-  );
-}
-function emitColorRun(run, options) {
-  const { parent } = run[0];
-  const contextColor = parent == null ? void 0 : parent.computedStyle.color;
-  return joinLatex(
-    getPropertyRuns(run, "color").map((x) => {
-      var _a3, _b3;
-      const body = emitVariantRun(x, options);
-      const style = x[0].computedStyle;
-      if (!((_a3 = options.skipStyles) != null ? _a3 : false) && style.color && (!parent || contextColor !== style.color)) {
-        return latexCommand(
-          "\\textcolor",
-          (_b3 = style.verbatimColor) != null ? _b3 : style.color,
-          body
-        );
-      }
-      return body;
-    })
-  );
-}
-function emitBackgroundColorRun(run, options) {
-  const { parent } = run[0];
-  const parentColor = parent == null ? void 0 : parent.computedStyle.backgroundColor;
-  return joinLatex(
-    getPropertyRuns(run, "backgroundColor").map((x) => {
-      var _a3, _b3;
-      let result = emitColorRun(x, options);
-      const style = x[0].computedStyle;
-      if (!((_a3 = options.skipStyles) != null ? _a3 : false) && result.trim() && style.backgroundColor && (!parent || parentColor !== style.backgroundColor) && (x.length > 0 || !(x[0] instanceof BoxAtom))) {
-        result = latexCommand(
-          "\\colorbox",
-          (_b3 = style.verbatimBackgroundColor) != null ? _b3 : style.backgroundColor,
-          result
-        );
-      }
-      return result;
-    })
-  );
+  return getPropertyRuns(run, "variant").map((x) => {
+    const variant = variantString(x[0]);
+    let command = "";
+    if (variant && variant !== contextVariant) {
+      command = {
+        "calligraphic": "\\mathcal",
+        "fraktur": "\\mathfrak",
+        "double-struck": "\\mathbb",
+        "script": "\\mathscr",
+        "monospace": "\\mathtt",
+        "sans-serif": "\\mathsf",
+        "normal": "\\mathrm",
+        "normal-italic": "\\mathnormal",
+        "normal-bold": "\\mathbf",
+        "normal-bolditalic": "\\mathbfit",
+        "ams": "",
+        "ams-italic": "\\mathit",
+        "ams-bold": "\\mathbf",
+        "ams-bolditalic": "\\mathbfit",
+        "main": "",
+        "main-italic": "\\mathit",
+        "main-bold": "\\mathbf",
+        "main-bolditalic": "\\mathbfit"
+        // There are a few rare font families possible, which
+        // are not supported:
+        // mathbbm, mathbbmss, mathbbmtt, mathds, swab, goth
+        // In addition, the 'main' and 'math' font technically
+        // map to \mathnormal{}
+      }[variant];
+      console.assert(command !== void 0);
+    }
+    const arg = joinLatex(x.map((x2) => x2._serialize(options)));
+    return !command ? arg : latexCommand(command, arg);
+  });
 }
 function variantString(atom) {
   if (!atom)
@@ -16640,44 +19955,11 @@ function variantString(atom) {
     result += "-" + style.variantStyle;
   return result;
 }
-function emitFontSize(run, options) {
-  if (run.length === 0)
-    return [];
-  const { parent } = run[0];
-  const contextFontsize = parent == null ? void 0 : parent.computedStyle.fontSize;
-  const result = [];
-  for (const sizeRun of getPropertyRuns(run, "fontSize")) {
-    const fontsize = sizeRun[0].computedStyle.fontSize;
-    const value = emitBackgroundColorRun(sizeRun, options);
-    if (value) {
-      if (fontsize && fontsize !== "auto" && (!parent || contextFontsize !== fontsize)) {
-        result.push(
-          [
-            "",
-            "\\tiny",
-            "\\scriptsize",
-            "\\footnotesize",
-            "\\small",
-            "\\normalsize",
-            "\\large",
-            "\\Large",
-            "\\LARGE",
-            "\\huge",
-            "\\Huge"
-          ][fontsize],
-          value
-        );
-      } else
-        result.push(value);
-    }
-  }
-  return result;
-}
 new MathMode();
 
 // src/core/modes-text.ts
 function emitStringTextRun(run, options) {
-  return run.map((x) => x.serialize(options));
+  return run.map((x) => x._serialize(options));
 }
 function emitFontShapeTextRun(run, options) {
   return getPropertyRuns(run, "fontShape").map((x) => {
@@ -16749,34 +20031,6 @@ function emitFontFamilyTextRun(run, options) {
     return joinLatex(s);
   });
 }
-function emitStyledTextRun(run, options) {
-  return emitFontFamilyTextRun(run, options);
-}
-function emitBackgroundColorRun2(run, options) {
-  return getPropertyRuns(run, "backgroundColor").map((x) => {
-    var _a3, _b3;
-    const s = emitColorRun2(x, options);
-    const style = x[0].computedStyle;
-    if (!((_a3 = options.skipStyles) != null ? _a3 : false) && style.backgroundColor && style.backgroundColor !== "none") {
-      return `\\colorbox{${(_b3 = style.verbatimBackgroundColor) != null ? _b3 : style.backgroundColor}}{${joinLatex(s)}}`;
-    }
-    return joinLatex(s);
-  });
-}
-function emitColorRun2(run, options) {
-  var _a3;
-  if (!run || run.length === 0)
-    return [];
-  const parentColor = (_a3 = run[0].parent) == null ? void 0 : _a3.style.color;
-  return getPropertyRuns(run, "color").map((x) => {
-    var _a4, _b3;
-    const s = emitStyledTextRun(x, options);
-    if (!((_a4 = options.skipStyles) != null ? _a4 : false) && x[0].style.color && x[0].style.color !== "none" && parentColor !== x[0].style.color) {
-      return `\\textcolor{${(_b3 = x[0].style.verbatimColor) != null ? _b3 : x[0].style.color}}{${joinLatex(s)}}`;
-    }
-    return joinLatex(s);
-  });
-}
 var TEXT_FONT_CLASS = {
   "roman": "",
   "sans-serif": "ML__sans",
@@ -16799,7 +20053,9 @@ var TextMode = class extends Mode {
     return null;
   }
   serialize(run, options) {
-    const result = emitBackgroundColorRun2(run, options);
+    const result = emitFontFamilyTextRun(run, __spreadProps(__spreadValues({}, options), {
+      defaultMode: "text"
+    }));
     if (result.length === 0 || options.defaultMode === "text")
       return result;
     return ["\\text{", ...result, "}"];
@@ -18157,705 +21413,6 @@ function normalizeKeybindings(keybindings, layout) {
   return [result, errors];
 }
 
-// css/suggestion-popover.less
-var suggestion_popover_default = `/* The element that display info while in latex mode */
-#mathlive-suggestion-popover {
-  background-color: rgba(97, 97, 97);
-  color: #fff;
-  text-align: center;
-  border-radius: 8px;
-  position: fixed;
-  z-index: 1;
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-}
-#mathlive-suggestion-popover.top-tip::after {
-  content: '';
-  position: absolute;
-  top: -15px;
-  left: calc(50% - 15px);
-  width: 0;
-  height: 0;
-  border-left: 15px solid transparent;
-  border-right: 15px solid transparent;
-  border-bottom: 15px solid rgba(97, 97, 97);
-  font-size: 1rem;
-}
-#mathlive-suggestion-popover.bottom-tip::after {
-  content: '';
-  position: absolute;
-  bottom: -15px;
-  left: calc(50% - 15px);
-  width: 0;
-  height: 0;
-  border-left: 15px solid transparent;
-  border-right: 15px solid transparent;
-  border-top: 15px solid rgba(97, 97, 97);
-  font-size: 1rem;
-}
-#mathlive-suggestion-popover.is-animated {
-  transition: all 0.2s cubic-bezier(0.64, 0.09, 0.08, 1);
-  animation: ML__fade-in cubic-bezier(0, 0, 0.2, 1) 0.15s;
-}
-#mathlive-suggestion-popover.is-visible {
-  display: flex;
-}
-@keyframes ML__fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-/* The wrapper class for the entire content of the popover panel */
-#mathlive-suggestion-popover ul {
-  display: flex;
-  flex-flow: column;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  align-items: flex-start;
-  max-height: 400px;
-  overflow-y: auto;
-}
-#mathlive-suggestion-popover li {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  margin: 8px;
-  padding: 8px;
-  width: calc(100% - 16px - 16px);
-  column-gap: 1em;
-  border-radius: 8px;
-  cursor: pointer;
-  /* Since the content can be clicked on, provide feedback on hover */
-}
-#mathlive-suggestion-popover li a {
-  color: #5ea6fd;
-  padding-top: 0.3em;
-  margin-top: 0.4em;
-  display: block;
-}
-#mathlive-suggestion-popover li a:hover {
-  color: #5ea6fd;
-  text-decoration: underline;
-}
-#mathlive-suggestion-popover li:hover,
-#mathlive-suggestion-popover li.is-pressed,
-#mathlive-suggestion-popover li.is-active {
-  background: rgba(255, 255, 255, 0.1);
-}
-/* The command inside a popover (inside a #mathlive-suggestion-popover) */
-.ML__popover__command {
-  font-size: 1.6rem;
-  font-family: KaTeX_Main;
-}
-.ML__popover__current {
-  background: #5ea6fd;
-  color: #fff;
-}
-.ML__popover__latex {
-  font-family: 'IBM Plex Mono', 'Source Code Pro', Consolas, 'Roboto Mono', Menlo, 'Bitstream Vera Sans Mono', 'DejaVu Sans Mono', Monaco, Courier, monospace;
-  align-self: center;
-}
-/* The keyboard shortcuts for a symbol as displayed in the popover */
-.ML__popover__keybinding {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  font-size: 0.8em;
-  opacity: 0.7;
-}
-/* Style for the character that joins the modifiers of a keyboard shortcut 
-(usually a "+" sign)*/
-.ML__shortcut-join {
-  opacity: 0.5;
-}
-`;
-
-// css/core.less
-var core_default = `.ML__sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
-}
-.ML__is-inline {
-  display: inline-block;
-}
-.ML__base {
-  visibility: inherit;
-  display: inline-block;
-  position: relative;
-  cursor: text;
-  padding: 0;
-  margin: 0;
-  box-sizing: content-box;
-  border: 0;
-  outline: 0;
-  vertical-align: baseline;
-  font-weight: inherit;
-  font-family: inherit;
-  font-style: inherit;
-  text-decoration: none;
-  width: min-content;
-}
-.ML__strut,
-.ML__strut--bottom {
-  display: inline-block;
-  min-height: 0.5em;
-}
-.ML__small-delim {
-  font-family: KaTeX_Main;
-}
-/* Text mode */
-.ML__text {
-  font-family: var(--text-font-family, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif);
-  white-space: pre;
-}
-/* Use cmr for 'math upright' */
-.ML__cmr {
-  font-family: KaTeX_Main;
-  font-style: normal;
-}
-.ML__mathit {
-  font-family: KaTeX_Math;
-  /* The KaTeX_Math font is italic by default, so the font-style below is only 
-     useful when a fallback font is used
-  */
-  font-style: italic;
-}
-.ML__mathbf {
-  font-family: KaTeX_Main;
-  font-weight: bold;
-}
-/* Lowercase greek symbols should stick to math font when \\mathbf is applied 
-   to match TeX idiosyncratic behavior */
-.lcGreek.ML__mathbf {
-  font-family: KaTeX_Math;
-  font-weight: normal;
-}
-.ML__mathbfit {
-  font-family: KaTeX_Math;
-  font-weight: bold;
-  font-style: italic;
-}
-.ML__ams {
-  font-family: KaTeX_AMS;
-}
-/* Blackboard */
-.ML__bb {
-  font-family: KaTeX_AMS;
-}
-.ML__cal {
-  font-family: KaTeX_Caligraphic;
-}
-.ML__frak {
-  font-family: KaTeX_Fraktur;
-}
-.ML__tt {
-  font-family: KaTeX_Typewriter;
-}
-.ML__script {
-  font-family: KaTeX_Script;
-}
-.ML__sans {
-  font-family: KaTeX_SansSerif;
-}
-.ML__series_ul {
-  font-weight: 100;
-}
-.ML__series_el {
-  font-weight: 100;
-}
-.ML__series_l {
-  font-weight: 200;
-}
-.ML__series_sl {
-  font-weight: 300;
-}
-.ML__series_sb {
-  font-weight: 500;
-}
-.ML__bold,
-.ML__boldsymbol {
-  font-weight: 700;
-}
-.ML__series_eb {
-  font-weight: 800;
-}
-.ML__series_ub {
-  font-weight: 900;
-}
-.ML__series_uc {
-  font-stretch: ultra-condensed;
-}
-.ML__series_ec {
-  font-stretch: extra-condensed;
-}
-.ML__series_c {
-  font-stretch: condensed;
-}
-.ML__series_sc {
-  font-stretch: semi-condensed;
-}
-.ML__series_sx {
-  font-stretch: semi-expanded;
-}
-.ML__series_x {
-  font-stretch: expanded;
-}
-.ML__series_ex {
-  font-stretch: extra-expanded;
-}
-.ML__series_ux {
-  font-stretch: ultra-expanded;
-}
-.ML__it {
-  font-style: italic;
-}
-.ML__shape_ol {
-  -webkit-text-stroke: 1px black;
-  text-stroke: 1px black;
-  color: transparent;
-}
-.ML__shape_sc {
-  font-variant: small-caps;
-}
-.ML__shape_sl {
-  font-style: oblique;
-}
-/* First level emphasis */
-.ML__emph {
-  color: #bc2612;
-}
-/* Second level emphasis */
-.ML__emph .ML__emph {
-  color: #0c7f99;
-}
-.ML__highlight {
-  color: #007cb2;
-  background: #edd1b0;
-}
-.ML__center {
-  text-align: center;
-}
-.ML__label_padding {
-  padding: 0 0.5em;
-}
-.ML__frac-line {
-  width: 100%;
-  min-height: 1px;
-}
-.ML__frac-line:after {
-  content: '';
-  display: block;
-  margin-top: max(-1px, -0.04em);
-  min-height: max(1px, 0.04em);
-  /* Ensure the line is visible when printing even if "turn off background images" is on*/
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-  /* There's a bug since Chrome 62 where 
-      sub-pixel border lines don't draw at some zoom 
-      levels (110%, 90%). 
-      Setting the min-height used to work around it, but that workaround
-      broke in Chrome 84 or so.
-      Setting the background (and the min-height) seems to work for now.
-      */
-  background: currentColor;
-  box-sizing: content-box;
-  /* Vuetify sets the box-sizing to inherit 
-            causes the fraction line to not draw at all sizes (see #26) */
-  /* On some versions of Firefox on Windows, the line fails to 
-            draw at some zoom levels, but setting the transform triggers
-            the hardware accelerated path, which works */
-  transform: translate(0, 0);
-}
-.ML__sqrt {
-  display: inline-block;
-}
-.ML__sqrt-sign {
-  display: inline-block;
-  position: relative;
-}
-.ML__sqrt-line {
-  display: inline-block;
-  height: max(1px, 0.04em);
-  width: 100%;
-}
-.ML__sqrt-line:before {
-  content: '';
-  display: block;
-  margin-top: min(-1px, -0.04em);
-  min-height: max(1px, 0.04em);
-  /* Ensure the line is visible when printing even if "turn off background images" is on*/
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-  background: currentColor;
-  /* On some versions of Firefox on Windows, the line fails to 
-            draw at some zoom levels, but setting the transform triggers
-            the hardware accelerated path, which works */
-  transform: translate(0, 0);
-}
-.ML__sqrt-line:after {
-  border-bottom-width: 1px;
-  content: ' ';
-  display: block;
-  margin-top: -0.1em;
-}
-.ML__sqrt-index {
-  margin-left: 0.27777778em;
-  margin-right: -0.55555556em;
-}
-.ML__delim-size1 {
-  font-family: KaTeX_Size1;
-}
-.ML__delim-size2 {
-  font-family: KaTeX_Size2;
-}
-.ML__delim-size3 {
-  font-family: KaTeX_Size3;
-}
-.ML__delim-size4 {
-  font-family: KaTeX_Size4;
-}
-.ML__delim-mult .delim-size1 > span {
-  font-family: KaTeX_Size1;
-}
-.ML__delim-mult .delim-size4 > span {
-  font-family: KaTeX_Size4;
-}
-.ML__accent-body > span {
-  font-family: KaTeX_Main;
-  width: 0;
-}
-.ML__accent-vec > span {
-  position: relative;
-  left: 0.24em;
-}
-.ML__mathlive {
-  display: inline-block;
-  direction: ltr;
-  text-align: left;
-  text-indent: 0;
-  text-rendering: auto;
-  font-family: KaTeX_Main, 'Times New Roman', serif;
-  font-style: normal;
-  font-size-adjust: none;
-  font-stretch: normal;
-  font-variant-caps: normal;
-  letter-spacing: normal;
-  line-height: 1.2;
-  word-wrap: normal;
-  word-spacing: normal;
-  white-space: nowrap;
-  text-shadow: none;
-  -webkit-user-select: none;
-  user-select: none;
-  width: min-content;
-}
-.ML__mathlive .style-wrap {
-  position: relative;
-}
-.ML__mathlive .mfrac,
-.ML__mathlive .left-right {
-  display: inline-block;
-}
-.ML__mathlive .vlist-t {
-  display: inline-table;
-  table-layout: fixed;
-  border-collapse: collapse;
-}
-.ML__mathlive .vlist-r {
-  display: table-row;
-}
-.ML__mathlive .vlist {
-  display: table-cell;
-  vertical-align: bottom;
-  position: relative;
-}
-.ML__mathlive .vlist > span {
-  display: block;
-  height: 0;
-  position: relative;
-}
-.ML__mathlive .vlist > span > span {
-  display: inline-block;
-}
-.ML__mathlive .vlist > span > .pstrut {
-  overflow: hidden;
-  width: 0;
-}
-.ML__mathlive .vlist-t2 {
-  margin-right: -2px;
-}
-.ML__mathlive .vlist-s {
-  display: table-cell;
-  vertical-align: bottom;
-  font-size: 1px;
-  width: 2px;
-  min-width: 2px;
-}
-.ML__mathlive .msubsup {
-  text-align: left;
-}
-.ML__mathlive .negativethinspace {
-  display: inline-block;
-  margin-left: -0.16667em;
-  height: 0.71em;
-}
-.ML__mathlive .thinspace {
-  display: inline-block;
-  width: 0.16667em;
-  height: 0.71em;
-}
-.ML__mathlive .mediumspace {
-  display: inline-block;
-  width: 0.22222em;
-  height: 0.71em;
-}
-.ML__mathlive .thickspace {
-  display: inline-block;
-  width: 0.27778em;
-  height: 0.71em;
-}
-.ML__mathlive .enspace {
-  display: inline-block;
-  width: 0.5em;
-  height: 0.71em;
-}
-.ML__mathlive .quad {
-  display: inline-block;
-  width: 1em;
-  height: 0.71em;
-}
-.ML__mathlive .qquad {
-  display: inline-block;
-  width: 2em;
-  height: 0.71em;
-}
-.ML__mathlive .llap,
-.ML__mathlive .rlap {
-  width: 0;
-  position: relative;
-  display: inline-block;
-}
-.ML__mathlive .llap > .inner,
-.ML__mathlive .rlap > .inner {
-  position: absolute;
-}
-.ML__mathlive .llap > .fix,
-.ML__mathlive .rlap > .fix {
-  display: inline-block;
-}
-.ML__mathlive .llap > .inner {
-  right: 0;
-}
-.ML__mathlive .rlap > .inner {
-  left: 0;
-}
-.ML__mathlive .rule {
-  display: inline-block;
-  border: solid 0;
-  position: relative;
-  box-sizing: border-box;
-}
-.ML__mathlive .overline .overline-line,
-.ML__mathlive .underline .underline-line {
-  width: 100%;
-}
-.ML__mathlive .overline .overline-line:before,
-.ML__mathlive .underline .underline-line:before {
-  content: '';
-  border-bottom-style: solid;
-  border-bottom-width: max(1px, 0.04em);
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-  display: block;
-}
-.ML__mathlive .overline .overline-line:after,
-.ML__mathlive .underline .underline-line:after {
-  border-bottom-style: solid;
-  border-bottom-width: max(1px, 0.04em);
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-  content: '';
-  display: block;
-  margin-top: -1px;
-}
-.ML__mathlive .stretchy {
-  display: block;
-  position: absolute;
-  width: 100%;
-  left: 0;
-  overflow: hidden;
-}
-.ML__mathlive .stretchy:before,
-.ML__mathlive .stretchy:after {
-  content: '';
-}
-.ML__mathlive .stretchy svg {
-  display: block;
-  position: absolute;
-  width: 100%;
-  height: inherit;
-  fill: currentColor;
-  stroke: currentColor;
-  fill-rule: nonzero;
-  fill-opacity: 1;
-  stroke-width: 1;
-  stroke-linecap: butt;
-  stroke-linejoin: miter;
-  stroke-miterlimit: 4;
-  stroke-dasharray: none;
-  stroke-dashoffset: 0;
-  stroke-opacity: 1;
-}
-.ML__mathlive .slice-1-of-2 {
-  display: inline-flex;
-  position: absolute;
-  left: 0;
-  width: 50.2%;
-  overflow: hidden;
-}
-.ML__mathlive .slice-2-of-2 {
-  display: inline-flex;
-  position: absolute;
-  right: 0;
-  width: 50.2%;
-  overflow: hidden;
-}
-.ML__mathlive .slice-1-of-3 {
-  display: inline-flex;
-  position: absolute;
-  left: 0;
-  width: 25.1%;
-  overflow: hidden;
-}
-.ML__mathlive .slice-2-of-3 {
-  display: inline-flex;
-  position: absolute;
-  left: 25%;
-  width: 50%;
-  overflow: hidden;
-}
-.ML__mathlive .slice-3-of-3 {
-  display: inline-flex;
-  position: absolute;
-  right: 0;
-  width: 25.1%;
-  overflow: hidden;
-}
-.ML__mathlive .slice-1-of-1 {
-  display: inline-flex;
-  position: absolute;
-  width: 100%;
-  left: 0;
-  overflow: hidden;
-}
-.ML__mathlive .nulldelimiter {
-  display: inline-block;
-}
-.ML__mathlive .op-group {
-  display: inline-block;
-}
-.ML__mathlive .op-symbol {
-  position: relative;
-}
-.ML__mathlive .op-symbol.small-op {
-  font-family: KaTeX_Size1;
-}
-.ML__mathlive .op-symbol.large-op {
-  font-family: KaTeX_Size2;
-}
-.ML__mathlive .accent > .vlist > span {
-  text-align: center;
-}
-.ML__mathlive .mtable .vertical-separator {
-  display: inline-block;
-  min-width: 1px;
-  box-sizing: border-box;
-}
-.ML__mathlive .mtable .arraycolsep {
-  display: inline-block;
-}
-.ML__mathlive .mtable .col-align-m > .vlist-t {
-  text-align: center;
-}
-.ML__mathlive .mtable .col-align-c > .vlist-t {
-  text-align: center;
-}
-.ML__mathlive .mtable .col-align-l > .vlist-t {
-  text-align: left;
-}
-.ML__mathlive .mtable .col-align-r > .vlist-t {
-  text-align: right;
-}
-.ML__error {
-  display: inline-block;
-  background-image: radial-gradient(ellipse at center, hsl(341, 100%, 40%), rgba(0, 0, 0, 0) 70%);
-  background-color: hsla(341, 100%, 40%, 0.1);
-  background-repeat: repeat-x;
-  background-size: 3px 3px;
-  padding-bottom: 3px;
-  background-position: 0 100%;
-}
-.ML__error > .ML__error {
-  background: transparent;
-  padding: 0;
-}
-.ML__composition {
-  background: #fff1c2;
-  color: black;
-  text-decoration: underline var(--caret-color-computed, var(--ML__caret-color));
-}
-.ML__placeholder {
-  color: var(--placeholder-color, var(--ML__placeholder-color));
-  opacity: var(--placeholder-opacity, 0.4);
-  padding-left: 0.4ex;
-  padding-right: 0.4ex;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-}
-.ML__notation {
-  position: absolute;
-  box-sizing: border-box;
-  line-height: 0;
-}
-.ML__container {
-  min-height: auto !important;
-}
-.ML__prompt {
-  border-radius: 2px;
-}
-.ML__editablePromptBox {
-  outline: 1px solid #acacac;
-  border-radius: 2px;
-  z-index: -1;
-}
-.ML__focusedPromptBox {
-  outline: highlight auto 1px;
-}
-.ML__lockedPromptBox {
-  background-color: rgba(142, 142, 141, 0.4);
-  z-index: -1;
-}
-.ML__correctPromptBox {
-  outline: 1px solid var(--correct-color, var(--ML__correct-color));
-  box-shadow: 0 0 5px var(--correct-color, var(--ML__correct-color));
-}
-.ML__incorrectPromptBox {
-  outline: 1px solid var(--incorrect-color, var(--ML__incorrect-color));
-  box-shadow: 0 0 5px var(--incorrect-color, var(--ML__incorrect-color));
-}
-`;
-
 // src/virtual-keyboard/mathfield-proxy.ts
 function makeProxy(mf) {
   return {
@@ -18870,20 +21427,20 @@ function makeProxy(mf) {
 
 // src/editor-model/listeners.ts
 function selectionDidChange(model) {
+  if (window.mathVirtualKeyboard.visible)
+    window.mathVirtualKeyboard.update(makeProxy(model.mathfield));
   if (model.silenceNotifications)
     return;
-  const save = model.silenceNotifications;
   model.silenceNotifications = true;
   model.listeners.onSelectionDidChange();
-  model.silenceNotifications = save;
+  model.silenceNotifications = false;
 }
 function contentWillChange(model, options = {}) {
   if (model.silenceNotifications)
     return true;
-  const save = model.silenceNotifications;
   model.silenceNotifications = true;
   const result = model.listeners.onContentWillChange(options);
-  model.silenceNotifications = save;
+  model.silenceNotifications = false;
   return result;
 }
 function contentDidChange(model, options) {
@@ -18913,10 +21470,9 @@ var LatexModeEditor = class extends ModeEditor {
     return new LatexAtom(command);
   }
   onPaste(mathfield, data) {
-    var _a3;
     if (!data)
       return false;
-    const text = typeof data === "string" ? data : (_a3 = data.getData("text/x-latex")) != null ? _a3 : data.getData("text/plain");
+    const text = typeof data === "string" ? data : data.getData("application/x-latex") || data.getData("text/plain");
     if (text && contentWillChange(mathfield.model, {
       inputType: "insertFromPaste",
       data: text
@@ -18982,14 +21538,14 @@ var LatexModeEditor = class extends ModeEditor {
   }
 };
 function getLatexGroup(model) {
-  return model.atoms.find((x) => x instanceof LatexGroupAtom);
+  return model.atoms.find((x) => x.type === "latexgroup");
 }
 function getLatexGroupBody(model) {
   var _a3, _b3;
-  const atom = model.atoms.find((x) => x instanceof LatexGroupAtom);
+  const atom = model.atoms.find((x) => x.type === "latexgroup");
   if (!atom)
     return [];
-  return (_b3 = (_a3 = atom.body) == null ? void 0 : _a3.filter((x) => x instanceof LatexAtom)) != null ? _b3 : [];
+  return (_b3 = (_a3 = atom.body) == null ? void 0 : _a3.filter((x) => x.type === "latex")) != null ? _b3 : [];
 }
 function getCommandSuggestionRange(model, options) {
   var _a3;
@@ -19161,7 +21717,11 @@ function releaseSharedElement(id) {
 // src/editor/suggestion-popover.ts
 function latexToMarkup(mf, latex) {
   const context = new Context({ from: mf.context });
-  const root = new Atom({ type: "root", body: parseLatex(latex, { context }) });
+  const root = new Atom({
+    mode: "math",
+    type: "root",
+    body: parseLatex(latex, { context })
+  });
   const box = coalesce(
     applyInterBoxSpacing(
       new Box(root.render(context), { classes: "ML__base" }),
@@ -19262,11 +21822,8 @@ function createSuggestionPopover(mf, html) {
   let panel = document.getElementById("mathlive-suggestion-popover");
   if (!panel) {
     panel = getSharedElement("mathlive-suggestion-popover");
-    injectStylesheet(
-      "mathlive-suggestion-popover-stylesheet",
-      suggestion_popover_default
-    );
-    injectStylesheet("mathlive-core-stylesheet", core_default);
+    injectStylesheet("suggestion-popover");
+    injectStylesheet("core");
     panel.addEventListener("pointerdown", (ev) => ev.preventDefault());
     panel.addEventListener("click", (ev) => {
       let el = ev.target;
@@ -19291,8 +21848,8 @@ function disposeSuggestionPopover() {
   if (!document.getElementById("mathlive-suggestion-popover"))
     return;
   releaseSharedElement("mathlive-suggestion-popover");
-  releaseStylesheet("mathlive-suggestion-popover-stylesheet");
-  releaseStylesheet("mathlive-core-stylesheet");
+  releaseStylesheet("suggestion-popover");
+  releaseStylesheet("core");
 }
 
 // src/common/script-url.ts
@@ -19424,7 +21981,7 @@ async function loadFonts() {
     ].map(
       (x) => makeFontFace(
         x[0].replace(/-[a-zA-Z]+$/, ""),
-        fontsFolder + "/" + x[0],
+        `${fontsFolder}/${x[0]}`,
         x[1]
       )
     );
@@ -19443,7 +22000,7 @@ async function loadFonts() {
       return;
     } catch (error) {
       console.error(
-        `MathLive 0.93.0: The math fonts could not be loaded from "${fontsFolder}"`,
+        `MathLive 0.94.5: The math fonts could not be loaded from "${fontsFolder}"`,
         { cause: error }
       );
       document.body.classList.add("ML__fonts-did-not-load");
@@ -19482,7 +22039,7 @@ function makeBox(mathfield, renderOptions) {
         // Using the hash as a seed for the ID
         // keeps the IDs the same until the content of the field changes.
         seed: renderOptions.forHighlighting ? hash(
-          mathfield.model.root.serialize({
+          Atom.serialize([mathfield.model.root], {
             expandMacro: false,
             defaultMode: mathfield.options.defaultMode
           })
@@ -19573,8 +22130,6 @@ function renderSelection(mathfield, interactive) {
     ".ML__selection, .ML__contains-highlight"
   ))
     element.remove();
-  if (!mathfield.hasFocus())
-    return;
   if (!(interactive != null ? interactive : false) && gFontsState !== "error" && gFontsState !== "ready") {
     setTimeout(() => {
       if (gFontsState === "ready")
@@ -19815,6 +22370,8 @@ var VirtualKeyboardProxy = class {
   constructor() {
     this.targetOrigin = window.origin;
     this.originValidator = "none";
+    this._boundingRect = new DOMRect(0, 0, 0, 0);
+    this._isShifted = false;
     window.addEventListener("message", this);
     this.sendMessage("proxy-created");
     this.listeners = {};
@@ -19853,6 +22410,9 @@ var VirtualKeyboardProxy = class {
   }
   hide(options) {
     this.sendMessage("hide", options);
+  }
+  get isShifted() {
+    return this._isShifted;
   }
   get visible() {
     return this._boundingRect.height > 0;
@@ -19926,6 +22486,7 @@ var VirtualKeyboardProxy = class {
     if (action === "synchronize-proxy") {
       console.log("synchronize-proxy", window, msg.boundingRect);
       this._boundingRect = msg.boundingRect;
+      this._isShifted = msg.isShifted;
       return;
     }
     if (action === "geometry-changed") {
@@ -19951,774 +22512,6 @@ var VirtualKeyboardProxy = class {
     );
   }
 };
-
-// css/virtual-keyboard.less
-var virtual_keyboard_default = `:where(:root) {
-  --keyboard-height: 0;
-  --keyboard-accent-color: #0c75d8;
-  --keyboard-background: #cacfd7;
-  --keyboard-border: #ddd;
-  --keyboard-padding-horizontal: 0px;
-  --keyboard-padding-top: 5px;
-  --keyboard-padding-bottom: 0px;
-  --keyboard-toolbar-text: #2c2e2f;
-  --keyboard-toolbar-text-active: var(--keyboard-accent-color);
-  --keyboard-toolbar-background: transparent;
-  --keyboard-toolbar-background-hover: #eee;
-  --keyboard-toolbar-background-selected: transparent;
-  --keyboard-horizontal-rule: 1px solid #fff;
-  --keycap-background: white;
-  --keycap-background-hover: #f5f5f7;
-  --keycap-background-active: var(--keyboard-accent-color);
-  --keycap-background-pressed: var(--keyboard-accent-color);
-  --keycap-border: #e5e6e9;
-  --keycap-border-bottom: #8d8f92;
-  --keycap-text: #000;
-  --keycap-text-active: #fff;
-  --keycap-text-hover: var(--keycap-text);
-  --keycap-text-pressed: #fff;
-  --keycap-secondary-text: #333;
-  --keycap-shift-text: var(--keyboard-accent-color);
-  --keycap-primary-background: var(--keyboard-accent-color);
-  --keycap-primary-text: #ddd;
-  --keycap-primary-background-hover: #0d80f2;
-  --keycap-secondary-background: #a0a9b8;
-  --keycap-secondary-background-hover: #7d8795;
-  --keycap-secondary-text: #060707;
-  --keycap-secondary-border: #c5c9d0;
-  --keycap-secondary-border-bottom: #989da6;
-  --keycap-height: 60px;
-  /* Keycap width (incl. margin) */
-  --keycap-max-width: 100px;
-  --keycap-gap: 8px;
-  --keycap-font-size: clamp(16px, 4cqw, 24px);
-  --keycap-small-font-size: calc(var(--keycap-font-size) * 0.8);
-  --keycap-extra-small-font-size: calc(var(--keycap-font-size) / 1.42);
-  --variant-panel-background: #fff;
-  --variant-keycap-text: var(--keycap-text, #000);
-  --variant-keycap-text-active: var(--keycap-text-active, #fff);
-  --variant-keycap-background-active: var(--keyboard-accent-color);
-  --variant-keycap-length: 70px;
-  --variant-keycap-font-size: 30px;
-  --variant-keycap-aside-font-size: 12px;
-  --keycap-shift-font-size: 16px;
-  --keycap-shift-color: var(--keyboard-accent-color);
-}
-.if-can-undo,
-.if-can-redo,
-.if-can-copy,
-.if-can-cut,
-.if-can-paste {
-  opacity: 0.4;
-  pointer-events: none;
-}
-.can-undo .if-can-undo,
-.can-redo .if-can-redo,
-.can-copy .if-can-copy,
-.can-cut .if-can-cut,
-.can-paste .if-can-paste {
-  opacity: 1;
-  pointer-events: all;
-}
-body > .ML__keyboard {
-  position: fixed;
-  --keyboard-padding-bottom: calc(var(--keyboard-padding-bottom) + env(safe-area-inset-bottom, 0));
-}
-body > .ML__keyboard.is-visible > .MLK__backdrop {
-  box-shadow: 0 -5px 6px rgba(0, 0, 0, 0.08);
-  border-top: 1px solid var(--keyboard-border);
-}
-body > .ML__keyboard.backdrop-is-transparent.is-visible > .MLK__backdrop {
-  box-shadow: none;
-  border: none;
-}
-body > .ML__keyboard.is-visible.animate > .MLK__backdrop {
-  transition: 0.28s cubic-bezier(0, 0, 0.2, 1);
-  transition-property: transform, opacity;
-  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
-}
-.ML__keyboard {
-  position: relative;
-  overflow: hidden;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  z-index: var(--keyboard-zindex, 105);
-  box-sizing: border-box;
-  outline: none;
-  border: none;
-  margin: 0;
-  padding: 0;
-  line-height: 1;
-  overflow-wrap: unset;
-  text-align: left;
-  vertical-align: baseline;
-  cursor: auto;
-  white-space: pre;
-  box-shadow: none;
-  opacity: 1;
-  transform: none;
-  pointer-events: none;
-}
-.ML__keyboard :where(div) {
-  box-sizing: border-box;
-  outline: none;
-  border: none;
-  margin: 0;
-  padding: 0;
-  line-height: 1;
-  overflow-wrap: unset;
-  text-align: left;
-  vertical-align: baseline;
-  cursor: auto;
-  white-space: pre;
-  box-shadow: none;
-  transform: none;
-}
-.MLK__backdrop {
-  position: absolute;
-  bottom: calc(-1 * var(--keyboard-height));
-  width: 100%;
-  height: var(--keyboard-height);
-  box-sizing: border-box;
-  padding-top: var(--keyboard-padding-top);
-  padding-bottom: var(--keyboard-padding-bottom);
-  padding-left: var(--keyboard-padding-horizontal);
-  padding-right: var(--keyboard-padding-horizontal);
-  opacity: 0;
-  visibility: hidden;
-  transform: translate(0, 0);
-  background: var(--keyboard-background);
-}
-.backdrop-is-transparent .MLK__backdrop {
-  background: transparent;
-}
-/* If a custom layout has a custom container/backdrop
-  (backdrop-is-transparent), make sure to let pointer event go through. */
-.backdrop-is-transparent .MLK__plate {
-  background: transparent;
-  pointer-events: none;
-}
-/* If a custom layout has a custom container/backdrop, make sure to 
-   allow pointer events on it. */
-.backdrop-is-transparent .MLK__layer > div > div {
-  pointer-events: all;
-}
-.ML__keyboard.is-visible > .MLK__backdrop {
-  transform: translate(0, calc(-1 * var(--keyboard-height)));
-  opacity: 1;
-  visibility: visible;
-}
-.caps-lock-indicator {
-  display: none;
-  width: 8px;
-  height: 8px;
-  background: #0cbc0c;
-  box-shadow: inset 0 0 4px 0 #13ca13, 0 0 4px 0 #a9ef48;
-  border-radius: 8px;
-  right: 8px;
-  top: 8px;
-  position: absolute;
-}
-.ML__keyboard.is-caps-lock .caps-lock-indicator {
-  display: block;
-}
-.ML__keyboard.is-caps-lock .shift {
-  background: var(--keycap-background-active);
-  color: var(--keycap-text-active);
-}
-.MLK__plate {
-  position: absolute;
-  top: 0;
-  left: var(--keyboard-padding-horizontal);
-  width: calc(100% - 2 * var(--keyboard-padding-horizontal));
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  container-type: inline-size;
-  touch-action: none;
-  -webkit-user-select: none;
-  user-select: none;
-  pointer-events: all;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  font-size: 16px;
-  /* Size of toolbar labels */
-  font-weight: 400;
-  text-shadow: none;
-}
-.ML__box-placeholder {
-  color: var(--box-placeholder-color, var(--keyboard-accent-color));
-}
-.MLK__tex {
-  font-family: KaTeX_Main, KaTeX_Math, 'Cambria Math', 'Asana Math', OpenSymbol, Symbola, STIX, Times, serif !important;
-}
-.MLK__tex-math {
-  font-family: KaTeX_Math, KaTeX_Main, 'Cambria Math', 'Asana Math', OpenSymbol, Symbola, STIX, Times, serif !important;
-  font-style: italic;
-}
-.MLK__layer {
-  display: none;
-  outline: none;
-}
-.MLK__layer.is-visible {
-  display: flex;
-  flex-flow: column;
-}
-/* Keyboard layouts are made or rows of keys... */
-.MLK__rows {
-  --private-keycap-gap: var(--keycap-gap);
-  --private-keycap-height: var(--keycap-height);
-  --private-keycap-max-width: var(--keycap-max-width);
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  border-collapse: separate;
-  clear: both;
-  border: 0;
-  margin: 0;
-  margin-bottom: var(--private-keycap-gap);
-  gap: var(--private-keycap-gap);
-  /* If the styling include, e.g., some shadows, they will be
-  cut off by the overflow. In that case, set the padding to 
-  compensate. */
-  padding-left: var(--keyboard-row-padding-left, 0);
-  padding-right: var(--keyboard-row-padding-right, 0);
-  overflow-x: auto;
-  touch-action: none;
-}
-.MLK__rows > .row {
-  display: flex;
-  flex-flow: row;
-  justify-content: center;
-  width: 100%;
-  gap: var(--private-keycap-gap);
-  margin: 0;
-  padding: 0;
-  /* For the alignment of the text on some modifiers (e.g. shift) */
-  /* Extra spacing between two adjacent keys */
-  /** A regular keycap */
-}
-.MLK__rows > .row .tex {
-  font-family: KaTeX_Math, KaTeX_Main, 'Cambria Math', 'Asana Math', OpenSymbol, Symbola, STIX, Times, serif !important;
-}
-.MLK__rows > .row .tex-math {
-  font-family: KaTeX_Math, 'Cambria Math', 'Asana Math', OpenSymbol, Symbola, STIX, Times, serif !important;
-}
-.MLK__rows > .row .big-op {
-  font-size: calc(1.25 * var(--keycap-font-size, 20px));
-}
-.MLK__rows > .row .small {
-  font-size: var(--keycap-small-font-size, 16px);
-}
-.MLK__rows > .row .bottom {
-  justify-content: flex-end;
-}
-.MLK__rows > .row .left {
-  align-items: flex-start;
-  padding-left: 12px;
-}
-.MLK__rows > .row .right {
-  align-items: flex-end;
-  padding-right: 12px;
-}
-.MLK__rows > .row .w0 {
-  width: 0;
-}
-.MLK__rows > .row .w5 {
-  width: calc(min(var(--private-keycap-max-width, 100px), 10cqw) / 2 - var(--private-keycap-gap));
-}
-.MLK__rows > .row .w15 {
-  width: calc(1.5 * min(var(--private-keycap-max-width, 100px), 10cqw) var(--private-keycap-gap));
-}
-.MLK__rows > .row .w20 {
-  width: calc(2 * min(var(--private-keycap-max-width, 100px), 10cqw) - var(--private-keycap-gap));
-}
-.MLK__rows > .row .w40 {
-  width: calc(4 * min(var(--private-keycap-max-width, 100px), 10cqw) - var(--private-keycap-gap));
-}
-.MLK__rows > .row .w50 {
-  width: calc(5 * min(var(--private-keycap-max-width, 100px), 10cqw) - var(--private-keycap-gap));
-}
-.MLK__rows > .row .MLK__keycap.w50 {
-  font-size: 80%;
-  padding-top: 10px;
-  font-weight: 100;
-}
-.MLK__rows > .row .separator {
-  background: transparent;
-  border: none;
-  pointer-events: none;
-}
-.MLK__rows > .row .horizontal-rule {
-  height: 6px;
-  margin-top: 3px;
-  margin-bottom: 0;
-  width: 100%;
-  border-radius: 0;
-  border-top: var(--keyboard-horizontal-rule);
-}
-.MLK__rows > .row .ghost {
-  background: var(--keyboard-toolbar-background);
-  border: none;
-  color: var(--keyboard-toolbar-text);
-}
-.MLK__rows > .row .ghost:hover {
-  background: var(--keyboard-toolbar-background-hover);
-}
-.MLK__rows > .row .bigfnbutton {
-  font-size: var(--keycap-extra-small-font-size, 14px);
-}
-.MLK__rows > .row .shift,
-.MLK__rows > .row .action {
-  color: var(--keycap-secondary-text);
-  background: var(--keycap-secondary-background);
-  border-color: var(--keycap-secondary-border);
-  border-bottom-color: var(--keycap-secondary-border-bottom);
-  line-height: 0.8;
-  font-size: min(1rem, var(--keycap-small-font-size, 16px));
-  font-weight: 600;
-  padding: 8px 12px 8px 12px;
-}
-.MLK__rows > .row .shift:hover,
-.MLK__rows > .row .action:hover {
-  background: var(--keycap-secondary-background-hover);
-}
-.MLK__rows > .row .action.primary {
-  background: var(--keycap-primary-background);
-  color: var(--keycap-primary-text);
-}
-.MLK__rows > .row .action.primary:hover {
-  background: var(--keycap-primary-background-hover);
-  color: var(--keycap-primary-text);
-}
-.MLK__rows > .row .shift.selected,
-.MLK__rows > .row .action.selected {
-  color: var(--keyboard-toolbar-text-active);
-}
-.MLK__rows > .row .shift.selected.is-pressed,
-.MLK__rows > .row .action.selected.is-pressed,
-.MLK__rows > .row .shift.selected.is-active,
-.MLK__rows > .row .action.selected.is-active {
-  color: white;
-}
-.MLK__rows > .row .warning {
-  background: #cd0030;
-  color: white;
-}
-.MLK__rows > .row .warning svg.svg-glyph {
-  width: 24px;
-  height: 24px;
-  min-height: 24px;
-}
-.MLK__rows > .row div {
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  justify-content: space-evenly;
-  width: calc(min(var(--private-keycap-max-width), 10cqw) - var(--private-keycap-gap));
-  height: var(--private-keycap-height);
-  box-sizing: border-box;
-  padding: 0;
-  vertical-align: top;
-  text-align: center;
-  float: left;
-  color: var(--keycap-text);
-  fill: currentColor;
-  font-size: var(--keycap-font-size, 20px);
-  background: var(--keycap-background);
-  border: 1px solid var(--keycap-border);
-  border-bottom-color: var(--keycap-border-bottom);
-  border-radius: 6px;
-  cursor: pointer;
-  touch-action: none;
-  /* Keys with a variants panel */
-  position: relative;
-  overflow: hidden;
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-.MLK__rows > .row div:hover {
-  background: var(--keycap-background-hover);
-}
-.MLK__rows > .row div .ML__mathlive {
-  pointer-events: none;
-  touch-action: none;
-}
-.MLK__rows > .row div svg.svg-glyph {
-  margin: 8px 0;
-  width: 20px;
-  height: 20px;
-  min-height: 20px;
-}
-.MLK__rows > .row div svg.svg-glyph-lg {
-  margin: 8px 0;
-  width: 24px;
-  height: 24px;
-  min-height: 24px;
-}
-.MLK__rows > .row div.MLK__tex-math {
-  font-size: 25px;
-}
-.MLK__rows > .row div.is-pressed {
-  background: var(--keycap-background-pressed);
-  color: var(--keycap-text-pressed);
-}
-.MLK__rows > .row div.MLK__keycap.is-active,
-.MLK__rows > .row div.action.is-active,
-.MLK__rows > .row div.MLK__keycap.is-pressed,
-.MLK__rows > .row div.action.is-pressed {
-  z-index: calc(var(--keyboard-zindex, 105) - 5);
-}
-.MLK__rows > .row div.MLK__keycap.is-active aside,
-.MLK__rows > .row div.action.is-active aside,
-.MLK__rows > .row div.MLK__keycap.is-pressed aside,
-.MLK__rows > .row div.action.is-pressed aside {
-  display: none;
-}
-.MLK__rows > .row div.MLK__keycap.is-active .MLK__shift,
-.MLK__rows > .row div.action.is-active .MLK__shift,
-.MLK__rows > .row div.MLK__keycap.is-pressed .MLK__shift,
-.MLK__rows > .row div.action.is-pressed .MLK__shift {
-  display: none;
-}
-.MLK__rows > .row div.shift.is-pressed,
-.MLK__rows > .row div.MLK__keycap.is-pressed,
-.MLK__rows > .row div.action.is-pressed {
-  background: var(--keycap-background-pressed);
-  color: var(--keycap-text-pressed);
-}
-.MLK__rows > .row div.shift.is-active,
-.MLK__rows > .row div.MLK__keycap.is-active,
-.MLK__rows > .row div.action.is-active {
-  background: var(--keycap-background-active);
-  color: var(--keycap-text-active);
-}
-.MLK__rows > .row div small {
-  color: var(--keycap-secondary-text);
-}
-.MLK__rows > .row div aside {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  font-size: 10px;
-  line-height: 10px;
-  color: var(--keycap-secondary-text);
-}
-/* Add an attribute 'data-tooltip' to display a tooltip on hover.
-Note there are a different set of tooltip rules for the keyboard toggle
-(it's in a different CSS tree) */
-.MLK__tooltip {
-  position: relative;
-}
-.MLK__tooltip::after {
-  position: absolute;
-  display: inline-table;
-  content: attr(data-tooltip);
-  top: inherit;
-  bottom: 100%;
-  width: max-content;
-  max-width: 200px;
-  padding: 8px 8px;
-  background: #616161;
-  color: #fff;
-  text-align: center;
-  z-index: 2;
-  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-  border-radius: 2px;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  font-weight: 400;
-  font-size: 12px;
-  transition: all 0.15s cubic-bezier(0.4, 0, 1, 1) 1s;
-  opacity: 0;
-  transform: scale(0.5);
-}
-.MLK__tooltip:hover {
-  position: relative;
-}
-.MLK__tooltip:hover::after {
-  opacity: 1;
-  transform: scale(1);
-}
-.MLK__toolbar {
-  align-self: center;
-  display: flex;
-  flex-flow: row;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 996px;
-  min-height: 32px;
-  /* Icons for undo/redo, etc. */
-}
-.MLK__toolbar svg {
-  height: 20px;
-  width: 20px;
-}
-.MLK__toolbar > .left {
-  position: relative;
-  display: flex;
-  justify-content: flex-start;
-  flex-flow: row;
-}
-.MLK__toolbar > .right {
-  display: flex;
-  justify-content: flex-end;
-  flex-flow: row;
-}
-.MLK__toolbar > div > div {
-  /* "button" in the toolbar */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--keyboard-toolbar-text);
-  fill: currentColor;
-  background: var(--keyboard-toolbar-background);
-  font-size: 135%;
-  padding: 4px 15px;
-  cursor: pointer;
-  width: max-content;
-  min-width: 42px;
-  min-height: 22px;
-  border: none;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-bottom: 8px;
-  padding-top: 8px;
-  margin-top: 7px;
-  margin-bottom: 8px;
-  margin-left: 4px;
-  margin-right: 4px;
-  border-radius: 8px;
-  box-shadow: none;
-  border-bottom: 2px solid transparent;
-}
-.MLK__toolbar > div > div:not(.disabled):not(.selected):hover {
-  background: var(--keyboard-toolbar-background-hover);
-}
-.MLK__toolbar > div > div.disabled svg,
-.MLK__toolbar > div > div.disabled:hover svg,
-.MLK__toolbar > div > div.disabled.is-pressed svg {
-  color: var(--keyboard-toolbar-text);
-  opacity: 0.2;
-}
-.MLK__toolbar > div > div:hover,
-.MLK__toolbar > div > div:active,
-.MLK__toolbar > div > div.is-pressed,
-.MLK__toolbar > div > div.is-active {
-  color: var(--keyboard-toolbar-text-active);
-}
-.MLK__toolbar > div > div.selected {
-  color: var(--keyboard-toolbar-text-active);
-  background: var(--keyboard-toolbar-background-selected);
-  border-radius: 0;
-  border-bottom-color: var(--keyboard-toolbar-text-active);
-  padding-bottom: 4px;
-  margin-bottom: 12px;
-}
-/* This is the element that displays variants on press+hold */
-.MLK__variant-panel {
-  visibility: hidden;
-  position: fixed;
-  display: flex;
-  flex-flow: row wrap-reverse;
-  justify-content: center;
-  align-content: center;
-  margin: 0;
-  padding: 0;
-  bottom: auto;
-  top: 0;
-  box-sizing: content-box;
-  transform: none;
-  z-index: calc(var(--keyboard-zindex, 105) + 1);
-  touch-action: none;
-  max-width: 350px;
-  background: var(--variant-panel-background);
-  text-align: center;
-  border-radius: 6px;
-  padding: 6px;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-  transition: none;
-}
-.MLK__variant-panel.is-visible {
-  visibility: visible;
-}
-.MLK__variant-panel.compact {
-  --variant-keycap-length: 50px;
-  --variant-keycap-font-size: 24px;
-  --variant-keycap-aside-font-size: 10px;
-}
-.MLK__variant-panel .item {
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--variant-keycap-font-size);
-  height: var(--variant-keycap-length);
-  width: var(--variant-keycap-length);
-  margin: 0;
-  box-sizing: border-box;
-  border-radius: 5px;
-  border: 1px solid transparent;
-  background: transparent;
-  pointer-events: all;
-  cursor: pointer;
-  color: var(--variant-keycap-text);
-  fill: currentColor;
-}
-@media (max-height: 412px) {
-  .MLK__variant-panel .item {
-    --variant-keycap-font-size: 24px;
-    --variant-keycap-length: 50px;
-  }
-}
-.MLK__variant-panel .item .ML__mathlive {
-  pointer-events: none;
-}
-.MLK__variant-panel .item.is-active {
-  background: var(--variant-keycap-background-active);
-  color: var(--variant-keycap-text-active);
-}
-.MLK__variant-panel .item.is-pressed {
-  background: var(--variant-keycap-background-pressed);
-  color: var(--variant-keycap-text-pressed);
-}
-.MLK__variant-panel .item.small {
-  font-size: var(--keycap-small-font-size, 16px);
-}
-.MLK__variant-panel .item.swatch-button {
-  box-sizing: border-box;
-  background: #fbfbfb;
-}
-.MLK__variant-panel .item.swatch-button > span {
-  display: inline-block;
-  margin: 6px;
-  width: calc(100% - 12px);
-  height: calc(100% - 12px);
-  border-radius: 50%;
-}
-.MLK__variant-panel .item.swatch-button:hover {
-  background: #f0f0f0;
-}
-.MLK__variant-panel .item.swatch-button:hover > span {
-  border-radius: 2px;
-}
-.MLK__variant-panel .item.box > div,
-.MLK__variant-panel .item.box > span {
-  border: 1px dashed rgba(0, 0, 0, 0.24);
-}
-.MLK__variant-panel .item .warning {
-  min-height: 60px;
-  min-width: 60px;
-  background: #cd0030;
-  color: white;
-  padding: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 5px;
-}
-.MLK__variant-panel .item .warning.is-pressed,
-.MLK__variant-panel .item .warning.is-active {
-  background: red;
-}
-.MLK__variant-panel .item .warning svg.svg-glyph {
-  width: 50px;
-  height: 50px;
-}
-.MLK__variant-panel .item aside {
-  font-size: var(--variant-keycap-aside-font-size);
-  line-height: 12px;
-  opacity: 0.78;
-  padding-top: 2px;
-}
-.MLK__keycap {
-  position: relative;
-}
-.MLK__shift {
-  display: block;
-  position: absolute;
-  right: 4px;
-  top: 4px;
-  font-size: var(--keycap-shift-font-size);
-  color: var(--keycap-shift-color);
-}
-.hide-shift .MLK__shift {
-  display: none;
-}
-@media (max-width: 414px) {
-  .MLK__variant-panel {
-    max-width: 350px;
-    --variant-keycap-font-size: 24px;
-    --variant-keycap-length: 50px;
-  }
-}
-/* @xs breakpoint: iPhone 5 */
-@container (max-width: 414px) {
-  .MLK__rows {
-    --private-keycap-gap: min(var(--keycap-gap), 2px);
-    --private-keycap-height: min(var(--keycap-height), 42px);
-    --private-keycap-max-width: min(var(--keycap-max-width), 62px);
-  }
-  .MLK__toolbar > div > div {
-    font-size: 100%;
-    padding: 0;
-    margin-left: 2px;
-    margin-right: 2px;
-  }
-  .MLK__rows .shift,
-  .MLK__rows .action {
-    font-size: 65%;
-  }
-  .MLK__rows .warning svg.svg-glyph {
-    width: 14px;
-    height: 14px;
-    min-height: 14px;
-  }
-}
-@container (max-width: 744px) {
-  .MLK__rows {
-    --private-keycap-gap: min(var(--keycap-gap), 2px);
-    --private-keycap-height: min(var(--keycap-height), 52px);
-    --private-keycap-max-width: min(var(--keycap-max-width), 62px);
-  }
-  .MLK__toolbar > div > div {
-    padding-left: 0;
-    padding-right: 0;
-  }
-  .MLK__tooltip::after {
-    padding: 8px 16px;
-    font-size: 16px;
-  }
-  .MLK__rows > .row > div.fnbutton {
-    font-size: 16px;
-  }
-  .MLK__rows > .row > div.bigfnbutton {
-    font-size: calc(var(--keycap-extra-small-font-size, 14px) / 1.55);
-  }
-  .MLK__rows > .row > div.small {
-    font-size: 13px;
-  }
-  .MLK__rows > .row > div > aside {
-    display: none;
-  }
-  .MLK__shift {
-    display: none;
-  }
-}
-/* Medium breakpoint: larger phones */
-@container (max-width: 768px) {
-  .MLK__rows {
-    --private-keycap-height: min(var(--keycap-height), 42px);
-  }
-  .MLK__rows > .row > div > small {
-    font-size: 14px;
-  }
-}
-@container (max-width: 1444px) {
-  .MLK__rows .if-wide {
-    display: none;
-  }
-}
-`;
 
 // src/virtual-keyboard/data.ts
 var LAYOUTS = {
@@ -21797,6 +23590,8 @@ var variantPanelController;
 function showVariantsPanel(element, onClose) {
   var _a3, _b3, _c2;
   const keyboard = VirtualKeyboard.singleton;
+  if (!keyboard)
+    return;
   const keycap = parentKeycap(element);
   const variantDef = (_b3 = (_a3 = keyboard.getKeycap(keycap == null ? void 0 : keycap.id)) == null ? void 0 : _a3.variants) != null ? _b3 : "";
   if (typeof variantDef === "string" && !hasVariants(variantDef) || Array.isArray(variantDef) && variantDef.length === 0) {
@@ -21831,7 +23626,7 @@ function showVariantsPanel(element, onClose) {
   if (!Scrim.scrim)
     Scrim.scrim = new Scrim();
   Scrim.scrim.open({
-    root: (_c2 = keyboard.container) == null ? void 0 : _c2.querySelector(".ML__keyboard"),
+    root: (_c2 = keyboard == null ? void 0 : keyboard.container) == null ? void 0 : _c2.querySelector(".ML__keyboard"),
     child: variantPanel
   });
   variantPanelController == null ? void 0 : variantPanelController.abort();
@@ -21969,6 +23764,7 @@ function latexToMarkup2(latex) {
     return "";
   const context = new Context();
   const root = new Atom({
+    mode: "math",
     type: "root",
     body: parseLatex(latex, {
       context,
@@ -22088,7 +23884,7 @@ function normalizeLayout(layout) {
   if (typeof layout === "string") {
     console.assert(
       LAYOUTS[layout] !== void 0,
-      `MathLive 0.93.0: unknown keyboard layout "${layout}"`
+      `MathLive 0.94.5: unknown keyboard layout "${layout}"`
     );
     return normalizeLayout(LAYOUTS[layout]);
   }
@@ -22096,7 +23892,7 @@ function normalizeLayout(layout) {
   if ("rows" in layout && Array.isArray(layout.rows)) {
     console.assert(
       !("layers" in layout || "markup" in layout),
-      `MathLive 0.93.0: when providing a "rows" property, "layers" and "markup" are ignored`
+      `MathLive 0.94.5: when providing a "rows" property, "layers" and "markup" are ignored`
     );
     const _a3 = layout, { rows } = _a3, partialLayout = __objRest(_a3, ["rows"]);
     result = __spreadProps(__spreadValues({}, partialLayout), {
@@ -22113,7 +23909,7 @@ function normalizeLayout(layout) {
       result.layers = normalizeLayer(layout.layers);
     else {
       console.error(
-        `MathLive 0.93.0: provide either a "rows", "markup" or "layers" property`
+        `MathLive 0.94.5: provide either a "rows", "markup" or "layers" property`
       );
     }
   }
@@ -22215,6 +24011,9 @@ function makeSyntheticKeycaps(elementList) {
     makeSyntheticKeycap(element);
 }
 function makeSyntheticKeycap(element) {
+  const keyboard = VirtualKeyboard.singleton;
+  if (!keyboard)
+    return;
   const keycap = {};
   if (!element.id) {
     if (element.hasAttribute("data-label"))
@@ -22241,7 +24040,7 @@ function makeSyntheticKeycap(element) {
       } catch (e) {
       }
     }
-    element.id = VirtualKeyboard.singleton.registerKeycap(keycap);
+    element.id = keyboard.registerKeycap(keycap);
   }
   if (!element.innerHTML) {
     const [markup, _] = renderKeycap(keycap);
@@ -22249,16 +24048,13 @@ function makeSyntheticKeycap(element) {
   }
 }
 function injectStylesheets() {
-  injectStylesheet(
-    "mathlive-virtual-keyboard-stylesheet",
-    virtual_keyboard_default
-  );
-  injectStylesheet("mathlive-core-stylesheet", core_default);
+  injectStylesheet("virtual-keyboard");
+  injectStylesheet("core");
   void loadFonts();
 }
 function releaseStylesheets() {
-  releaseStylesheet("mathlive-core-stylesheet");
-  releaseStylesheet("mathlive-virtual-keyboard-stylesheet");
+  releaseStylesheet("core");
+  releaseStylesheet("virtual-keyboard");
 }
 var SVG_ICONS = `<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
 
@@ -22568,15 +24364,30 @@ var KEYCAP_SHORTCUTS = {
     tooltip: localize("tooltip.redo")
   },
   "[(]": {
-    variants: ["\\lbrack", "\\langle", "\\lfloor", "\\lceil", "\\lbrace"],
-    latex: "(",
+    variants: [
+      // We insert the fences as "keys" so they can be handled by smartFence.
+      // They will be sent via `onKeystroke` instead of inserted directly in
+      // the model
+      { latex: "\\lbrack", key: "[" },
+      "\\langle",
+      "\\lfloor",
+      "\\lceil",
+      { latex: "\\lbrace", key: "{" }
+    ],
+    key: "(",
     label: "(",
-    shift: { label: "[", latex: "\\lbrack" },
+    shift: { label: "[", key: "[" },
     class: "hide-shift"
   },
   "[)]": {
-    variants: ["\\rbrack", "\\rangle", "\\rfloor", "\\rceil", "\\rbrace"],
-    latex: ")",
+    variants: [
+      { latex: "\\rbrack", key: "]" },
+      "\\rangle",
+      "\\rfloor",
+      "\\rceil",
+      { latex: "\\rbrace", key: "]" }
+    ],
+    key: ")",
     label: ")",
     shift: { label: "]", latex: "\\rbrack" },
     class: "hide-shift"
@@ -22716,6 +24527,8 @@ function handlePointerDown(ev) {
   if (ev.button !== 0)
     return;
   const keyboard = VirtualKeyboard.singleton;
+  if (!keyboard)
+    return;
   let layerButton = ev.target;
   while (layerButton && !layerButton.getAttribute("data-layer"))
     layerButton = layerButton.parentElement;
@@ -22761,7 +24574,7 @@ function handlePointerDown(ev) {
   });
   if (isShiftKey(keycap)) {
     target.classList.add("is-active");
-    keyboard.isShifted = true;
+    keyboard.incrementShiftPress();
   }
   if (keycap.variants) {
     if (pressAndHoldTimer)
@@ -22787,6 +24600,8 @@ function handleVirtualKeyboardEvent(controller) {
     if (!(target == null ? void 0 : target.id))
       return;
     const keyboard = VirtualKeyboard.singleton;
+    if (!keyboard)
+      return;
     const keycap = keyboard.getKeycap(target.id);
     if (!keycap)
       return;
@@ -22798,7 +24613,7 @@ function handleVirtualKeyboardEvent(controller) {
     if (ev.type === "pointercancel") {
       target.classList.remove("is-pressed");
       if (isShiftKey(keycap)) {
-        keyboard.isShifted = false;
+        keyboard.decrementShiftPress();
         target.classList.toggle("is-active", keyboard.isShifted);
       }
       controller.abort();
@@ -22807,7 +24622,7 @@ function handleVirtualKeyboardEvent(controller) {
     if (ev.type === "pointerleave" && ev.target === target) {
       target.classList.remove("is-pressed");
       if (isShiftKey(keycap)) {
-        keyboard.isShifted = false;
+        keyboard.decrementShiftPress();
         target.classList.toggle("is-active", keyboard.isShifted);
       }
       return;
@@ -22816,13 +24631,12 @@ function handleVirtualKeyboardEvent(controller) {
       if (pressAndHoldTimer)
         clearTimeout(pressAndHoldTimer);
       if (isShiftKey(keycap)) {
-        keyboard.isShifted = false;
         target.classList.toggle("is-active", keyboard.isShifted);
       } else if (target.classList.contains("is-pressed")) {
         target.classList.remove("is-pressed");
-        if (VirtualKeyboard.singleton.isShifted && keycap.shift) {
+        if (keyboard.isShifted && keycap.shift) {
           if (typeof keycap.shift === "string") {
-            VirtualKeyboard.singleton.executeCommand([
+            keyboard.executeCommand([
               "insert",
               keycap.shift,
               {
@@ -22838,6 +24652,8 @@ function handleVirtualKeyboardEvent(controller) {
             executeKeycapCommand(keycap.shift);
         } else
           executeKeycapCommand(keycap);
+        if (keyboard.shiftPressCount === 1)
+          keyboard.resetShiftPress();
       }
       controller.abort();
       ev.preventDefault();
@@ -22846,6 +24662,7 @@ function handleVirtualKeyboardEvent(controller) {
   };
 }
 function executeKeycapCommand(keycap) {
+  var _a3;
   let command = keycap.command;
   if (!command && keycap.insert) {
     command = [
@@ -22859,6 +24676,13 @@ function executeKeycapCommand(keycap) {
         format: "latex",
         resetStyle: true
       }
+    ];
+  }
+  if (!command && keycap.key) {
+    command = [
+      "typedText",
+      keycap.key,
+      { focus: true, feedback: true, simulateKeystroke: true }
     ];
   }
   if (!command && keycap.latex) {
@@ -22878,11 +24702,11 @@ function executeKeycapCommand(keycap) {
   if (!command) {
     command = [
       "typedText",
-      keycap.key || keycap.label,
+      keycap.label,
       { focus: true, feedback: true, simulateKeystroke: true }
     ];
   }
-  VirtualKeyboard.singleton.executeCommand(command);
+  (_a3 = VirtualKeyboard.singleton) == null ? void 0 : _a3.executeCommand(command);
 }
 function isKeycapElement(el) {
   if (el.nodeType !== 1)
@@ -22908,12 +24732,19 @@ var VirtualKeyboard = class {
     this.originalContainerBottomPadding = null;
     this.keycapRegistry = {};
     this._isCapslock = false;
+    /** `0`: not pressed
+     *
+     * `1`: Shift is locked for next char only
+     *
+     * `2`: Shift is locked for all characters
+     */
+    this._shiftPressCount = 0;
     this._isShifted = false;
     var _a3, _b3, _c2;
     this.targetOrigin = window.origin;
     this.originValidator = "none";
     this._alphabeticLayout = "auto";
-    this._layouts = "default";
+    this._layouts = Object.freeze(["default"]);
     this._editToolbar = "default";
     this._container = (_b3 = (_a3 = window.document) == null ? void 0 : _a3.body) != null ? _b3 : null;
     this.overrideAutoClose = false;
@@ -22975,17 +24806,40 @@ var VirtualKeyboard = class {
       (_a3 = this._element.querySelector(".MLK__layer.is-visible")) == null ? void 0 : _a3.classList.remove("is-visible");
       newActive.classList.add("is-visible");
     }
+    if (this.isShifted)
+      this.render();
   }
   get isCapslock() {
     return this._isCapslock;
   }
   set isCapslock(val) {
     var _a3;
+    (_a3 = this._element) == null ? void 0 : _a3.classList.toggle("is-caps-lock", this.shiftPressCount === 2);
     if (val === this._isCapslock)
       return;
-    (_a3 = this._element) == null ? void 0 : _a3.classList.toggle("is-caps-lock", val);
     this._isCapslock = val;
     this.isShifted = val;
+  }
+  get shiftPressCount() {
+    return this._shiftPressCount;
+  }
+  /** Increments `_shiftPressCount` by `1`, and handle the appropriate related behavior for each val */
+  incrementShiftPress() {
+    if (++this._shiftPressCount > 2)
+      this.resetShiftPress();
+    else
+      this.isCapslock = true;
+  }
+  /** Decrements `_shiftPressCount` by `1`, and sets `isCapslock` to `false` if reaches `0` */
+  decrementShiftPress() {
+    this._shiftPressCount = Math.max(--this._shiftPressCount, 0);
+    if (this._shiftPressCount === 0)
+      this.isCapslock = false;
+  }
+  /** Resets `_shiftPressCount` to `0`, and sets `isCapslock` to `false` */
+  resetShiftPress() {
+    this._shiftPressCount = 0;
+    this.isCapslock = false;
   }
   get isShifted() {
     return this._isShifted;
@@ -23052,12 +24906,11 @@ var VirtualKeyboard = class {
     return this._layouts;
   }
   set layouts(value) {
-    this._layouts = value;
-    this.updateNormalizedLayouts();
+    this.updateNormalizedLayouts(value);
     this.rebuild();
   }
-  updateNormalizedLayouts() {
-    const layouts = Array.isArray(this._layouts) ? [...this._layouts] : [this._layouts];
+  updateNormalizedLayouts(value) {
+    const layouts = Array.isArray(value) ? [...value] : [value];
     const defaultIndex = layouts.findIndex((x) => x === "default");
     if (defaultIndex >= 0) {
       layouts.splice(
@@ -23069,11 +24922,12 @@ var VirtualKeyboard = class {
         "greek"
       );
     }
+    this._layouts = Object.freeze(layouts);
     this._normalizedLayouts = layouts.map((x) => normalizeLayout(x));
   }
   get normalizedLayouts() {
     if (!this._normalizedLayouts)
-      this.updateNormalizedLayouts();
+      this.updateNormalizedLayouts(this._layouts);
     return this._normalizedLayouts;
   }
   get editToolbar() {
@@ -23091,8 +24945,13 @@ var VirtualKeyboard = class {
     this.rebuild();
   }
   static get singleton() {
-    if (!this._singleton)
-      this._singleton = new VirtualKeyboard();
+    if (this._singleton === void 0) {
+      try {
+        this._singleton = new VirtualKeyboard();
+      } catch (e) {
+        this._singleton = null;
+      }
+    }
     return this._singleton;
   }
   get style() {
@@ -23152,13 +25011,13 @@ var VirtualKeyboard = class {
     const h = this.boundingRect.height;
     if (this.container === document.body) {
       (_a3 = this._element) == null ? void 0 : _a3.style.setProperty(
-        "--keyboard-height",
+        "--_keyboard-height",
         `calc(${h}px + env(safe-area-inset-bottom, 0))`
       );
       const keyboardHeight = h - 1;
       this.container.style.paddingBottom = this.originalContainerBottomPadding ? `calc(${this.originalContainerBottomPadding} + ${keyboardHeight}px)` : `${keyboardHeight}px`;
     } else
-      (_b3 = this._element) == null ? void 0 : _b3.style.setProperty("--keyboard-height", `${h}px`);
+      (_b3 = this._element) == null ? void 0 : _b3.style.setProperty("--_keyboard-height", `${h}px`);
   }
   rebuild() {
     if (this._rebuilding || !this._element)
@@ -23204,10 +25063,13 @@ var VirtualKeyboard = class {
     }
   }
   show(options) {
+    var _a3;
     if (this._visible)
       return;
     const container = this.container;
     if (!container)
+      return;
+    if (!window.mathVirtualKeyboard)
       return;
     if (!this.stateWillChange(true))
       return;
@@ -23233,6 +25095,10 @@ var VirtualKeyboard = class {
       window.addEventListener("keyup", this, { capture: true });
       this.currentLayer = this.latentLayer;
       this.render();
+      (_a3 = this._element) == null ? void 0 : _a3.classList.toggle(
+        "is-caps-lock",
+        this.shiftPressCount === 2
+      );
     }
     this._visible = true;
     if (options == null ? void 0 : options.animate) {
@@ -23242,8 +25108,8 @@ var VirtualKeyboard = class {
           this._element.addEventListener(
             "transitionend",
             () => {
-              var _a3;
-              return (_a3 = this._element) == null ? void 0 : _a3.classList.remove("animate");
+              var _a4;
+              return (_a4 = this._element) == null ? void 0 : _a4.classList.remove("animate");
             },
             { once: true }
           );
@@ -23338,16 +25204,16 @@ var VirtualKeyboard = class {
         break;
       case "keydown": {
         const kev = evt;
-        this.isCapslock = kev.getModifierState("CapsLock");
         if (kev.key === "Shift")
-          this.isShifted = true;
+          this.incrementShiftPress();
         break;
       }
       case "keyup": {
         const kev = evt;
-        if (kev.key === "Shift")
-          this.isShifted = false;
-        this.isCapslock = kev.getModifierState("CapsLock");
+        if (kev.key !== "Shift" && this._shiftPressCount === 1) {
+          this.isCapslock = false;
+          this._shiftPressCount = 0;
+        }
         break;
       }
     }
@@ -23590,7 +25456,7 @@ function update(updates) {
           updates.defaultMode
         )) {
           console.error(
-            `MathLive 0.93.0:  valid values for defaultMode are "text", "math" or "inline-math"`
+            `MathLive 0.94.5:  valid values for defaultMode are "text", "math" or "inline-math"`
           );
           result.defaultMode = "math";
         } else
@@ -23681,36 +25547,6 @@ function isSelection(value) {
 }
 
 // src/addons/math-ml.ts
-var SPECIAL_OPERATORS = {
-  "\\ne": "<mo>&ne;</mo>",
-  "\\neq": "<mo>&neq;</mo>",
-  "\\pm": "&#177;",
-  "\\times": "&#215;",
-  "\\colon": ":",
-  "\\vert": "|",
-  "\\Vert": "\u2225",
-  "\\mid": "\u2223",
-  "\\lbrace": "{",
-  "\\rbrace": "}",
-  "\\lparen": "(",
-  "\\rparen": ")",
-  "\\langle": "\u27E8",
-  "\\rangle": "\u27E9",
-  "\\lfloor": "\u230A",
-  "\\rfloor": "\u230B",
-  "\\lceil": "\u2308",
-  "\\rceil": "\u2309",
-  "\\vec": "&#x20d7;",
-  "\\acute": "&#x00b4;",
-  "\\grave": "&#x0060;",
-  "\\dot": "&#x02d9;",
-  "\\ddot": "&#x00a8;",
-  "\\tilde": "&#x007e;",
-  "\\bar": "&#x00af;",
-  "\\breve": "&#x02d8;",
-  "\\check": "&#x02c7;",
-  "\\hat": "&#x005e;"
-};
 var APPLY_FUNCTION = "<mo>&#x2061;</mo>";
 var INVISIBLE_TIMES = "<mo>&#8290;</mo>";
 function xmlEscape(string) {
@@ -23722,36 +25558,96 @@ function makeID(id, options) {
   return ` extid="${id}"`;
 }
 function scanIdentifier(stream, final, options) {
-  var _a3, _b3, _c2, _d2, _e, _f, _g, _h;
+  var _a3, _b3, _c2, _d2, _e, _f, _g, _h, _i;
   let result = false;
   final = final != null ? final : stream.atoms.length;
   let mathML = "";
   let body = "";
   let atom = stream.atoms[stream.index];
+  const variant = (_b3 = (_a3 = atom.style) == null ? void 0 : _a3.variant) != null ? _b3 : "";
+  const variantStyle = (_d2 = (_c2 = atom.style) == null ? void 0 : _c2.variantStyle) != null ? _d2 : "";
+  let variantProp = "";
+  if (variant || variantStyle) {
+    variantProp = (_e = {
+      "upnormal": "normal",
+      "boldnormal": "bold",
+      "italicmain": "italic",
+      "bolditalicmain": "bold-italic",
+      "double-struck": "double-struck",
+      "boldfraktur": "bold-fraktur",
+      "calligraphic": "script",
+      "upcalligraphic": "script",
+      "script": "script",
+      "boldscript": "bold-script",
+      "boldcalligraphic": "bold-script",
+      "fraktur": "fraktur",
+      "upsans-serif": "sans-serif",
+      "boldsans-serif": "bold-sans-serif",
+      "italicsans-serif": "sans-serif-italic",
+      "bolditalicsans-serif": "sans-serif-bold-italic",
+      "monospace": "monospace"
+    }[variantStyle + variant]) != null ? _e : "";
+    variantProp = `mathvariant="${variantProp}"`;
+  }
+  const SPECIAL_IDENTIFIERS2 = {
+    "\\exponentialE": "&#x02147;",
+    "\\imaginaryI": "&#x2148;",
+    "\\differentialD": "&#x2146;",
+    "\\capitalDifferentialD": "&#x2145;",
+    "\\alpha": "&#x03b1;",
+    "\\pi": "&#x03c0;",
+    "\\infty": "&#x221e;",
+    "\\forall": "&#x2200;",
+    "\\nexists": "&#x2204;",
+    "\\exists": "&#x2203;",
+    "\\hbar": "\u210F",
+    "\\cdotp": "\u22C5",
+    "\\ldots": "\u2026",
+    "\\cdots": "\u22EF",
+    "\\ddots": "\u22F1",
+    "\\vdots": "\u22EE",
+    "\\ldotp": "."
+  };
+  if (SPECIAL_IDENTIFIERS2[atom.command]) {
+    stream.index += 1;
+    let mathML2 = `<mi${makeID(atom.id, options)}${variantProp}>${SPECIAL_IDENTIFIERS2[atom.command]}</mi>`;
+    if (stream.lastType === "mi" || stream.lastType === "mn" || stream.lastType === "mtext" || stream.lastType === "fence")
+      mathML2 = INVISIBLE_TIMES + mathML2;
+    if (!parseSubsup(mathML2, stream, options)) {
+      stream.mathML += mathML2;
+      stream.lastType = "mi";
+    }
+    return true;
+  }
   if (atom.command === "\\operatorname") {
     body = toString2(atom.body);
     stream.index += 1;
   } else {
-    const variant = (_b3 = (_a3 = atom.style) == null ? void 0 : _a3.variant) != null ? _b3 : "";
-    const variantStyle = (_d2 = (_c2 = atom.style) == null ? void 0 : _c2.variantStyle) != null ? _d2 : "";
-    while (stream.index < final && (atom.type === "mord" || atom.type === "macro") && !atom.isDigit() && variant === ((_f = (_e = atom.style) == null ? void 0 : _e.variant) != null ? _f : "") && variantStyle === ((_h = (_g = atom.style) == null ? void 0 : _g.variantStyle) != null ? _h : "")) {
+    if (variant || variantStyle) {
+      while (stream.index < final && (atom.type === "mord" || atom.type === "macro") && !atom.isDigit() && variant === ((_g = (_f = atom.style) == null ? void 0 : _f.variant) != null ? _g : "") && variantStyle === ((_i = (_h = atom.style) == null ? void 0 : _h.variantStyle) != null ? _i : "")) {
+        body += toString2([atom]);
+        stream.index += 1;
+        atom = stream.atoms[stream.index];
+      }
+    } else if ((atom.type === "mord" || atom.type === "macro") && !atom.isDigit()) {
       body += toString2([atom]);
       stream.index += 1;
-      atom = stream.atoms[stream.index];
     }
   }
   if (body.length > 0) {
     result = true;
-    mathML = `<mi>${body}</mi>`;
-    if ((stream.lastType === "mi" || stream.lastType === "mn" || stream.lastType === "mtext" || stream.lastType === "fence") && !/^<mo>(.*)<\/mo>$/.test(mathML))
-      mathML = INVISIBLE_TIMES + mathML;
-    if (body.endsWith(">f</mi>") || body.endsWith(">g</mi>")) {
+    mathML = `<mi${variantProp}>${body}</mi>`;
+    const lastType = stream.lastType;
+    if (mathML.endsWith(">f</mi>") || mathML.endsWith(">g</mi>")) {
       mathML += APPLY_FUNCTION;
       stream.lastType = "applyfunction";
     } else
       stream.lastType = /^<mo>(.*)<\/mo>$/.test(mathML) ? "mo" : "mi";
-    if (!parseSubsup(body, stream, options))
+    if (!parseSubsup(mathML, stream, options)) {
+      if (lastType === "mi" || lastType === "mn" || lastType === "mtext" || lastType === "fence")
+        mathML = INVISIBLE_TIMES + mathML;
       stream.mathML += mathML;
+    }
   }
   return result;
 }
@@ -23785,8 +25681,12 @@ function parseSubsup(base, stream, options) {
     } else
       return false;
   }
+  const lastType = stream.lastType;
+  stream.lastType = "";
   const superscript = toMathML(atom.superscript, options);
+  stream.lastType = "";
   const subscript = toMathML(atom.subscript, options);
+  stream.lastType = lastType;
   if (!superscript && !subscript)
     return false;
   let mathML = "";
@@ -23892,6 +25792,37 @@ function scanOperator(stream, final, options) {
   let mathML = "";
   let lastType = "";
   const atom = stream.atoms[stream.index];
+  const SPECIAL_OPERATORS2 = {
+    "\\ne": "&ne;",
+    "\\neq": "&neq;",
+    "\\pm": "&#177;",
+    "\\times": "&#215;",
+    "\\colon": ":",
+    "\\vert": "|",
+    "\\Vert": "\u2225",
+    "\\mid": "\u2223",
+    "\\lbrace": "{",
+    "\\rbrace": "}",
+    "\\lparen": "(",
+    "\\rparen": ")",
+    "\\langle": "\u27E8",
+    "\\rangle": "\u27E9",
+    "\\lfloor": "\u230A",
+    "\\rfloor": "\u230B",
+    "\\lceil": "\u2308",
+    "\\rceil": "\u2309",
+    "\\hline": "&#x2500;",
+    "\\lcm": ""
+  };
+  if (SPECIAL_OPERATORS2[atom.command]) {
+    stream.index += 1;
+    const mathML2 = `<mo${makeID(atom.id, options)}>${SPECIAL_OPERATORS2[atom.command]}</mo>`;
+    if (!parseSubsup(mathML2, stream, options)) {
+      stream.mathML += mathML2;
+      stream.lastType = "mo";
+    }
+    return true;
+  }
   if (stream.index < final && (atom.type === "mbin" || atom.type === "mrel")) {
     mathML += atomToMathML(stream.atoms[stream.index], options);
     stream.index += 1;
@@ -24005,7 +25936,9 @@ function toString2(atoms) {
   return xmlEscape(result);
 }
 function atomToMathML(atom, options) {
-  var _a3, _b3, _c2, _d2, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y;
+  var _a3, _b3, _c2, _d2, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v;
+  if (atom.mode === "text")
+    return `<mi${makeID(atom.id, options)}>${atom.value}</mi>`;
   const SVG_CODE_POINTS = {
     widehat: "^",
     widecheck: "\u02C7",
@@ -24056,33 +25989,6 @@ function atomToMathML(atom, options) {
     longLeftrightharpoons: "\u21CB"
     // None better available.
   };
-  const SPECIAL_IDENTIFIERS2 = {
-    "\\exponentialE": "&#x02147;",
-    "\\imaginaryI": "&#x2148;",
-    "\\differentialD": "&#x2146;",
-    "\\capitalDifferentialD": "&#x2145;",
-    "\\alpha": "&#x03b1;",
-    "\\pi": "&#x03c0;",
-    "\\infty": "&#x221e;",
-    "\\forall": "&#x2200;",
-    "\\nexists": "&#x2204;",
-    "\\exists": "&#x2203;",
-    "\\hbar": "\u210F",
-    "\\cdotp": "\u22C5",
-    "\\ldots": "\u2026",
-    "\\cdots": "\u22EF",
-    "\\ddots": "\u22F1",
-    "\\vdots": "\u22EE",
-    "\\ldotp": "."
-  };
-  const MATH_VARIANTS = {
-    cal: "script",
-    frak: "fraktur",
-    bb: "double-struck",
-    scr: "script",
-    cmtt: "monospace",
-    cmss: "sans-serif"
-  };
   const SPACING = {
     "\\!": -3 / 18,
     "\\ ": 6 / 18,
@@ -24102,264 +26008,278 @@ function atomToMathML(atom, options) {
   let underscript;
   let overscript;
   let body;
-  let variant = (_b3 = MATH_VARIANTS[(_a3 = atom.fontFamily) != null ? _a3 : atom.font]) != null ? _b3 : "";
-  if (variant)
-    variant = ` mathvariant="${variant}"`;
   const { command } = atom;
-  if (atom.mode === "text")
-    result = `<mi${makeID(atom.id, options)}>${atom.value}</mi>`;
-  else {
-    switch (atom.type) {
-      case "first":
-        break;
-      case "group":
-      case "root":
-        if (SPECIAL_OPERATORS[atom.command])
-          result = SPECIAL_OPERATORS[atom.command];
-        else
-          result = toMathML(atom.body, options);
-        break;
-      case "array":
-        if (atom.leftDelim && atom.leftDelim !== "." || atom.rightDelim && atom.rightDelim !== ".") {
-          result += "<mrow>";
-          if (atom.leftDelim && atom.leftDelim !== ".") {
-            result += "<mo>" + (SPECIAL_OPERATORS[atom.leftDelim] || atom.leftDelim) + "</mo>";
-          }
-        }
-        result += "<mtable";
-        if (atom.colFormat) {
-          result += ' columnalign="';
-          for (i = 0; i < atom.colFormat.length; i++) {
-            if (atom.colFormat[i].align) {
-              result += { l: "left", c: "center", r: "right" }[atom.colFormat[i].align] + " ";
-            }
-          }
-          result += '"';
-        }
-        result += ">";
-        for (row = 0; row < atom.array.length; row++) {
-          result += "<mtr>";
-          for (col = 0; col < atom.array[row].length; col++) {
-            result += "<mtd>" + toMathML(atom.array[row][col], options) + "</mtd>";
-          }
-          result += "</mtr>";
-        }
-        result += "</mtable>";
-        if (atom.leftDelim && atom.leftDelim !== "." || atom.rightDelim && atom.rightDelim !== ".") {
-          if (atom.rightDelim && atom.rightDelim !== ".") {
-            result += "<mo>" + (SPECIAL_OPERATORS[atom.leftDelim] || atom.rightDelim) + "</mo>";
-          }
-          result += "</mrow>";
-        }
-        break;
-      case "genfrac":
-        if (atom.leftDelim || atom.rightDelim)
-          result += "<mrow>";
+  if (atom.command === "\\error") {
+    return `<merror${makeID(atom.id, options)}>${toMathML(
+      atom.body,
+      options
+    )}</merror>`;
+  }
+  const SPECIAL_DELIMS = {
+    "\\vert": "|",
+    "\\Vert": "\u2225",
+    "\\mid": "\u2223",
+    "\\lbrace": "{",
+    "\\rbrace": "}",
+    "\\lparen": "(",
+    "\\rparen": ")",
+    "\\langle": "\u27E8",
+    "\\rangle": "\u27E9",
+    "\\lfloor": "\u230A",
+    "\\rfloor": "\u230B",
+    "\\lceil": "\u2308",
+    "\\rceil": "\u2309"
+  };
+  const SPECIAL_ACCENTS = {
+    "\\vec": "&#x20d7;",
+    "\\acute": "&#x00b4;",
+    "\\grave": "&#x0060;",
+    "\\dot": "&#x02d9;",
+    "\\ddot": "&#x00a8;",
+    "\\tilde": "&#x007e;",
+    "\\bar": "&#x00af;",
+    "\\breve": "&#x02d8;",
+    "\\check": "&#x02c7;",
+    "\\hat": "&#x005e;"
+  };
+  switch (atom.type) {
+    case "first":
+      break;
+    case "group":
+    case "root":
+      result = toMathML(atom.body, options);
+      break;
+    case "array":
+      if (atom.leftDelim && atom.leftDelim !== "." || atom.rightDelim && atom.rightDelim !== ".") {
+        result += "<mrow>";
         if (atom.leftDelim && atom.leftDelim !== ".") {
-          result += "<mo" + makeID(atom.id, options) + ">" + (SPECIAL_OPERATORS[atom.leftDelim] || atom.leftDelim) + "</mo>";
+          result += "<mo>" + (SPECIAL_DELIMS[atom.leftDelim] || atom.leftDelim) + "</mo>";
         }
-        if (atom.hasBarLine) {
-          result += "<mfrac>";
-          result += toMathML(atom.above, options) || "<mi>&nbsp;</mi>";
-          result += toMathML(atom.below, options) || "<mi>&nbsp;</mi>";
-          result += "</mfrac>";
-        } else {
-          result += "<mtable" + makeID(atom.id, options) + ">";
-          result += "<mtr>" + toMathML(atom.above, options) + "</mtr>";
-          result += "<mtr>" + toMathML(atom.below, options) + "</mtr>";
-          result += "</mtable>";
+      }
+      result += "<mtable";
+      if (atom.colFormat) {
+        result += ' columnalign="';
+        for (i = 0; i < atom.colFormat.length; i++) {
+          if (atom.colFormat[i].align) {
+            result += { l: "left", c: "center", r: "right" }[atom.colFormat[i].align] + " ";
+          }
         }
+        result += '"';
+      }
+      result += ">";
+      for (row = 0; row < atom.array.length; row++) {
+        result += "<mtr>";
+        for (col = 0; col < atom.array[row].length; col++) {
+          result += "<mtd>" + toMathML(atom.array[row][col], options) + "</mtd>";
+        }
+        result += "</mtr>";
+      }
+      result += "</mtable>";
+      if (atom.leftDelim && atom.leftDelim !== "." || atom.rightDelim && atom.rightDelim !== ".") {
         if (atom.rightDelim && atom.rightDelim !== ".") {
-          result += "<mo" + makeID(atom.id, options) + ">" + (SPECIAL_OPERATORS[atom.rightDelim] || atom.rightDelim) + "</mo>";
-        }
-        if (atom.leftDelim || atom.rightDelim)
-          result += "</mrow>";
-        break;
-      case "surd":
-        if (!atom.hasEmptyBranch("above")) {
-          result += "<mroot" + makeID(atom.id, options) + ">";
-          result += toMathML(atom.body, options);
-          result += toMathML(atom.above, options);
-          result += "</mroot>";
-        } else {
-          result += "<msqrt" + makeID(atom.id, options) + ">";
-          result += toMathML(atom.body, options);
-          result += "</msqrt>";
-        }
-        break;
-      case "leftright":
-        result = "<mrow>";
-        if (atom.leftDelim && atom.leftDelim !== ".") {
-          result += "<mo" + makeID(atom.id, options) + ">" + ((_c2 = SPECIAL_OPERATORS[atom.leftDelim]) != null ? _c2 : atom.leftDelim) + "</mo>";
-        }
-        if (atom.body)
-          result += toMathML(atom.body, options);
-        if (atom.rightDelim && atom.rightDelim !== ".") {
-          result += "<mo" + makeID(atom.id, options) + ">" + ((_d2 = SPECIAL_OPERATORS[atom.rightDelim]) != null ? _d2 : atom.rightDelim) + "</mo>";
+          result += "<mo>" + (SPECIAL_DELIMS[atom.leftDelim] || atom.rightDelim) + "</mo>";
         }
         result += "</mrow>";
-        break;
-      case "sizeddelim":
-      case "delim":
-        result += '<mo separator="true"' + makeID(atom.id, options) + ">" + (SPECIAL_OPERATORS[atom.delim] || atom.delim) + "</mo>";
-        break;
-      case "accent":
-        result += '<mover accent="true"' + makeID(atom.id, options) + ">";
-        result += toMathML(atom.body, options);
-        result += "<mo>" + (SPECIAL_OPERATORS[command] || atom.accent) + "</mo>";
-        result += "</mover>";
-        break;
-      case "line":
-      case "overlap":
-        break;
-      case "overunder":
-        overscript = atom.above;
-        underscript = atom.below;
-        if ((atom.svgAbove || overscript) && (atom.svgBelow || underscript))
-          body = atom.body;
-        else if (overscript && overscript.length > 0) {
-          body = atom.body;
-          if ((_f = (_e = atom.body) == null ? void 0 : _e[0]) == null ? void 0 : _f.below) {
-            underscript = atom.body[0].below;
-            body = atom.body[0].body;
-          } else if (((_h = (_g = atom.body) == null ? void 0 : _g[0]) == null ? void 0 : _h.type) === "first" && ((_j = (_i = atom.body) == null ? void 0 : _i[1]) == null ? void 0 : _j.below)) {
-            underscript = atom.body[1].below;
-            body = atom.body[1].body;
-          }
-        } else if (underscript && underscript.length > 0) {
-          body = atom.body;
-          if ((_l = (_k = atom.body) == null ? void 0 : _k[0]) == null ? void 0 : _l.above) {
-            overscript = atom.body[0].above;
-            body = atom.body[0].body;
-          } else if (((_n = (_m = atom.body) == null ? void 0 : _m[0]) == null ? void 0 : _n.type) === "first" && ((_p = (_o = atom.body) == null ? void 0 : _o[1]) == null ? void 0 : _p.above)) {
-            overscript = atom.body[1].overscript;
-            body = atom.body[1].body;
-          }
-        }
-        if ((atom.svgAbove || overscript) && (atom.svgBelow || underscript)) {
-          result += `<munderover ${variant} ${makeID(atom.id, options)}>`;
-          result += (_q = SVG_CODE_POINTS[atom.svgBody]) != null ? _q : toMathML(body, options);
-          result += (_r = SVG_CODE_POINTS[atom.svgBelow]) != null ? _r : toMathML(underscript, options);
-          result += (_s = SVG_CODE_POINTS[atom.svgAbove]) != null ? _s : toMathML(overscript, options);
-          result += "</munderover>";
-        } else if (atom.svgAbove || overscript) {
-          result += `<mover ${variant} ${makeID(atom.id, options)}>` + ((_t = SVG_CODE_POINTS[atom.svgBody]) != null ? _t : toMathML(body, options));
-          result += (_u = SVG_CODE_POINTS[atom.svgAbove]) != null ? _u : toMathML(overscript, options);
-          result += "</mover>";
-        } else if (atom.svgBelow || underscript) {
-          result += `<munder ${variant} ${makeID(atom.id, options)}>` + ((_v = SVG_CODE_POINTS[atom.svgBody]) != null ? _v : toMathML(body, options));
-          result += (_w = SVG_CODE_POINTS[atom.svgBelow]) != null ? _w : toMathML(underscript, options);
-          result += "</munder>";
-        }
-        break;
-      case "placeholder":
-        result += "?";
-        break;
-      case "mord": {
-        result = SPECIAL_IDENTIFIERS2[command] || command || (typeof atom.value === "string" ? atom.value : "");
-        const m = command ? command.match(/{?\\char"([\dabcdefABCDEF]*)}?/) : null;
-        if (m) {
-          result = "&#x" + m[1] + ";";
-        } else if (result.length > 0 && result.startsWith("\\")) {
-          if (typeof atom.value === "string" && atom.value.charCodeAt(0) > 255) {
-            result = "&#x" + ("000000" + atom.value.charCodeAt(0).toString(16)).slice(-4) + ";";
-          } else if (typeof atom.value === "string")
-            result = atom.value.charAt(0);
-          else {
-            console.error("Did not expect this");
-            result = "";
-          }
-        }
-        const tag = /\d/.test(result) ? "mn" : "mi";
-        result = `<${tag}${variant}${makeID(atom.id, options)}>${xmlEscape(
-          result
-        )}</${tag}>`;
-        break;
       }
-      case "mbin":
-      case "mrel":
-      case "minner":
-        if (command && SPECIAL_IDENTIFIERS2[command]) {
-          result = "<mi" + makeID(atom.id, options) + ">" + SPECIAL_IDENTIFIERS2[command] + "</mi>";
-        } else if (command && SPECIAL_OPERATORS[command]) {
-          result = "<mo" + makeID(atom.id, options) + ">" + SPECIAL_OPERATORS[command] + "</mo>";
-        } else
-          result = toMo(atom, options);
-        break;
-      case "mpunct":
-        result = '<mo separator="true"' + makeID(atom.id, options) + ">" + ((_x = SPECIAL_OPERATORS[command]) != null ? _x : command) + "</mo>";
-        break;
-      case "mop":
-        if (atom.body !== "\u200B") {
-          result = "<mo" + makeID(atom.id, options) + ">";
-          result += command === "\\operatorname" ? atom.body : command || atom.body;
-          result += "</mo>";
-        }
-        break;
-      case "box":
-        result = '<menclose notation="box"';
-        if (atom.backgroundcolor)
-          result += ' mathbackground="' + atom.backgroundcolor + '"';
-        result += makeID(atom.id, options) + ">" + toMathML(atom.body, options) + "</menclose>";
-        break;
-      case "spacing":
-        result += '<mspace width="' + ((_y = SPACING[command]) != null ? _y : 0) + 'em"/>';
-        break;
-      case "enclose":
-        result = '<menclose notation="';
-        for (const notation in atom.notation) {
-          if (Object.prototype.hasOwnProperty.call(atom.notation, notation) && atom.notation[notation]) {
-            result += sep + notation;
-            sep = " ";
-          }
-        }
-        result += makeID(atom.id, options) + '">' + toMathML(atom.body, options) + "</menclose>";
-        break;
-      case "prompt":
-        result = '<menclose notation="roundexbox""">' + toMathML(atom.body, options) + "</menclose>";
-        break;
-      case "space":
-        result += "&nbsp;";
-        break;
-      case "subsup":
-        break;
-      case "phantom":
-        break;
-      case "composition":
-        break;
-      case "rule":
-        console.log("In conversion to MathML, unknown type : " + atom.type);
-        break;
-      case "chem":
-        break;
-      case "mopen":
-        result += toMo(atom, options);
-        break;
-      case "mclose":
-        result += toMo(atom, options);
-        break;
-      case "macro":
-        {
-          const body2 = atom.command + toString2(atom.macroArgs);
-          if (body2)
-            result += `<mo ${makeID(atom.id, options)}>${body2}</mo>`;
-        }
-        break;
-      case "error":
-        console.log("In conversion to MathML, unknown type : " + atom.type);
-        break;
-      case "latexgroup":
+      break;
+    case "genfrac":
+      if (atom.leftDelim || atom.rightDelim)
+        result += "<mrow>";
+      if (atom.leftDelim && atom.leftDelim !== ".") {
+        result += "<mo" + makeID(atom.id, options) + ">" + (SPECIAL_DELIMS[atom.leftDelim] || atom.leftDelim) + "</mo>";
+      }
+      if (atom.hasBarLine) {
+        result += "<mfrac>";
+        result += toMathML(atom.above, options) || "<mi>&nbsp;</mi>";
+        result += toMathML(atom.below, options) || "<mi>&nbsp;</mi>";
+        result += "</mfrac>";
+      } else {
+        result += "<mtable" + makeID(atom.id, options) + ">";
+        result += "<mtr>" + toMathML(atom.above, options) + "</mtr>";
+        result += "<mtr>" + toMathML(atom.below, options) + "</mtr>";
+        result += "</mtable>";
+      }
+      if (atom.rightDelim && atom.rightDelim !== ".") {
+        result += "<mo" + makeID(atom.id, options) + ">" + (SPECIAL_DELIMS[atom.rightDelim] || atom.rightDelim) + "</mo>";
+      }
+      if (atom.leftDelim || atom.rightDelim)
+        result += "</mrow>";
+      break;
+    case "surd":
+      if (!atom.hasEmptyBranch("above")) {
+        result += "<mroot" + makeID(atom.id, options) + ">";
         result += toMathML(atom.body, options);
-        break;
-      case "latex":
-        result += "<mtext" + makeID(atom.id, options) + ">" + atom.value + "</mtext>";
-        break;
-      case "tooltip":
+        result += toMathML(atom.above, options);
+        result += "</mroot>";
+      } else {
+        result += "<msqrt" + makeID(atom.id, options) + ">";
         result += toMathML(atom.body, options);
-        break;
-      default:
-        console.log("In conversion to MathML, unknown type : " + atom.type);
+        result += "</msqrt>";
+      }
+      break;
+    case "leftright":
+      result = "<mrow>";
+      if (atom.leftDelim && atom.leftDelim !== ".") {
+        result += `<mo${makeID(atom.id, options)}${(_a3 = SPECIAL_DELIMS[atom.leftDelim]) != null ? _a3 : atom.leftDelim}</mo>`;
+      }
+      if (atom.body)
+        result += toMathML(atom.body, options);
+      if (atom.rightDelim && atom.rightDelim !== ".") {
+        result += `<mo${makeID(atom.id, options)}>${(_b3 = SPECIAL_DELIMS[atom.rightDelim]) != null ? _b3 : atom.rightDelim}</mo>`;
+      }
+      result += "</mrow>";
+      break;
+    case "sizeddelim":
+    case "delim":
+      result += `<mo${makeID(atom.id, options)}>${SPECIAL_DELIMS[atom.delim] || atom.delim}</mo>`;
+      break;
+    case "accent":
+      result += '<mover accent="true"' + makeID(atom.id, options) + ">";
+      result += toMathML(atom.body, options);
+      result += "<mo>" + (SPECIAL_ACCENTS[command] || atom.accent) + "</mo>";
+      result += "</mover>";
+      break;
+    case "line":
+    case "overlap":
+      break;
+    case "overunder":
+      overscript = atom.above;
+      underscript = atom.below;
+      if ((atom.svgAbove || overscript) && (atom.svgBelow || underscript))
+        body = atom.body;
+      else if (overscript && overscript.length > 0) {
+        body = atom.body;
+        if ((_d2 = (_c2 = atom.body) == null ? void 0 : _c2[0]) == null ? void 0 : _d2.below) {
+          underscript = atom.body[0].below;
+          body = atom.body[0].body;
+        } else if (((_f = (_e = atom.body) == null ? void 0 : _e[0]) == null ? void 0 : _f.type) === "first" && ((_h = (_g = atom.body) == null ? void 0 : _g[1]) == null ? void 0 : _h.below)) {
+          underscript = atom.body[1].below;
+          body = atom.body[1].body;
+        }
+      } else if (underscript && underscript.length > 0) {
+        body = atom.body;
+        if ((_j = (_i = atom.body) == null ? void 0 : _i[0]) == null ? void 0 : _j.above) {
+          overscript = atom.body[0].above;
+          body = atom.body[0].body;
+        } else if (((_l = (_k = atom.body) == null ? void 0 : _k[0]) == null ? void 0 : _l.type) === "first" && ((_n = (_m = atom.body) == null ? void 0 : _m[1]) == null ? void 0 : _n.above)) {
+          overscript = atom.body[1].overscript;
+          body = atom.body[1].body;
+        }
+      }
+      if ((atom.svgAbove || overscript) && (atom.svgBelow || underscript)) {
+        result += `<munderover ${makeID(atom.id, options)}>`;
+        result += (_o = SVG_CODE_POINTS[atom.svgBody]) != null ? _o : toMathML(body, options);
+        result += (_p = SVG_CODE_POINTS[atom.svgBelow]) != null ? _p : toMathML(underscript, options);
+        result += (_q = SVG_CODE_POINTS[atom.svgAbove]) != null ? _q : toMathML(overscript, options);
+        result += "</munderover>";
+      } else if (atom.svgAbove || overscript) {
+        result += `<mover ${makeID(atom.id, options)}>` + ((_r = SVG_CODE_POINTS[atom.svgBody]) != null ? _r : toMathML(body, options));
+        result += (_s = SVG_CODE_POINTS[atom.svgAbove]) != null ? _s : toMathML(overscript, options);
+        result += "</mover>";
+      } else if (atom.svgBelow || underscript) {
+        result += `<munder ${makeID(atom.id, options)}>` + ((_t = SVG_CODE_POINTS[atom.svgBody]) != null ? _t : toMathML(body, options));
+        result += (_u = SVG_CODE_POINTS[atom.svgBelow]) != null ? _u : toMathML(underscript, options);
+        result += "</munder>";
+      }
+      break;
+    case "placeholder":
+      result += "?";
+      break;
+    case "mord": {
+      result = typeof atom.value === "string" ? atom.value : command;
+      const m = command ? command.match(/{?\\char"([\dabcdefABCDEF]*)}?/) : null;
+      if (m) {
+        result = "&#x" + m[1] + ";";
+      } else if (result.length > 0 && result.startsWith("\\")) {
+        if (typeof atom.value === "string" && atom.value.charCodeAt(0) > 255) {
+          result = "&#x" + ("000000" + atom.value.charCodeAt(0).toString(16)).slice(-4) + ";";
+        } else if (typeof atom.value === "string")
+          result = atom.value.charAt(0);
+        else {
+          console.error("Did not expect this");
+          result = "";
+        }
+      }
+      const tag = /\d/.test(result) ? "mn" : "mi";
+      result = `<${tag}${makeID(atom.id, options)}>${xmlEscape(
+        result
+      )}</${tag}>`;
+      break;
     }
+    case "mbin":
+    case "mrel":
+    case "minner":
+      result = toMo(atom, options);
+      break;
+    case "mpunct":
+      result = '<mo separator="true"' + makeID(atom.id, options) + ">" + command + "</mo>";
+      break;
+    case "mop":
+      if (atom.body !== "\u200B") {
+        result = "<mo" + makeID(atom.id, options) + ">";
+        result += command === "\\operatorname" ? atom.body : command || atom.body;
+        result += "</mo>";
+      }
+      break;
+    case "box":
+      result = '<menclose notation="box"';
+      if (atom.backgroundcolor)
+        result += ' mathbackground="' + atom.backgroundcolor + '"';
+      result += makeID(atom.id, options) + ">" + toMathML(atom.body, options) + "</menclose>";
+      break;
+    case "spacing":
+      result += '<mspace width="' + ((_v = SPACING[command]) != null ? _v : 0) + 'em"/>';
+      break;
+    case "enclose":
+      result = '<menclose notation="';
+      for (const notation in atom.notation) {
+        if (Object.prototype.hasOwnProperty.call(atom.notation, notation) && atom.notation[notation]) {
+          result += sep + notation;
+          sep = " ";
+        }
+      }
+      result += makeID(atom.id, options) + '">' + toMathML(atom.body, options) + "</menclose>";
+      break;
+    case "prompt":
+      result = '<menclose notation="roundexbox""">' + toMathML(atom.body, options) + "</menclose>";
+      break;
+    case "space":
+      result += "&nbsp;";
+      break;
+    case "subsup":
+      break;
+    case "phantom":
+      break;
+    case "composition":
+      break;
+    case "rule":
+      break;
+    case "chem":
+      break;
+    case "mopen":
+      result += toMo(atom, options);
+      break;
+    case "mclose":
+      result += toMo(atom, options);
+      break;
+    case "macro":
+      {
+        const body2 = atom.command + toString2(atom.macroArgs);
+        if (body2)
+          result += `<mo ${makeID(atom.id, options)}>${body2}</mo>`;
+      }
+      break;
+    case "latexgroup":
+      result += toMathML(atom.body, options);
+      break;
+    case "latex":
+      result += "<mtext" + makeID(atom.id, options) + ">" + atom.value + "</mtext>";
+      break;
+    case "tooltip":
+      result += toMathML(atom.body, options);
+      break;
+    default:
+      console.log("MathML, unknown type : ", atom);
   }
   return result;
 }
@@ -24419,7 +26339,7 @@ var SPECIAL_IDENTIFIERS = {
   "\\qquad": " ",
   "\\quad": " "
 };
-var SPECIAL_OPERATORS2 = {
+var SPECIAL_OPERATORS = {
   "\\pm": "+-",
   "\\times": "xx",
   "\\colon": ":",
@@ -24549,14 +26469,14 @@ function atomToAsciiMath(atom) {
     case "mbin":
     case "mrel":
     case "minner":
-      result = (_f = (_e = SPECIAL_IDENTIFIERS[command]) != null ? _e : SPECIAL_OPERATORS2[command]) != null ? _f : atom.value;
+      result = (_f = (_e = SPECIAL_IDENTIFIERS[command]) != null ? _e : SPECIAL_OPERATORS[command]) != null ? _f : atom.value;
       break;
     case "mopen":
     case "mclose":
       result += atom.value;
       break;
     case "mpunct":
-      result = (_g = SPECIAL_OPERATORS2[command]) != null ? _g : command;
+      result = (_g = SPECIAL_OPERATORS[command]) != null ? _g : command;
       break;
     case "mop":
       if (atom.value !== "\u200B") {
@@ -24601,7 +26521,7 @@ function atomToAsciiMath(atom) {
       result = "";
       break;
     case "macro":
-      result = (_m = (_l = SPECIAL_IDENTIFIERS[command]) != null ? _l : SPECIAL_OPERATORS2[command]) != null ? _m : atomToAsciiMath(atom.body);
+      result = (_m = (_l = SPECIAL_IDENTIFIERS[command]) != null ? _l : SPECIAL_OPERATORS[command]) != null ? _m : atomToAsciiMath(atom.body);
       break;
   }
   if (!atom.hasEmptyBranch("subscript")) {
@@ -24816,14 +26736,44 @@ function atomToSpeakableFragment(mode, atom) {
     let body = "";
     let supsubHandled = false;
     const { command } = atom;
+    switch (command) {
+      case "\\vec":
+        return "vector " + atomToSpeakableFragment(mode, atom.body);
+      case "\\acute":
+        return atomToSpeakableFragment(mode, atom.body) + " acute";
+      case "\\grave":
+        return atomToSpeakableFragment(mode, atom.body) + " grave";
+      case "\\dot":
+        return "dot over" + atomToSpeakableFragment(mode, atom.body);
+      case "\\ddot":
+        return "double dot over" + atomToSpeakableFragment(mode, atom.body);
+      case "\\mathring":
+        return "ring over" + atomToSpeakableFragment(mode, atom.body);
+      case "\\tilde":
+      case "\\widetilde":
+        return "tilde over" + atomToSpeakableFragment(mode, atom.body);
+      case "\\bar":
+        return atomToSpeakableFragment(mode, atom.body) + " bar";
+      case "\\breve":
+        return atomToSpeakableFragment(mode, atom.body) + " breve";
+      case "\\check":
+      case "\\widecheck":
+        return "check over " + atomToSpeakableFragment(mode, atom.body);
+      case "\\hat":
+      case "\\widehat":
+        return "hat over" + atomToSpeakableFragment(mode, atom.body);
+      case "\\overarc":
+      case "\\overparen":
+      case "\\wideparen":
+        return "arc over " + atomToSpeakableFragment(mode, atom.body);
+      case "\\underarc":
+      case "\\underparen":
+        return "arc under " + atomToSpeakableFragment(mode, atom.body);
+    }
     switch (atom.type) {
       case "prompt":
         const input = atom.body.length > 1 ? 'start input . <break time="500ms"/> ' + atomToSpeakableFragment(mode, atom.body) + '. <break time="500ms"/> end input' : "blank";
         result += ' <break time="300ms"/> ' + input + '. <break time="700ms"/>' + ((_b3 = atom.correctness) != null ? _b3 : "") + ' . <break time="700ms"/> ';
-        break;
-      case "accent":
-        if (command === "\\vec")
-          result += "vector " + atomToSpeakableFragment(mode, atom.body);
         break;
       case "array":
         const array = atom.array;
@@ -24926,12 +26876,6 @@ function atomToSpeakableFragment(mode, atom) {
       case "overunder":
         break;
       case "overlap":
-        break;
-      case "line":
-        const position = atom.position;
-        result += `${position} `;
-        result += atomToSpeakableFragment("math", atom.body);
-        result += ` end ${position} `;
         break;
       case "macro":
         const macroName = command.replace(/^\\/g, "");
@@ -25105,7 +27049,7 @@ function atomToSpeakableText(atoms) {
         result2 = SRE.toSpeech(mathML);
       } catch (e) {
         console.error(
-          `MathLive 0.93.0: \`SRE.toSpeech()\` runtime error`,
+          `MathLive 0.94.5: \`SRE.toSpeech()\` runtime error`,
           e
         );
       }
@@ -25240,7 +27184,7 @@ function defaultSpeakHook(text) {
   } else if (window.MathfieldElement.speechEngine === "amazon") {
     if (!("AWS" in window)) {
       console.error(
-        `MathLive 0.93.0: AWS SDK not loaded. See https://www.npmjs.com/package/aws-sdk`
+        `MathLive 0.94.5: AWS SDK not loaded. See https://www.npmjs.com/package/aws-sdk`
       );
     } else {
       const polly = new window.AWS.Polly({ apiVersion: "2016-06-10" });
@@ -25268,7 +27212,7 @@ function defaultSpeakHook(text) {
       polly.synthesizeSpeech(parameters, (err, data) => {
         if (err) {
           console.trace(
-            `MathLive 0.93.0: \`polly.synthesizeSpeech()\` error: ${err}`
+            `MathLive 0.94.5: \`polly.synthesizeSpeech()\` error: ${err}`
           );
         } else if (data == null ? void 0 : data.AudioStream) {
           const uInt8Array = new Uint8Array(data.AudioStream);
@@ -25282,7 +27226,7 @@ function defaultSpeakHook(text) {
     }
   } else if (window.MathfieldElement.speechEngine === "google") {
     console.error(
-      `MathLive 0.93.0: The Google speech engine is not supported yet. Please come again.`
+      `MathLive 0.94.5: The Google speech engine is not supported yet. Please come again.`
     );
   }
 }
@@ -25690,33 +27634,15 @@ var ModelPrivate = class {
       window.MathfieldElement.textToSpeechMarkup = saveTextToSpeechMarkup;
       return result;
     }
-    if (format === "math-json") {
-      if (!window.MathfieldElement.computeEngine) {
-        if (!window[Symbol.for("io.cortexjs.compute-engine")]) {
-          console.error(
-            'The CortexJS Compute Engine library is not available.\nLoad the library, for example with:\nimport "https://unpkg.com/@cortex-js/compute-engine?module"'
-          );
-        }
-        return '["Error", "compute-engine-not-available"]';
-      }
-      try {
-        const expr = window.MathfieldElement.computeEngine.parse(
-          atom.serialize({ expandMacro: false, defaultMode: "math" })
-        );
-        return JSON.stringify(expr.json);
-      } catch (e) {
-        return JSON.stringify(["Error", `'${e.toString()}'`]);
-      }
-    }
     if (format === "ascii-math")
       return atomToAsciiMath(atom);
-    console.error(`MathLive 0.93.0: Unknown format "${format}`);
+    console.error(`MathLive 0.94.5: Unexpected format "${format}`);
     return "";
   }
   getValue(arg1, arg2, arg3) {
     if (arg1 === void 0)
       return this.atomToString(this.root, "latex");
-    if (typeof arg1 === "string")
+    if (typeof arg1 === "string" && arg1 !== "math-json")
       return this.atomToString(this.root, arg1);
     let ranges;
     let format;
@@ -25730,8 +27656,25 @@ var ModelPrivate = class {
       ranges = arg1.ranges;
       format = arg2;
     } else {
-      ranges = [];
-      format = "latex";
+      ranges = [this.normalizeRange([0, -1])];
+      format = arg1 != null ? arg1 : "latex";
+    }
+    if (format === "math-json") {
+      if (!window.MathfieldElement.computeEngine) {
+        if (!window[Symbol.for("io.cortexjs.compute-engine")]) {
+          console.error(
+            'The CortexJS Compute Engine library is not available.\nLoad the library, for example with:\nimport "https://unpkg.com/@cortex-js/compute-engine?module"'
+          );
+        }
+        return '["Error", "compute-engine-not-available"]';
+      }
+      const latex = this.getValue({ ranges }, "latex-unstyled");
+      try {
+        const expr = window.MathfieldElement.computeEngine.parse(latex);
+        return JSON.stringify(expr.json);
+      } catch (e) {
+        return JSON.stringify(["Error", `'${e.toString()}'`]);
+      }
     }
     if (format.startsWith("latex")) {
       const options = {
@@ -26912,8 +28855,8 @@ function keyboardEventToString(evt) {
   if (evt.shiftKey)
     modifiers.push("shift");
   if (modifiers.length === 0)
-    return "[" + evt.code + "]";
-  modifiers.push("[" + evt.code + "]");
+    return `[${evt.code}]`;
+  modifiers.push(`[${evt.code}]`);
   return modifiers.join("+");
 }
 function delegateKeyboardEvents(keyboardSink, element, delegate) {
@@ -27014,7 +28957,7 @@ function delegateKeyboardEvents(keyboardSink, element, delegate) {
         event.preventDefault();
       event.stopImmediatePropagation();
     },
-    { passive: true, signal }
+    { signal }
   );
   keyboardSink.addEventListener("cut", (ev) => delegate.onCut(ev), {
     capture: true,
@@ -27105,9 +29048,9 @@ function deepActiveElement2() {
     a = a.shadowRoot.activeElement;
   return a;
 }
-function eventToChar(evt) {
+function keyboardEventToChar(evt) {
   var _a3;
-  if (!evt)
+  if (!evt || !mightProducePrintableCharacter(evt))
     return "";
   let result;
   if (evt.key === "Unidentified") {
@@ -27588,7 +29531,7 @@ function convertLastAtomsToMath(model, count, until) {
     const atom = model.at(i);
     done = count === 0 || !atom || atom.isFirstSibling || atom.mode !== "text" || atom.value === " " || until && !until(atom);
     if (!done) {
-      data.push(atom.serialize({ defaultMode: "math" }));
+      data.push(Atom.serialize([atom], { defaultMode: "math" }));
       atom.mode = "math";
     }
     i -= 1;
@@ -27634,7 +29577,7 @@ function smartMode(mathfield, keystroke, evt) {
     return false;
   if (!evt || !mightProducePrintableCharacter(evt))
     return false;
-  const c = eventToChar(evt);
+  const c = keyboardEventToChar(evt);
   if (!model.selectionIsCollapsed) {
     if (mathfield.model.mode === "text") {
       if (/[/_^]/.test(c))
@@ -27736,9 +29679,6 @@ function smartMode(mathfield, keystroke, evt) {
   return false;
 }
 
-// css/keystroke-caption.less
-var keystroke_caption_default = "/* The element that displays the keys as the user type them */\n#mathlive-keystroke-caption-panel {\n  visibility: hidden;\n  /*min-width: 160px;*/\n  /*background-color: rgba(97, 97, 200, .95);*/\n  background: var(--secondary, hsl(var(--hue, 212), 19%, 26%));\n  border-color: var(--secondary-border, hsl(0, 0%, 91%));\n  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);\n  text-align: center;\n  border-radius: 6px;\n  padding: 16px;\n  position: absolute;\n  z-index: 1;\n  display: flex;\n  flex-direction: row-reverse;\n  justify-content: center;\n  --keystroke: white;\n  --on-keystroke: #555;\n  --keystroke-border: #f7f7f7;\n}\n@media (prefers-color-scheme: dark) {\n  body:not([theme='light']) #mathlive-keystroke-caption-panel {\n    --keystroke: hsl(var(--hue, 212), 50%, 30%);\n    --on-keystroke: hsl(0, 0%, 98%);\n    --keystroke-border: hsl(var(--hue, 212), 50%, 25%);\n  }\n}\nbody[theme='dark'] #mathlive-keystroke-caption-panel {\n  --keystroke: hsl(var(--hue, 212), 50%, 30%);\n  --on-keystroke: hsl(0, 0%, 98%);\n  --keystroke-border: hsl(var(--hue, 212), 50%, 25%);\n}\n#mathlive-keystroke-caption-panel > span {\n  min-width: 14px;\n  /*height: 8px;*/\n  margin: 0 8px 0 0;\n  padding: 4px;\n  background-color: var(--keystroke);\n  color: var(--on-keystroke);\n  fill: currentColor;\n  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;\n  font-size: 1em;\n  border-radius: 6px;\n  border: 2px solid var(--keystroke-border);\n  /*box-shadow: 0 7px 14px rgba(0,0,0,0.25), 0 5px 5px rgba(0,0,0,0.22);*/\n}\n";
-
 // src/editor-mathfield/keystroke-caption.ts
 function showKeystroke(mathfield, keystroke) {
   if (!mathfield.isSelectionEditable || !mathfield.keystrokeCaptionVisible)
@@ -27770,586 +29710,89 @@ function toggleKeystrokeCaption(mathfield) {
   return false;
 }
 function createKeystrokeCaption() {
-  let panel = document.getElementById("mathlive-keystroke-caption-panel");
+  const panel = document.getElementById("mathlive-keystroke-caption-panel");
   if (panel)
     return panel;
-  panel = getSharedElement("mathlive-keystroke-caption-panel");
-  injectStylesheet(
-    "mathlive-keystroke-caption-stylesheet",
-    keystroke_caption_default
-  );
-  injectStylesheet("mathlive-core-stylesheet", core_default);
-  return panel;
+  injectStylesheet("keystroke-caption");
+  injectStylesheet("core");
+  return getSharedElement("mathlive-keystroke-caption-panel");
 }
 function disposeKeystrokeCaption() {
   if (!document.getElementById("mathlive-keystroke-caption-panel"))
     return;
   releaseSharedElement("mathlive-keystroke-caption-panel");
-  releaseStylesheet("mathlive-core-stylesheet");
-  releaseStylesheet("mathlive-keystroke-caption-stylesheet");
+  releaseStylesheet("core");
+  releaseStylesheet("keystroke-caption");
 }
-
-// src/editor-mathfield/mode-editor-math.ts
-var MathModeEditor = class extends ModeEditor {
-  constructor() {
-    super("math");
-  }
-  onPaste(mathfield, data) {
-    if (!data)
-      return false;
-    if (!contentWillChange(mathfield.model, {
-      data: typeof data === "string" ? data : null,
-      dataTransfer: typeof data === "string" ? null : data,
-      inputType: "insertFromPaste"
-    }))
-      return false;
-    let text = "";
-    let format = "auto";
-    let json = typeof data !== "string" ? data.getData("application/json+mathlive") : "";
-    if (json) {
-      try {
-        const atomJson = JSON.parse(json);
-        if (atomJson && Array.isArray(atomJson)) {
-          mathfield.snapshot();
-          const atoms = fromJson(atomJson);
-          const { model } = mathfield;
-          if (!model.selectionIsCollapsed)
-            model.deleteAtoms(range(model.selection));
-          const cursor = model.at(model.position);
-          if (cursor.parent instanceof ArrayAtom) {
-            console.assert(cursor.parentBranch !== void 0);
-            const columns = [];
-            let buffer = [];
-            if (atoms[0].type === "first")
-              atoms.shift();
-            if (atoms[atoms.length - 1].type === "first")
-              atoms.pop();
-            for (const atom of atoms) {
-              if (atom.type === "first" && buffer.length > 0) {
-                columns.push(buffer);
-                buffer = [atom];
-              } else
-                buffer.push(atom);
-            }
-            if (buffer.length > 0)
-              columns.push(buffer);
-            let currentRow = Number(cursor.parentBranch[0]);
-            let currentColumn = Number(cursor.parentBranch[1]);
-            const maxColumns = cursor.parent.maxColumns;
-            while (cursor.parent.colCount - currentColumn < columns.length && cursor.parent.colCount < maxColumns)
-              cursor.parent.addColumn();
-            cursor.parent.addChildrenAfter(columns[0], cursor);
-            for (let i = 1; i < columns.length; i++) {
-              currentColumn++;
-              if (currentColumn >= maxColumns) {
-                currentColumn = 0;
-                cursor.parent.addRowAfter(currentRow);
-                currentRow++;
-              }
-              cursor.parent.setCell(currentRow, currentColumn, columns[i]);
-            }
-          } else {
-            cursor.parent.addChildrenAfter(
-              atoms.filter((a) => a.type !== "first"),
-              cursor
-            );
-          }
-          model.position = model.offsetOf(atoms[atoms.length - 1]);
-          contentDidChange(model, { inputType: "insertFromPaste" });
-          requestUpdate(mathfield);
-          return true;
-        }
-      } catch (e) {
-      }
-    }
-    json = typeof data !== "string" ? data.getData("application/json") : "";
-    if (json && window.MathfieldElement.computeEngine) {
-      try {
-        const expr = JSON.parse(json);
-        if (typeof expr === "object" && "latex" in expr && expr.latex)
-          text = expr.latex;
-        if (!text) {
-          const box = window.MathfieldElement.computeEngine.box(expr);
-          if (box && !box.has("Error"))
-            text = box.latex;
-        }
-        if (!text)
-          format = "latex";
-      } catch (e) {
-      }
-    }
-    if (!text && typeof data !== "string") {
-      text = data.getData("application/x-latex");
-      if (text)
-        format = "latex";
-    }
-    if (!text)
-      text = typeof data === "string" ? data : data.getData("text/plain");
-    if (text) {
-      let wasLatex;
-      [wasLatex, text] = trimModeShiftCommand(text);
-      if (format === "auto" && wasLatex)
-        format = "latex";
-      mathfield.stopCoalescingUndo();
-      mathfield.stopRecording();
-      if (this.insert(mathfield.model, text, { format })) {
-        mathfield.startRecording();
-        mathfield.snapshot("paste");
-        requestUpdate(mathfield);
-      }
-      mathfield.startRecording();
-      return true;
-    }
-    return false;
-  }
-  insert(model, input, options) {
-    var _a3, _b3;
-    const data = typeof input === "string" ? input : (_b3 = (_a3 = window.MathfieldElement.computeEngine) == null ? void 0 : _a3.box(input).latex) != null ? _b3 : "";
-    if (!options.silenceNotifications && !contentWillChange(model, { data, inputType: "insertText" }))
-      return false;
-    if (!options.insertionMode)
-      options.insertionMode = "replaceSelection";
-    if (!options.selectionMode)
-      options.selectionMode = "placeholder";
-    if (!options.format)
-      options.format = "auto";
-    if (!model.mathfield.smartFence) {
-      if (options.insertionMode !== "replaceAll") {
-        const { parent: parent2 } = model.at(model.position);
-        if (parent2 instanceof LeftRightAtom && parent2.rightDelim === "?" && model.at(model.position).isLastSibling && typeof input === "string" && /^[)}\]|]$/.test(input)) {
-          parent2.isDirty = true;
-          parent2.rightDelim = input;
-          model.position += 1;
-          selectionDidChange(model);
-          contentDidChange(model, { data, inputType: "insertText" });
-          return true;
-        }
-      }
-    } else if (model.selectionIsCollapsed && typeof input === "string" && insertSmartFence(model, input, options.style))
-      return true;
-    const { silenceNotifications } = model;
-    if (options.silenceNotifications)
-      model.silenceNotifications = true;
-    const contentWasChanging = model.silenceNotifications;
-    model.silenceNotifications = true;
-    const args = {};
-    args[0] = options.insertionMode === "replaceAll" ? "" : model.getValue(model.selection, "latex-unstyled");
-    args["?"] = "\\placeholder{}";
-    args["@"] = args["?"];
-    if (options.insertionMode === "replaceSelection" && !model.selectionIsCollapsed)
-      model.deleteAtoms(range(model.selection));
-    else if (options.insertionMode === "replaceAll") {
-      model.root.setChildren([], "body");
-      model.position = 0;
-    } else if (options.insertionMode === "insertBefore")
-      model.collapseSelection("backward");
-    else if (options.insertionMode === "insertAfter")
-      model.collapseSelection("forward");
-    if (!model.at(model.position).isLastSibling && model.at(model.position + 1).type === "placeholder") {
-      model.deleteAtoms([model.position, model.position + 1]);
-    } else if (model.at(model.position).type === "placeholder") {
-      model.deleteAtoms([model.position - 1, model.position]);
-    }
-    if (args[0]) {
-      args["@"] = args[0];
-    } else if (typeof input === "string" && /(^|[^\\])#@/.test(input)) {
-      const offset = getImplicitArgOffset(model);
-      if (offset >= 0) {
-        args["@"] = model.getValue(offset, model.position, "latex-unstyled");
-        model.deleteAtoms([offset, model.position]);
-      }
-    }
-    if (!args[0])
-      args[0] = args["?"];
-    let usedArg = false;
-    const argFunction = (arg) => {
-      usedArg = true;
-      return args[arg];
-    };
-    const [format, newAtoms] = convertStringToAtoms(
-      model,
-      input,
-      argFunction,
-      options
-    );
-    if (!newAtoms)
-      return false;
-    const { parent } = model.at(model.position);
-    if (format !== "latex" && model.mathfield.options.removeExtraneousParentheses && parent instanceof LeftRightAtom && parent.leftDelim === "(" && parent.hasEmptyBranch("body") && newAtoms.length === 1 && newAtoms[0].type === "genfrac") {
-      const newParent = parent.parent;
-      const branch = parent.parentBranch;
-      newParent.removeChild(parent);
-      newParent.setChildren(newAtoms, branch);
-    }
-    const hadEmptyBody = parent.hasEmptyBranch("body");
-    const cursor = model.at(model.position);
-    cursor.parent.addChildrenAfter(newAtoms, cursor);
-    if (format === "latex" && typeof input === "string") {
-      if (!parent.parent && hadEmptyBody && !usedArg)
-        parent.verbatimLatex = input;
-    }
-    model.silenceNotifications = contentWasChanging;
-    const lastNewAtom = newAtoms[newAtoms.length - 1];
-    if (options.selectionMode === "placeholder") {
-      const placeholder = newAtoms.flatMap((x) => [x, ...x.children]).find((x) => x.type === "placeholder");
-      if (placeholder) {
-        const placeholderOffset = model.offsetOf(placeholder);
-        model.setSelection(placeholderOffset - 1, placeholderOffset);
-        model.announce("move");
-      } else if (lastNewAtom) {
-        model.position = model.offsetOf(lastNewAtom);
-      }
-    } else if (options.selectionMode === "before") {
-    } else if (options.selectionMode === "after") {
-      if (lastNewAtom)
-        model.position = model.offsetOf(lastNewAtom);
-    } else if (options.selectionMode === "item")
-      model.setSelection(model.anchor, model.offsetOf(lastNewAtom));
-    contentDidChange(model, { data, inputType: "insertText" });
-    model.silenceNotifications = silenceNotifications;
-    return true;
-  }
-};
-function convertStringToAtoms(model, s, args, options) {
-  var _a3;
-  let format = void 0;
-  let result = [];
-  if (typeof s !== "string" || options.format === "math-json") {
-    const ce = window.MathfieldElement.computeEngine;
-    if (!ce)
-      return ["math-json", []];
-    [format, s] = ["latex", ce.box(s).latex];
-    result = parseLatex(s, { context: model.mathfield.context });
-  } else if (typeof s === "string" && options.format === "ascii-math") {
-    [format, s] = parseMathString(s, {
-      format: "ascii-math",
-      inlineShortcuts: model.mathfield.options.inlineShortcuts
-    });
-    result = parseLatex(s, { context: model.mathfield.context });
-    if (format !== "latex" && model.mathfield.options.removeExtraneousParentheses)
-      simplifyParen(result);
-  } else if (options.format === "auto" || ((_a3 = options.format) == null ? void 0 : _a3.startsWith("latex"))) {
-    if (options.format === "auto") {
-      [format, s] = parseMathString(s, {
-        format: "auto",
-        inlineShortcuts: model.mathfield.options.inlineShortcuts
-      });
-    }
-    if (options.format === "latex")
-      [, s] = trimModeShiftCommand(s);
-    result = parseLatex(s, {
-      context: model.mathfield.context,
-      args
-    });
-    if (options.format !== "latex" && model.mathfield.options.removeExtraneousParentheses)
-      simplifyParen(result);
-  }
-  applyStyleToUnstyledAtoms(result, options.style);
-  return [format != null ? format : "latex", result];
-}
-function removeParen(atoms) {
-  if (!atoms)
-    return null;
-  console.assert(atoms[0].type === "first");
-  if (atoms.length > 1)
-    return null;
-  const atom = atoms[0];
-  if (atom instanceof LeftRightAtom && atom.leftDelim === "(" && atom.rightDelim === ")")
-    return atom.removeBranch("body");
-  return null;
-}
-function simplifyParen(atoms) {
-  if (!atoms)
-    return;
-  for (let i = 0; atoms[i]; i++) {
-    const atom = atoms[i];
-    if (atom instanceof LeftRightAtom && atom.leftDelim === "(") {
-      let genFracCount = 0;
-      let genFracIndex = 0;
-      let nonGenFracCount = 0;
-      for (let j = 0; atom.body[j]; j++) {
-        if (atom.body[j].type === "genfrac") {
-          genFracCount++;
-          genFracIndex = j;
-        }
-        nonGenFracCount++;
-      }
-      if (nonGenFracCount === 0 && genFracCount === 1) {
-        atoms[i] = atom.body[genFracIndex];
-      }
-    }
-  }
-  for (const atom of atoms) {
-    for (const branch of atom.branches) {
-      if (!atom.hasEmptyBranch(branch)) {
-        simplifyParen(atom.branch(branch));
-        const newChildren = removeParen(atom.branch(branch));
-        if (newChildren)
-          atom.setChildren(newChildren, branch);
-      }
-    }
-    if (atom instanceof ArrayAtom)
-      for (const x of atom.cells)
-        simplifyParen(x);
-  }
-}
-function getImplicitArgOffset(model) {
-  let atom = model.at(model.position);
-  if (atom.mode === "text") {
-    while (!atom.isFirstSibling && atom.mode === "text")
-      atom = atom.leftSibling;
-    return model.offsetOf(atom);
-  }
-  const atomAtCursor = atom;
-  let afterDelim = false;
-  if (atom.type === "mclose") {
-    const delim = LEFT_DELIM[atom.value];
-    while (!atom.isFirstSibling && !(atom.type === "mopen" && atom.value === delim))
-      atom = atom.leftSibling;
-    if (!atom.isFirstSibling)
-      atom = atom.leftSibling;
-    afterDelim = true;
-  } else if (atom.type === "leftright") {
-    atom = atom.leftSibling;
-    afterDelim = true;
-  }
-  if (afterDelim) {
-    while (!atom.isFirstSibling && (atom.isFunction || isImplicitArg(atom)))
-      atom = atom.leftSibling;
-  } else {
-    const delimiterStack = [];
-    while (!atom.isFirstSibling && (isImplicitArg(atom) || delimiterStack.length > 0)) {
-      if (atom.type === "mclose")
-        delimiterStack.unshift(atom.value);
-      if (atom.type === "mopen" && delimiterStack.length > 0 && atom.value === LEFT_DELIM[delimiterStack[0]])
-        delimiterStack.shift();
-      atom = atom.leftSibling;
-    }
-  }
-  if (atomAtCursor === atom)
-    return -1;
-  return model.offsetOf(atom);
-}
-function isImplicitArg(atom) {
-  if (atom.type && /^(mord|surd|msubsup|leftright|mop|mclose)$/.test(atom.type)) {
-    if (atom.isExtensibleSymbol)
-      return false;
-    if (atom.isFunction)
-      return false;
-    return true;
-  }
-  return false;
-}
-function isValidClose(open, close) {
-  if (!open)
-    return true;
-  if (["(", "{", "[", "\\lbrace", "\\lparen", "\\{", "\\lbrack"].includes(open)) {
-    return [")", "}", "]", "\\rbrace", "\\rparen", "\\}", "\\rbrack"].includes(
-      close
-    );
-  }
-  return RIGHT_DELIM[open] === close;
-}
-function isValidOpen(open, close) {
-  if (!close)
-    return true;
-  if ([")", "}", "]", "\\rbrace", "\\rparen", "\\}", "\\rbrack"].includes(close)) {
-    return ["(", "{", "[", "\\lbrace", "\\lparen", "\\{", "\\lbrack"].includes(
-      open
-    );
-  }
-  return LEFT_DELIM[close] === open;
-}
-function insertSmartFence(model, fence, style) {
-  console.assert(model.selectionIsCollapsed);
-  const atom = model.at(model.position);
-  const { parent } = atom;
-  if (fence === "{" || fence === "\\{")
-    fence = "\\lbrace";
-  if (fence === "}" || fence === "\\}")
-    fence = "\\rbrace";
-  if (fence === "[")
-    fence = "\\lbrack";
-  if (fence === "]")
-    fence = "\\rbrack";
-  if (/\||\\vert|\\Vert|\\mvert|\\mid/.test(fence)) {
-    let delims = parent instanceof LeftRightAtom ? parent.leftDelim + parent.rightDelim : "";
-    if (delims === "\\lbrace\\rbrace")
-      delims = "{}";
-    if (delims === "\\{\\}")
-      delims = "{}";
-    if (delims === "\\lparen\\rparen")
-      delims = "()";
-    if (delims === "{}") {
-      ModeEditor.insert(model, "\\,\\middle" + fence + "\\, ", {
-        format: "latex",
-        style
-      });
-      return true;
-    }
-  }
-  const rDelim = RIGHT_DELIM[fence];
-  if (rDelim) {
-    if (parent instanceof LeftRightAtom && parent.firstChild === atom && // At first child
-    (parent.leftDelim === "?" || parent.leftDelim === ".")) {
-      parent.leftDelim = fence;
-      parent.isDirty = true;
-      contentDidChange(model, { data: fence, inputType: "insertText" });
-      return true;
-    }
-    if (!(parent instanceof LeftRightAtom)) {
-      let sibling = atom;
-      while (sibling) {
-        if (sibling.type === "mclose" && sibling.value === rDelim)
-          break;
-        sibling = sibling.rightSibling;
-      }
-      if (sibling) {
-        const body = model.extractAtoms([
-          model.offsetOf(atom),
-          model.offsetOf(sibling)
-        ]);
-        body.pop();
-        parent.addChildrenAfter(
-          [
-            new LeftRightAtom("left...right", body, {
-              leftDelim: fence,
-              rightDelim: rDelim
-            })
-          ],
-          atom
-        );
-        model.position = model.offsetOf(parent.firstChild) + 1;
-        contentDidChange(model, { data: fence, inputType: "insertText" });
-        return true;
-      }
-    }
-    const lastSibling = model.offsetOf(atom.lastSibling);
-    let i;
-    for (i = model.position; i <= lastSibling; i++) {
-      const atom2 = model.at(i);
-      if (atom2 instanceof LeftRightAtom && (atom2.leftDelim === "?" || atom2.leftDelim === ".") && isValidOpen(fence, atom2.rightDelim))
-        break;
-    }
-    const match = model.at(i);
-    if (i <= lastSibling && match instanceof LeftRightAtom) {
-      match.leftDelim = fence;
-      let extractedAtoms = model.extractAtoms([model.position, i - 1]);
-      extractedAtoms = extractedAtoms.filter((value) => value.type !== "first");
-      match.addChildren(extractedAtoms, match.parentBranch);
-      model.position += 1;
-      contentDidChange(model, { data: fence, inputType: "insertText" });
-      return true;
-    }
-    if (parent instanceof LeftRightAtom && (parent.leftDelim === "?" || parent.leftDelim === ".") && isValidOpen(fence, parent.rightDelim)) {
-      parent.isDirty = true;
-      parent.leftDelim = fence;
-      const extractedAtoms = model.extractAtoms([
-        model.offsetOf(atom.firstSibling),
-        model.position
-      ]);
-      for (const extractedAtom of extractedAtoms)
-        parent.parent.addChildBefore(extractedAtom, parent);
-      contentDidChange(model, { data: fence, inputType: "insertText" });
-      return true;
-    }
-    if (!(parent instanceof LeftRightAtom && parent.leftDelim === "|")) {
-      ModeEditor.insert(model, `\\left${fence}\\right?`, {
-        format: "latex",
-        style
-      });
-      if (atom.lastSibling.type !== "first") {
-        const lastSiblingOffset = model.offsetOf(atom.lastSibling);
-        const content = model.extractAtoms([model.position, lastSiblingOffset]);
-        model.at(model.position).body = content;
-        model.position -= 1;
-      }
-      return true;
-    }
-  }
-  const targetLeftDelim = LEFT_DELIM[fence];
-  if (targetLeftDelim) {
-    let sibling = atom;
-    while (sibling) {
-      if (sibling.type === "mopen" && sibling.value === targetLeftDelim) {
-        const insertAfter = sibling.leftSibling;
-        const body = model.extractAtoms([
-          model.offsetOf(sibling.leftSibling),
-          model.offsetOf(atom)
-        ]);
-        body.shift();
-        const result = new LeftRightAtom("left...right", body, {
-          leftDelim: targetLeftDelim,
-          rightDelim: fence
-        });
-        parent.addChildrenAfter([result], insertAfter);
-        model.position = model.offsetOf(result);
-        contentDidChange(model, { data: fence, inputType: "insertText" });
-        return true;
-      }
-      sibling = sibling.leftSibling;
-    }
-    if (parent instanceof LeftRightAtom && atom.isLastSibling && isValidClose(parent.leftDelim, fence)) {
-      parent.isDirty = true;
-      parent.rightDelim = fence;
-      model.position += 1;
-      contentDidChange(model, { data: fence, inputType: "insertText" });
-      return true;
-    }
-    const firstSibling = model.offsetOf(atom.firstSibling);
-    let i;
-    for (i = model.position; i >= firstSibling; i--) {
-      const atom2 = model.at(i);
-      if (atom2 instanceof LeftRightAtom && (atom2.rightDelim === "?" || atom2.rightDelim === ".") && isValidClose(atom2.leftDelim, fence))
-        break;
-    }
-    const match = model.at(i);
-    if (i >= firstSibling && match instanceof LeftRightAtom) {
-      match.rightDelim = fence;
-      match.addChildren(
-        model.extractAtoms([i, model.position]),
-        match.parentBranch
-      );
-      contentDidChange(model, { data: fence, inputType: "insertText" });
-      return true;
-    }
-    if (parent instanceof LeftRightAtom && (parent.rightDelim === "?" || parent.rightDelim === ".") && isValidClose(parent.leftDelim, fence)) {
-      parent.isDirty = true;
-      parent.rightDelim = fence;
-      parent.parent.addChildren(
-        model.extractAtoms([model.position, model.offsetOf(atom.lastSibling)]),
-        parent.parentBranch
-      );
-      model.position = model.offsetOf(parent);
-      contentDidChange(model, { data: fence, inputType: "insertText" });
-      return true;
-    }
-    const grandparent = parent.parent;
-    if (grandparent instanceof LeftRightAtom && (grandparent.rightDelim === "?" || grandparent.rightDelim === ".") && model.at(model.position).isLastSibling) {
-      model.position = model.offsetOf(grandparent);
-      return insertSmartFence(model, fence, style);
-    }
-    return false;
-  }
-  return false;
-}
-new MathModeEditor();
 
 // src/editor-mathfield/keyboard-input.ts
 function onKeystroke(mathfield, keystroke, evt) {
   var _a3, _b3, _c2, _d2;
   const { model } = mathfield;
-  validateKeyboardLayout(evt);
-  const activeLayout = getActiveKeyboardLayout();
-  if (mathfield.keyboardLayout !== activeLayout.id) {
-    mathfield.keyboardLayout = activeLayout.id;
-    mathfield._keybindings = void 0;
+  if (evt.isTrusted) {
+    validateKeyboardLayout(evt);
+    const activeLayout = getActiveKeyboardLayout();
+    if (mathfield.keyboardLayout !== activeLayout.id) {
+      mathfield.keyboardLayout = activeLayout.id;
+      mathfield._keybindings = void 0;
+    }
   }
   clearTimeout(mathfield.inlineShortcutBufferFlushTimer);
   mathfield.inlineShortcutBufferFlushTimer = 0;
   showKeystroke(mathfield, keystroke);
-  if (evt.defaultPrevented) {
+  if (evt.isTrusted && evt.defaultPrevented) {
     mathfield.flushInlineShortcutBuffer();
+    return false;
+  }
+  if (!model.mathfield.smartFence) {
+    const { parent: parent2 } = model.at(model.position);
+    if (parent2 instanceof LeftRightAtom && parent2.rightDelim === "?" && model.at(model.position).isLastSibling && /^[)}\]|]$/.test(keystroke)) {
+      mathfield.snapshot();
+      parent2.isDirty = true;
+      parent2.rightDelim = keystroke;
+      model.position += 1;
+      selectionDidChange(model);
+      contentDidChange(model, {
+        data: keyboardEventToChar(evt),
+        inputType: "insertText"
+      });
+      mathfield.snapshot("insert-fence");
+      mathfield.dirty = true;
+      mathfield.scrollIntoView();
+      if (evt.preventDefault)
+        evt.preventDefault();
+      return false;
+    }
+    if (!model.selectionIsCollapsed) {
+      const fence = keyboardEventToChar(evt);
+      if (fence === "(" || fence === "{" || fence === "[") {
+        const lDelim = { "(": "(", "{": "\\lbrace", "[": "\\lbrack" }[fence];
+        const rDelim = { "(": ")", "{": "\\rbrace", "[": "\\rbrack" }[fence];
+        const [start, end] = range(model.selection);
+        mathfield.snapshot();
+        model.position = end;
+        ModeEditor.insert(model, rDelim, { format: "latex" });
+        model.position = start;
+        ModeEditor.insert(model, lDelim, { format: "latex" });
+        model.setSelection(start + 1, end + 1);
+        contentDidChange(model, {
+          data: fence,
+          inputType: "insertText"
+        });
+        mathfield.snapshot("insert-fence");
+        mathfield.dirty = true;
+        mathfield.scrollIntoView();
+        if (evt.preventDefault)
+          evt.preventDefault();
+        return false;
+      }
+    }
+  } else if (insertSmartFence(model, keyboardEventToChar(evt), mathfield.style)) {
+    mathfield.flushInlineShortcutBuffer();
+    mathfield.dirty = true;
+    mathfield.scrollIntoView();
+    if (evt.preventDefault)
+      evt.preventDefault();
     return false;
   }
   let shortcut;
@@ -28364,7 +29807,7 @@ function onKeystroke(mathfield, keystroke, evt) {
       } else if (!mightProducePrintableCharacter(evt)) {
         mathfield.flushInlineShortcutBuffer();
       } else {
-        const c = eventToChar(evt);
+        const c = keyboardEventToChar(evt);
         const keystrokes = [
           ...(_b3 = (_a3 = buffer[buffer.length - 1]) == null ? void 0 : _a3.keystrokes) != null ? _b3 : [],
           c
@@ -28463,10 +29906,10 @@ function onKeystroke(mathfield, keystroke, evt) {
           mathfield.snapshot("insert-space");
           mathfield.dirty = true;
           mathfield.scrollIntoView();
-          return true;
+          return false;
         }
       }
-      if (((_d2 = model.at(model.position)) == null ? void 0 : _d2.isDigit()) && window.MathfieldElement.decimalSeparator === "," && eventToChar(evt) === ",")
+      if (((_d2 = model.at(model.position)) == null ? void 0 : _d2.isDigit()) && window.MathfieldElement.decimalSeparator === "," && keyboardEventToChar(evt) === ",")
         selector = "insertDecimalSeparator";
     }
   }
@@ -28522,7 +29965,6 @@ function onKeystroke(mathfield, keystroke, evt) {
   return false;
 }
 function onInput(mathfield, text, options) {
-  var _a3;
   const { model } = mathfield;
   if (!mathfield.isSelectionEditable) {
     model.announce("plonk");
@@ -28537,20 +29979,26 @@ function onInput(mathfield, text, options) {
     mathfield.switchMode(options.mode);
     mathfield.snapshot();
   }
+  let graphemes = splitGraphemes(text);
+  const keyboard = window.mathVirtualKeyboard;
+  if ((keyboard == null ? void 0 : keyboard.visible) && keyboard.isShifted) {
+    graphemes = typeof graphemes === "string" ? graphemes.toUpperCase() : graphemes.map((c) => c.toUpperCase());
+  }
   if (options.simulateKeystroke) {
-    const c = text.charAt(0);
-    const ev = new KeyboardEvent("keypress", { key: c });
-    if (!onKeystroke(mathfield, c, ev))
+    let handled = true;
+    for (const c of graphemes) {
+      if (onKeystroke(mathfield, c, new KeyboardEvent("keypress", { key: c })))
+        handled = false;
+    }
+    if (handled)
       return;
   }
   const atom = model.at(model.position);
-  const rightSibling = atom.rightSibling;
   const style = __spreadValues(__spreadValues({}, atom.computedStyle), mathfield.style);
   if (!model.selectionIsCollapsed) {
     model.deleteAtoms(range(model.selection));
     mathfield.snapshot("delete");
   }
-  const graphemes = splitGraphemes(text);
   if (model.mode === "latex") {
     model.deferNotifications(
       { content: true, selection: true, data: text, type: "insertText" },
@@ -28566,37 +30014,9 @@ function onInput(mathfield, text, options) {
     for (const c of graphemes)
       ModeEditor.insert(model, c, { style });
     mathfield.snapshot("insert-text");
-  } else if (model.mode === "math") {
-    for (const c of graphemes) {
-      let selector = {
-        "^": "moveToSuperscript",
-        "_": "moveToSubscript",
-        " ": "moveAfterParent"
-      }[c];
-      if (c === " " && mathfield.options.mathModeSpace)
-        selector = ["insert", mathfield.options.mathModeSpace];
-      if (selector)
-        mathfield.executeCommand(selector);
-      else if (/\d/.test(c) && mathfield.options.smartSuperscript && atom.parentBranch === "superscript" && ((_a3 = atom.parent) == null ? void 0 : _a3.type) !== "mop" && atom.hasNoSiblings) {
-        ModeEditor.insert(model, c, { style });
-        mathfield.snapshot();
-        moveAfterParent(model);
-        mathfield.snapshot();
-      } else {
-        if (mathfield.adoptStyle !== "none") {
-          const sibling = mathfield.adoptStyle === "left" ? atom : rightSibling;
-          if ((sibling == null ? void 0 : sibling.type) === "mord" && /[a-zA-Z]/.test(sibling.value) && /[a-zA-Z]/.test(c)) {
-            if (sibling.style.variant)
-              style.variant = sibling.style.variant;
-            if (sibling.style.variantStyle)
-              style.variantStyle = sibling.style.variantStyle;
-          }
-        }
-        ModeEditor.insert(model, c, { style });
-        mathfield.snapshot(`insert-${model.at(model.position).type}`);
-      }
-    }
-  }
+  } else if (model.mode === "math")
+    for (const c of graphemes)
+      insertMathModeChar(mathfield, c, style, atom);
   mathfield.dirty = true;
   mathfield.scrollIntoView();
 }
@@ -28609,6 +30029,282 @@ function getLeftSiblings(mf) {
     atom = atom.leftSibling;
   }
   return result;
+}
+function insertMathModeChar(mathfield, c, style, atom) {
+  var _a3;
+  const model = mathfield.model;
+  let selector = {
+    "^": "moveToSuperscript",
+    "_": "moveToSubscript",
+    " ": "moveAfterParent"
+  }[c];
+  if (c === " " && mathfield.options.mathModeSpace)
+    selector = ["insert", mathfield.options.mathModeSpace];
+  if (selector) {
+    mathfield.executeCommand(selector);
+    return;
+  }
+  if (/\d/.test(c) && mathfield.options.smartSuperscript && atom.parentBranch === "superscript" && ((_a3 = atom.parent) == null ? void 0 : _a3.type) !== "mop" && atom.hasNoSiblings) {
+    clearSelection(model);
+    ModeEditor.insert(model, c, { style });
+    mathfield.snapshot();
+    moveAfterParent(model);
+    mathfield.snapshot();
+    return;
+  }
+  if (mathfield.adoptStyle !== "none") {
+    const sibling = mathfield.adoptStyle === "left" ? atom : atom.parent ? atom.rightSibling : null;
+    if ((sibling == null ? void 0 : sibling.type) === "mord" && /[a-zA-Z0-9]/.test(sibling.value) && /[a-zA-Z0-9]/.test(c)) {
+      style = __spreadValues({}, style);
+      if (sibling.style.variant)
+        style.variant = sibling.style.variant;
+      if (sibling.style.variantStyle)
+        style.variantStyle = sibling.style.variantStyle;
+    }
+  }
+  ModeEditor.insert(model, c, { style });
+  mathfield.snapshot(`insert-${model.at(model.position).type}`);
+}
+function clearSelection(model) {
+  if (!model.selectionIsCollapsed) {
+    model.deleteAtoms(range(model.selection));
+    model.mathfield.snapshot("delete");
+  }
+}
+function insertSmartFence(model, key, style) {
+  if (!key)
+    return false;
+  if (model.mode !== "math")
+    return false;
+  const atom = model.at(model.position);
+  const { parent } = atom;
+  const fence = {
+    "(": "(",
+    ")": ")",
+    "{": "\\lbrace",
+    "}": "\\rbrace",
+    "[": "\\lbrack",
+    "]": "\\rbrack",
+    "|": "|"
+  }[key];
+  if (!fence)
+    return false;
+  const lDelim = LEFT_DELIM[fence];
+  const rDelim = RIGHT_DELIM[fence];
+  if (!model.selectionIsCollapsed) {
+    model.mathfield.snapshot();
+    const [start, end] = range(model.selection);
+    const body = model.extractAtoms([start, end]);
+    const atom2 = parent.addChildrenAfter(
+      [
+        new LeftRightAtom("left...right", body, {
+          leftDelim: fence,
+          rightDelim: rDelim
+        })
+      ],
+      model.at(start)
+    );
+    model.setSelection(
+      model.offsetOf(atom2.firstChild),
+      model.offsetOf(atom2.lastChild)
+    );
+    model.mathfield.snapshot("insert-fence");
+    contentDidChange(model, { data: fence, inputType: "insertText" });
+    return true;
+  }
+  if (fence === "|") {
+    const delims = parent instanceof LeftRightAtom ? parent.leftDelim + parent.rightDelim : "";
+    if (delims === "\\lbrace\\rbrace" || delims === "\\{\\}" || delims === "\\lbrace?") {
+      model.mathfield.snapshot();
+      ModeEditor.insert(model, "\\,\\middle\\vert\\,", {
+        format: "latex",
+        style
+      });
+      model.mathfield.snapshot("insert-fence");
+      contentDidChange(model, { data: fence, inputType: "insertText" });
+      return true;
+    }
+  }
+  if (rDelim) {
+    if (parent instanceof LeftRightAtom && parent.firstChild === atom && // At first child
+    (parent.leftDelim === "?" || parent.leftDelim === ".")) {
+      parent.leftDelim = fence;
+      parent.isDirty = true;
+      model.mathfield.snapshot();
+      contentDidChange(model, { data: fence, inputType: "insertText" });
+      model.mathfield.snapshot("insert-fence");
+      return true;
+    }
+    if (!(parent instanceof LeftRightAtom)) {
+      let sibling = atom;
+      while (sibling) {
+        if (sibling.type === "mclose" && sibling.value === rDelim)
+          break;
+        sibling = sibling.rightSibling;
+      }
+      if (sibling) {
+        model.mathfield.snapshot();
+        const body = model.extractAtoms([
+          model.offsetOf(atom),
+          model.offsetOf(sibling)
+        ]);
+        body.pop();
+        parent.addChildrenAfter(
+          [
+            new LeftRightAtom("left...right", body, {
+              leftDelim: fence,
+              rightDelim: rDelim
+            })
+          ],
+          atom
+        );
+        model.position = model.offsetOf(parent.firstChild) + 1;
+        contentDidChange(model, { data: fence, inputType: "insertText" });
+        model.mathfield.snapshot("insert-fence");
+        return true;
+      }
+    }
+    const lastSibling = model.offsetOf(atom.lastSibling);
+    let i;
+    for (i = model.position; i <= lastSibling; i++) {
+      const atom2 = model.at(i);
+      if (atom2 instanceof LeftRightAtom && (atom2.leftDelim === "?" || atom2.leftDelim === ".") && isValidOpen(fence, atom2.rightDelim))
+        break;
+    }
+    const match = model.at(i);
+    if (i <= lastSibling && match instanceof LeftRightAtom) {
+      match.leftDelim = fence;
+      model.mathfield.snapshot();
+      let extractedAtoms = model.extractAtoms([model.position, i - 1]);
+      extractedAtoms = extractedAtoms.filter((value) => value.type !== "first");
+      match.addChildren(extractedAtoms, match.parentBranch);
+      model.position += 1;
+      contentDidChange(model, { data: fence, inputType: "insertText" });
+      model.mathfield.snapshot("insert-fence");
+      return true;
+    }
+    if (parent instanceof LeftRightAtom && (parent.leftDelim === "?" || parent.leftDelim === ".") && isValidOpen(fence, parent.rightDelim)) {
+      parent.isDirty = true;
+      parent.leftDelim = fence;
+      model.mathfield.snapshot();
+      const extractedAtoms = model.extractAtoms([
+        model.offsetOf(atom.firstSibling),
+        model.position
+      ]);
+      for (const extractedAtom of extractedAtoms)
+        parent.parent.addChildBefore(extractedAtom, parent);
+      contentDidChange(model, { data: fence, inputType: "insertText" });
+      model.mathfield.snapshot("insert-fence");
+      return true;
+    }
+    if (!(parent instanceof LeftRightAtom && parent.leftDelim === "|")) {
+      model.mathfield.snapshot();
+      ModeEditor.insert(model, `\\left${fence}\\right?`, {
+        format: "latex",
+        style
+      });
+      if (atom.lastSibling.type !== "first") {
+        const lastSiblingOffset = model.offsetOf(atom.lastSibling);
+        const content = model.extractAtoms([model.position, lastSiblingOffset]);
+        model.at(model.position).body = content;
+        model.position -= 1;
+      }
+      model.mathfield.snapshot("insert-fence");
+      return true;
+    }
+  }
+  if (lDelim) {
+    let sibling = atom;
+    while (sibling) {
+      if (sibling.type === "mopen" && sibling.value === lDelim) {
+        model.mathfield.snapshot();
+        const insertAfter = sibling.leftSibling;
+        const body = model.extractAtoms([
+          model.offsetOf(sibling.leftSibling),
+          model.offsetOf(atom)
+        ]);
+        body.shift();
+        const result = new LeftRightAtom("left...right", body, {
+          leftDelim: lDelim,
+          rightDelim: fence
+        });
+        parent.addChildrenAfter([result], insertAfter);
+        model.position = model.offsetOf(result);
+        contentDidChange(model, { data: fence, inputType: "insertText" });
+        model.mathfield.snapshot("insert-fence");
+        return true;
+      }
+      sibling = sibling.leftSibling;
+    }
+    if (parent instanceof LeftRightAtom && atom.isLastSibling && isValidClose(parent.leftDelim, fence)) {
+      model.mathfield.snapshot();
+      parent.isDirty = true;
+      parent.rightDelim = fence;
+      model.position += 1;
+      contentDidChange(model, { data: fence, inputType: "insertText" });
+      model.mathfield.snapshot("insert-fence");
+      return true;
+    }
+    const firstSibling = model.offsetOf(atom.firstSibling);
+    let i;
+    for (i = model.position; i >= firstSibling; i--) {
+      const atom2 = model.at(i);
+      if (atom2 instanceof LeftRightAtom && (atom2.rightDelim === "?" || atom2.rightDelim === ".") && isValidClose(atom2.leftDelim, fence))
+        break;
+    }
+    const match = model.at(i);
+    if (i >= firstSibling && match instanceof LeftRightAtom) {
+      model.mathfield.snapshot();
+      match.rightDelim = fence;
+      match.addChildren(
+        model.extractAtoms([i, model.position]),
+        match.parentBranch
+      );
+      contentDidChange(model, { data: fence, inputType: "insertText" });
+      model.mathfield.snapshot("insert-fence");
+      return true;
+    }
+    if (parent instanceof LeftRightAtom && (parent.rightDelim === "?" || parent.rightDelim === ".") && isValidClose(parent.leftDelim, fence)) {
+      model.mathfield.snapshot();
+      parent.isDirty = true;
+      parent.rightDelim = fence;
+      parent.parent.addChildren(
+        model.extractAtoms([model.position, model.offsetOf(atom.lastSibling)]),
+        parent.parentBranch
+      );
+      model.position = model.offsetOf(parent);
+      contentDidChange(model, { data: fence, inputType: "insertText" });
+      model.mathfield.snapshot("insert-fence");
+      return true;
+    }
+    const grandparent = parent.parent;
+    if (grandparent instanceof LeftRightAtom && (grandparent.rightDelim === "?" || grandparent.rightDelim === ".") && model.at(model.position).isLastSibling) {
+      model.position = model.offsetOf(grandparent);
+      return insertSmartFence(model, fence, style);
+    }
+    return false;
+  }
+  return false;
+}
+function isValidClose(open, close) {
+  if (!open)
+    return true;
+  if (["(", "{", "[", "\\lbrace", "\\lparen", "\\{", "\\lbrack"].includes(open)) {
+    return [")", "}", "]", "\\rbrace", "\\rparen", "\\}", "\\rbrack"].includes(
+      close
+    );
+  }
+  return RIGHT_DELIM[open] === close;
+}
+function isValidOpen(open, close) {
+  if (!close)
+    return true;
+  if ([")", "}", "]", "\\rbrace", "\\rparen", "\\}", "\\rbrack"].includes(close)) {
+    return ["(", "{", "[", "\\lbrace", "\\lparen", "\\{", "\\lbrack"].includes(
+      open
+    );
+  }
+  return LEFT_DELIM[close] === open;
 }
 
 // src/core-definitions/accents.ts
@@ -28626,65 +30322,56 @@ var ACCENTS = {
   vec: 8407
 };
 defineFunction(Object.keys(ACCENTS), "{body:auto}", {
-  createAtom: (command, args, style) => {
-    return new AccentAtom(
-      command,
-      !args[0] ? [new PlaceholderAtom()] : argAtoms(args[0]),
-      {
-        accentChar: ACCENTS[command.slice(1)],
-        style
-      }
-    );
-  }
+  createAtom: (options) => new AccentAtom(__spreadProps(__spreadValues({}, options), {
+    body: argAtoms(options.args[0]),
+    accentChar: ACCENTS[options.command.slice(1)]
+  }))
 });
 defineFunction(["widehat", "widecheck", "widetilde"], "{body:auto}", {
-  createAtom: (command, args, style) => {
-    const baseString = parseArgAsString(argAtoms(args[0]));
-    return new AccentAtom(command, argAtoms(args[0]), {
-      style,
-      svgAccent: command.slice(1) + (baseString.length > 5 ? "4" : ["1", "1", "2", "2", "3", "3"][baseString.length])
-    });
+  createAtom: (options) => {
+    const baseString = parseArgAsString(argAtoms(options.args[0]));
+    return new AccentAtom(__spreadProps(__spreadValues({}, options), {
+      body: argAtoms(options.args[0]),
+      svgAccent: options.command.slice(1) + (baseString.length > 5 ? "4" : ["1", "1", "2", "2", "3", "3"][baseString.length])
+    }));
   }
 });
 defineFunction(["overarc", "overparen", "wideparen"], "{body:auto}", {
-  createAtom: (command, args, style) => {
-    return new AccentAtom(command, argAtoms(args[0]), {
-      style,
+  createAtom: (options) => {
+    return new AccentAtom(__spreadProps(__spreadValues({}, options), {
+      body: argAtoms(options.args[0]),
       svgAccent: "overarc"
-    });
+    }));
   }
 });
 defineFunction(["underarc", "underparen"], "{body:auto}", {
-  createAtom: (command, args, style) => {
-    return new OverunderAtom(command, {
-      body: argAtoms(args[0]),
-      style,
+  createAtom: (options) => {
+    return new OverunderAtom(__spreadProps(__spreadValues({}, options), {
+      body: argAtoms(options.args[0]),
       svgBelow: "underarc"
-    });
+    }));
   }
 });
 defineFunction("utilde", "{body:auto}", {
-  createAtom: (command, args, style) => {
-    const baseString = parseArgAsString(argAtoms(args[0]));
+  createAtom: (options) => {
+    const body = argAtoms(options.args[0]);
+    const baseString = parseArgAsString(body);
     const accent = "widetilde" + (baseString.length > 5 ? "4" : ["1", "1", "2", "2", "3", "3"][baseString.length]);
-    return new OverunderAtom(command, {
-      body: argAtoms(args[0]),
+    return new OverunderAtom(__spreadProps(__spreadValues({}, options), {
+      body,
       svgBelow: accent,
-      style,
-      boxType: atomsBoxType(argAtoms(args[0]))
-    });
+      boxType: atomsBoxType(body)
+    }));
   }
 });
 defineFunction("^", "{:string}", {
-  createAtom: (command, args, style) => {
+  createAtom: (options) => {
     var _a3;
-    return new Atom({
+    return new Atom(__spreadProps(__spreadValues({}, options), {
       type: "mord",
-      command,
       isFunction: false,
       limits: "adjacent",
-      style,
-      value: args[0] ? (_a3 = {
+      value: options.args[0] ? (_a3 = {
         a: "\xE2",
         e: "\xEA",
         i: "\xEE",
@@ -28695,20 +30382,18 @@ defineFunction("^", "{:string}", {
         I: "\xCE",
         O: "\xD4",
         U: "\xDB"
-      }[args[0]]) != null ? _a3 : "^" : "^"
-    });
+      }[options.args[0]]) != null ? _a3 : "^" : "^"
+    }));
   }
 });
 defineFunction("`", "{:string}", {
-  createAtom: (command, args, style) => {
+  createAtom: (options) => {
     var _a3;
-    return new Atom({
+    return new Atom(__spreadProps(__spreadValues({}, options), {
       type: "mord",
-      command,
       isFunction: false,
       limits: "adjacent",
-      style,
-      value: args[0] ? (_a3 = {
+      value: options.args[0] ? (_a3 = {
         a: "\xE0",
         e: "\xE8",
         i: "\xEC",
@@ -28719,20 +30404,18 @@ defineFunction("`", "{:string}", {
         I: "\xCC",
         O: "\xD2",
         U: "\xD9"
-      }[args[0]]) != null ? _a3 : "`" : "`"
-    });
+      }[options.args[0]]) != null ? _a3 : "`" : "`"
+    }));
   }
 });
 defineFunction("'", "{:string}", {
-  createAtom: (command, args, style) => {
+  createAtom: (options) => {
     var _a3;
-    return new Atom({
+    return new Atom(__spreadProps(__spreadValues({}, options), {
       type: "mord",
-      command,
       isFunction: false,
       limits: "adjacent",
-      style,
-      value: args[0] ? (_a3 = {
+      value: options.args[0] ? (_a3 = {
         a: "\xE1",
         e: "\xE9",
         i: "\xED",
@@ -28743,41 +30426,39 @@ defineFunction("'", "{:string}", {
         I: "\xCD",
         O: "\xD3",
         U: "\xDA"
-      }[args[0]]) != null ? _a3 : "^" : "^"
-    });
+      }[options.args[0]]) != null ? _a3 : "^" : "^"
+    }));
   }
 });
 defineFunction("~", "{:string}", {
-  createAtom: (command, args, style) => {
+  createAtom: (options) => {
     var _a3;
-    return new Atom({
-      type: "mord",
-      command,
+    return new Atom(__spreadProps(__spreadValues({
+      type: "mord"
+    }, options), {
       isFunction: false,
       limits: "adjacent",
-      style,
-      value: args[0] ? (_a3 = { n: "\xF1", N: "\xD1", a: "\xE3", o: "\xF5", A: "\xC3", O: "\xD5" }[args[0]]) != null ? _a3 : "\xB4" : "\xB4"
-    });
+      value: options.args[0] ? (_a3 = { n: "\xF1", N: "\xD1", a: "\xE3", o: "\xF5", A: "\xC3", O: "\xD5" }[options.args[0]]) != null ? _a3 : "\xB4" : "\xB4"
+    }));
   }
 });
 defineFunction("c", "{:string}", {
-  createAtom: (command, args, style) => {
+  createAtom: (options) => {
     var _a3;
-    return new Atom({
+    return new Atom(__spreadProps(__spreadValues({}, options), {
       type: "mord",
-      command,
       isFunction: false,
       limits: "adjacent",
-      style,
-      value: args[0] ? (_a3 = { c: "\xE7", C: "\xC7" }[args[0]]) != null ? _a3 : "" : ""
-    });
+      value: options.args[0] ? (_a3 = { c: "\xE7", C: "\xC7" }[options.args[0]]) != null ? _a3 : "" : ""
+    }));
   }
 });
 
 // src/core-definitions/enclose.ts
 defineFunction("enclose", "{notation:string}[style:string]{body:auto}", {
-  createAtom: (command, args, style) => {
-    var _a3;
+  createAtom: (atomOptions) => {
+    var _a3, _b3;
+    const args = atomOptions.args;
     const options = {
       strokeColor: "currentColor",
       strokeWidth: "",
@@ -28787,7 +30468,7 @@ defineFunction("enclose", "{notation:string}[style:string]{body:auto}", {
       shadow: "auto",
       svgStrokeStyle: void 0,
       borderStyle: void 0,
-      style
+      style: (_a3 = atomOptions.style) != null ? _a3 : {}
     };
     if (args[1]) {
       const styles = args[1].split(/,(?![^(]*\)(?:(?:[^(]*\)){2})*[^"]*$)/);
@@ -28818,62 +30499,76 @@ defineFunction("enclose", "{notation:string}[style:string]{body:auto}", {
     }
     options.borderStyle = `${options.strokeWidth} ${options.strokeStyle} ${options.strokeColor}`;
     const notation = {};
-    ((_a3 = args[0]) != null ? _a3 : "").split(/[, ]/).filter((v) => v.length > 0).forEach((x) => {
+    ((_b3 = args[0]) != null ? _b3 : "").split(/[, ]/).filter((v) => v.length > 0).forEach((x) => {
       notation[x.toLowerCase()] = true;
     });
-    return new EncloseAtom(command, argAtoms(args[2]), notation, options);
+    return new EncloseAtom(
+      atomOptions.command,
+      argAtoms(args[2]),
+      notation,
+      options
+    );
   }
 });
 defineFunction("cancel", "{body:auto}", {
-  createAtom: (name, args, style) => new EncloseAtom(
-    name,
-    argAtoms(args[0]),
-    { updiagonalstrike: true },
-    {
-      strokeColor: "currentColor",
-      strokeWidth: "",
-      strokeStyle: "solid",
-      borderStyle: "1px solid currentColor",
-      backgroundcolor: "transparent",
-      padding: "auto",
-      shadow: "auto",
-      style
-    }
-  )
+  createAtom: (options) => {
+    var _a3;
+    return new EncloseAtom(
+      options.command,
+      argAtoms(options.args[0]),
+      { updiagonalstrike: true },
+      {
+        strokeColor: "currentColor",
+        strokeWidth: "",
+        strokeStyle: "solid",
+        borderStyle: "1px solid currentColor",
+        backgroundcolor: "transparent",
+        padding: "auto",
+        shadow: "auto",
+        style: (_a3 = options.style) != null ? _a3 : {}
+      }
+    );
+  }
 });
 defineFunction("bcancel", "{body:auto}", {
-  createAtom: (name, args, style) => new EncloseAtom(
-    name,
-    argAtoms(args[0]),
-    { downdiagonalstrike: true },
-    {
-      strokeColor: "currentColor",
-      strokeWidth: "",
-      strokeStyle: "solid",
-      borderStyle: "1px solid currentColor",
-      backgroundcolor: "transparent",
-      padding: "auto",
-      shadow: "auto",
-      style
-    }
-  )
+  createAtom: (options) => {
+    var _a3;
+    return new EncloseAtom(
+      options.command,
+      argAtoms(options.args[0]),
+      { downdiagonalstrike: true },
+      {
+        strokeColor: "currentColor",
+        strokeWidth: "",
+        strokeStyle: "solid",
+        borderStyle: "1px solid currentColor",
+        backgroundcolor: "transparent",
+        padding: "auto",
+        shadow: "auto",
+        style: (_a3 = options.style) != null ? _a3 : {}
+      }
+    );
+  }
 });
 defineFunction("xcancel", "{body:auto}", {
-  createAtom: (name, args, style) => new EncloseAtom(
-    name,
-    argAtoms(args[0]),
-    { updiagonalstrike: true, downdiagonalstrike: true },
-    {
-      strokeColor: "currentColor",
-      strokeWidth: "",
-      strokeStyle: "solid",
-      borderStyle: "1px solid currentColor",
-      backgroundcolor: "transparent",
-      padding: "auto",
-      shadow: "auto",
-      style
-    }
-  )
+  createAtom: (options) => {
+    var _a3;
+    return new EncloseAtom(
+      options.command,
+      argAtoms(options.args[0]),
+      { updiagonalstrike: true, downdiagonalstrike: true },
+      {
+        strokeColor: "currentColor",
+        strokeWidth: "",
+        strokeStyle: "solid",
+        borderStyle: "1px solid currentColor",
+        backgroundcolor: "transparent",
+        padding: "auto",
+        shadow: "auto",
+        style: (_a3 = options.style) != null ? _a3 : {}
+      }
+    );
+  }
 });
 
 // src/core-definitions/extensible-symbols.ts
@@ -28890,29 +30585,30 @@ defineFunction(
   ],
   "{:auto}",
   {
-    createAtom: (command, args, style) => new OverunderAtom(command, {
-      body: argAtoms(args[0]),
-      skipBoundary: false,
-      supsubPlacement: "over-under",
-      paddedBody: true,
-      boxType: "rel",
-      style,
-      // Set the "svgAbove" to the name of a SVG object (which is the same
-      // as the command name)
-      svgAbove: command.slice(1)
-    })
+    createAtom: (options) => {
+      var _a3;
+      return new OverunderAtom(__spreadProps(__spreadValues({}, options), {
+        body: argAtoms((_a3 = options.args) == null ? void 0 : _a3[0]),
+        skipBoundary: false,
+        supsubPlacement: "over-under",
+        paddedBody: true,
+        boxType: "rel",
+        // Set the "svgAbove" to the name of a SVG object (which is the same
+        // as the command name)
+        svgAbove: options.command.slice(1)
+      }));
+    }
   }
 );
 defineFunction("overbrace", "{:auto}", {
-  createAtom: (command, args, style) => new OverunderAtom(command, {
-    body: argAtoms(args[0]),
+  createAtom: (options) => new OverunderAtom(__spreadProps(__spreadValues({}, options), {
+    body: argAtoms(options.args[0]),
     skipBoundary: false,
     supsubPlacement: "over-under",
     paddedBody: true,
     boxType: "ord",
-    style,
-    svgAbove: command.slice(1)
-  })
+    svgAbove: options.command.slice(1)
+  }))
 });
 defineFunction(
   [
@@ -28924,29 +30620,27 @@ defineFunction(
   ],
   "{:auto}",
   {
-    createAtom: (command, args, style) => new OverunderAtom(command, {
-      body: argAtoms(args[0]),
+    createAtom: (options) => new OverunderAtom(__spreadProps(__spreadValues({}, options), {
+      body: argAtoms(options.args[0]),
       skipBoundary: false,
       supsubPlacement: "over-under",
       paddedBody: true,
       boxType: "rel",
-      style,
       // Set the "svgBelow" to the name of a SVG object (which is the same
       // as the command name)
-      svgBelow: command.slice(1)
-    })
+      svgBelow: options.command.slice(1)
+    }))
   }
 );
 defineFunction(["underbrace"], "{:auto}", {
-  createAtom: (command, args, style) => new OverunderAtom(command, {
-    body: argAtoms(args[0]),
+  createAtom: (options) => new OverunderAtom(__spreadProps(__spreadValues({}, options), {
+    body: argAtoms(options.args[0]),
     skipBoundary: false,
     supsubPlacement: "over-under",
     paddedBody: true,
     boxType: "ord",
-    style,
-    svgBelow: command.slice(1)
-  })
+    svgBelow: options.command.slice(1)
+  }))
 });
 defineFunction(
   [
@@ -28992,22 +30686,21 @@ defineFunction(
   ],
   "[:auto]{:auto}",
   {
-    createAtom: (command, args, style) => {
-      var _a3, _b3;
-      return new OverunderAtom(command, {
-        style,
+    createAtom: (options) => {
+      var _a3, _b3, _c2, _d2, _e;
+      return new OverunderAtom(__spreadProps(__spreadValues({}, options), {
         // Set the "svgBody" to the name of a SVG object (which is the same
         // as the command name)
-        svgBody: command.slice(1),
+        svgBody: options.command.slice(1),
         // The overscript is optional, i.e. `\xtofrom` is valid
-        above: ((_a3 = argAtoms(args[1])) == null ? void 0 : _a3.length) === 0 ? void 0 : argAtoms(args[1]),
-        below: (_b3 = argAtoms(args[0])) != null ? _b3 : null,
+        above: ((_b3 = argAtoms((_a3 = options.args) == null ? void 0 : _a3[1])) == null ? void 0 : _b3.length) === 0 ? void 0 : argAtoms((_c2 = options.args) == null ? void 0 : _c2[1]),
+        below: (_e = argAtoms((_d2 = options.args) == null ? void 0 : _d2[0])) != null ? _e : null,
         skipBoundary: false,
         supsubPlacement: "over-under",
         paddedBody: true,
         paddedLabels: true,
         boxType: "rel"
-      });
+      }));
     },
     serialize: (atom, options) => atom.command + (!atom.hasEmptyBranch("below") ? `[${atom.belowToLatex(options)}]` : "") + `{${atom.aboveToLatex(options)}}${atom.supsubToLatex(options)}`
   }
@@ -29076,48 +30769,40 @@ defineFunction(
   {
     isFunction: true,
     ifMode: "math",
-    createAtom: (command, _args, style) => new OperatorAtom(command, command.slice(1), {
+    createAtom: (options) => new OperatorAtom(options.command.slice(1), __spreadProps(__spreadValues({}, options), {
       limits: "adjacent",
       isFunction: true,
       variant: "main",
-      variantStyle: "up",
-      style
-    })
+      variantStyle: "up"
+    }))
   }
 );
 defineFunction(["liminf", "limsup"], "", {
   ifMode: "math",
-  createAtom: (command, _args, style) => new OperatorAtom(
-    command,
-    { "\\liminf": "lim inf", "\\limsup": "lim sup" }[command],
-    {
-      limits: "over-under",
-      variant: "main",
-      style
-    }
+  createAtom: (options) => new OperatorAtom(
+    { "\\liminf": "lim inf", "\\limsup": "lim sup" }[options.command],
+    __spreadProps(__spreadValues({}, options), { limits: "over-under", variant: "main" })
   )
 });
 defineFunction(["lim", "mod"], "", {
   ifMode: "math",
-  createAtom: (command, _args, style) => new OperatorAtom(command, command.slice(1), {
+  createAtom: (options) => new OperatorAtom(options.command.slice(1), __spreadProps(__spreadValues({}, options), {
     limits: "over-under",
-    variant: "main",
-    style
-  })
+    variant: "main"
+  }))
 });
 defineFunction(["det", "max", "min"], "", {
   ifMode: "math",
   isFunction: true,
-  createAtom: (command, _args, style) => new OperatorAtom(command, command.slice(1), {
+  createAtom: (options) => new OperatorAtom(options.command.slice(1), __spreadProps(__spreadValues({}, options), {
     limits: "over-under",
     isFunction: true,
-    variant: "main",
-    style
-  })
+    variant: "main"
+  }))
 });
 defineFunction(["ang"], "{:math}", {
   ifMode: "math",
-  createAtom: (command, args, style) => new Atom({ command, body: argAtoms(args[0]), mode: "math", style }),
+  createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), { body: argAtoms(options.args[0]) })),
   serialize: (atom, options) => `\\ang{${atom.bodyToLatex(options)}}`,
   render: (atom, context) => {
     const box = atom.createBox(context);
@@ -29135,19 +30820,20 @@ defineFunction(["ang"], "{:math}", {
 });
 defineFunction("sqrt", "[index:auto]{radicand:expression}", {
   ifMode: "math",
-  createAtom: (command, args, style) => new SurdAtom(command, {
-    body: argAtoms(args[1]),
-    index: args[0] ? argAtoms(args[0]) : void 0,
-    style
-  })
+  createAtom: (options) => new SurdAtom(__spreadProps(__spreadValues({}, options), {
+    body: argAtoms(options.args[1]),
+    index: options.args[0] ? argAtoms(options.args[0]) : void 0
+  }))
 });
 defineFunction(
   ["frac", "dfrac", "tfrac", "cfrac", "binom", "dbinom", "tbinom"],
   "{:expression}{:expression}",
   {
     ifMode: "math",
-    createAtom: (command, args, style) => {
-      const genfracOptions = { style };
+    createAtom: (options) => {
+      const genfracOptions = __spreadValues({}, options);
+      const command = options.command;
+      const args = options.args;
       switch (command) {
         case "\\dfrac":
         case "\\frac":
@@ -29182,7 +30868,6 @@ defineFunction(
         default:
       }
       return new GenfracAtom(
-        command,
         !args[0] ? [new PlaceholderAtom()] : argAtoms(args[0]),
         !args[1] ? [new PlaceholderAtom()] : argAtoms(args[1]),
         genfracOptions
@@ -29199,12 +30884,11 @@ defineFunction(
 );
 defineFunction(["brace", "brack"], "", {
   infix: true,
-  createAtom: (command, args, style) => new GenfracAtom(command, argAtoms(args[0]), argAtoms(args[1]), {
+  createAtom: (options) => new GenfracAtom(argAtoms(options.args[0]), argAtoms(options.args[1]), __spreadProps(__spreadValues({}, options), {
     hasBarLine: false,
-    leftDelim: command === "\\brace" ? "\\lbrace" : "\\lbrack",
-    rightDelim: command === "\\brace" ? "\\rbrace" : "\\rbrack",
-    style
-  }),
+    leftDelim: options.command === "\\brace" ? "\\lbrace" : "\\lbrack",
+    rightDelim: options.command === "\\brace" ? "\\rbrace" : "\\rbrack"
+  })),
   serialize: (atom, options) => joinLatex([
     atom.aboveToLatex(options),
     atom.command,
@@ -29213,19 +30897,19 @@ defineFunction(["brace", "brack"], "", {
 });
 defineFunction(["over", "atop", "choose"], "", {
   infix: true,
-  createAtom: (command, args, style) => {
+  createAtom: (options) => {
     let leftDelim = void 0;
     let rightDelim = void 0;
-    if (command === "\\choose") {
+    const args = options.args;
+    if (options.command === "\\choose") {
       leftDelim = "(";
       rightDelim = ")";
     }
-    return new GenfracAtom(command, argAtoms(args[0]), argAtoms(args[1]), {
-      hasBarLine: command === "\\over",
+    return new GenfracAtom(argAtoms(args[0]), argAtoms(args[1]), __spreadProps(__spreadValues({}, options), {
+      hasBarLine: options.command === "\\over",
       leftDelim,
-      rightDelim,
-      style
-    });
+      rightDelim
+    }));
   },
   serialize: (atom, options) => joinLatex([
     atom.aboveToLatex(options),
@@ -29238,26 +30922,25 @@ defineFunction(
   "{numer:auto}{denom:auto}{left-delim:delim}{right-delim:delim}",
   {
     infix: true,
-    createAtom: (command, args, style) => {
+    createAtom: (options) => {
       var _a3, _b3;
-      return new GenfracAtom(command, argAtoms(args[0]), argAtoms(args[1]), {
+      const args = options.args;
+      return new GenfracAtom(argAtoms(args[0]), argAtoms(args[1]), __spreadProps(__spreadValues({}, options), {
         leftDelim: (_a3 = args[2]) != null ? _a3 : ".",
         rightDelim: (_b3 = args[3]) != null ? _b3 : ".",
-        hasBarLine: false,
-        style
-      });
+        hasBarLine: false
+      }));
     },
     serialize: (atom, options) => `${atom.aboveToLatex(options)} ${atom.command}${atom.leftDelim}${atom.rightDelim}${atom.belowToLatex(options)}`
   }
 );
 defineFunction("pdiff", "{numerator}{denominator}", {
   ifMode: "math",
-  createAtom: (command, args, style) => new GenfracAtom(command, argAtoms(args[0]), argAtoms(args[1]), {
+  createAtom: (options) => new GenfracAtom(argAtoms(options.args[0]), argAtoms(options.args[1]), __spreadProps(__spreadValues({}, options), {
     hasBarLine: true,
     numerPrefix: "\u2202",
-    denomPrefix: "\u2202",
-    style
-  })
+    denomPrefix: "\u2202"
+  }))
 });
 defineFunction(
   [
@@ -29278,8 +30961,7 @@ defineFunction(
   "",
   {
     ifMode: "math",
-    createAtom: (command, args, style) => new OperatorAtom(
-      command,
+    createAtom: (options) => new OperatorAtom(
       {
         coprod: "\u2210",
         bigvee: "\u22C1",
@@ -29295,24 +30977,22 @@ defineFunction(
         bigodot: "\u2A00",
         bigsqcup: "\u2A06",
         smallint: "\u222B"
-      }[command.slice(1)],
-      {
+      }[options.command.slice(1)],
+      __spreadProps(__spreadValues({}, options), {
         isExtensibleSymbol: true,
         limits: "auto",
-        variant: "main",
-        style
-      }
+        variant: "main"
+      })
     )
   }
 );
 defineFunction("smallint", "", {
   ifMode: "math",
-  createAtom: (command, args, style) => new OperatorAtom(command, "\u222B", {
+  createAtom: (options) => new OperatorAtom("\u222B", __spreadProps(__spreadValues({}, options), {
     limits: "adjacent",
     isExtensibleSymbol: false,
-    style,
     variant: "main"
-  })
+  }))
 });
 var EXTENSIBLE_SYMBOLS = {
   int: "\u222B",
@@ -29337,42 +31017,43 @@ var EXTENSIBLE_SYMBOLS = {
 };
 defineFunction(Object.keys(EXTENSIBLE_SYMBOLS), "", {
   ifMode: "math",
-  createAtom: (command, args, style) => new OperatorAtom(command, EXTENSIBLE_SYMBOLS[command.slice(1)], {
-    limits: "adjacent",
-    isExtensibleSymbol: true,
-    style,
-    variant: { "\u22D2": "ams", "\u22D3": "ams" }[EXTENSIBLE_SYMBOLS[command.slice(1)]]
-  })
+  createAtom: (options) => {
+    const command = options.command;
+    const symbol = EXTENSIBLE_SYMBOLS[command.slice(1)];
+    return new OperatorAtom(symbol, __spreadProps(__spreadValues({}, options), {
+      limits: "adjacent",
+      isExtensibleSymbol: true,
+      variant: { "\u22D2": "ams", "\u22D3": "ams" }[symbol]
+    }));
+  }
 });
 defineFunction(["Re", "Im"], "", {
   ifMode: "math",
-  createAtom: (command, args, style) => new OperatorAtom(
-    command,
-    { "\\Re": "\u211C", "\\Im": "\u2111" }[command],
-    {
+  createAtom: (options) => new OperatorAtom(
+    { "\\Re": "\u211C", "\\Im": "\u2111" }[options.command],
+    __spreadProps(__spreadValues({}, options), {
       limits: "adjacent",
-      style,
       isFunction: true,
       variant: "fraktur"
-    }
+    })
   )
 });
 defineFunction("middle", "{:delim}", {
   ifMode: "math",
-  createAtom: (command, args, style) => {
+  createAtom: (options) => {
     var _a3;
-    return new DelimAtom(command, (_a3 = args[0]) != null ? _a3 : "|", { size: 1, style });
+    return new MiddleDelimAtom(__spreadProps(__spreadValues({}, options), {
+      delim: (_a3 = options.args[0]) != null ? _a3 : "|",
+      size: 1
+    }));
   }
 });
 defineFunction("the", "{:value}", {
-  createAtom: (command, args, style) => new Atom({
-    command,
+  createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), {
     captureSelection: true,
-    args,
-    style,
     verbatimLatex: null
     // disable verbatim LaTeX
-  }),
+  })),
   render: (atom, parent) => {
     var _a3;
     const ctx = new Context({ parent }, atom.style);
@@ -29406,34 +31087,40 @@ defineFunction("the", "{:value}", {
 });
 
 // src/core-definitions/styling.ts
-defineFunction("mathtip", "{:math}{:math}", {
-  createAtom: (name, args, style) => new TooltipAtom(argAtoms(args[0]), argAtoms(args[1]), {
-    command: name,
-    content: "math",
-    style
-  })
+defineFunction("mathtip", "{:auto}{:math}", {
+  createAtom: (options) => new TooltipAtom(__spreadProps(__spreadValues({}, options), {
+    body: argAtoms(options.args[0]),
+    tooltip: argAtoms(options.args[1]),
+    content: "math"
+  })),
+  serialize: (atom, options) => options.skipStyles ? atom.bodyToLatex(options) : `\\texttip{${atom.bodyToLatex(options)}}{${Atom.serialize(
+    [atom.tooltip],
+    __spreadProps(__spreadValues({}, options), {
+      defaultMode: "math"
+    })
+  )}}`
 });
-defineFunction("texttip", "{:math}{:text}", {
-  createAtom: (name, args, style) => new TooltipAtom(argAtoms(args[0]), argAtoms(args[1]), {
-    command: name,
-    content: "text",
-    style
-  })
+defineFunction("texttip", "{:auto}{:text}", {
+  createAtom: (options) => new TooltipAtom(__spreadProps(__spreadValues({}, options), {
+    body: argAtoms(options.args[0]),
+    tooltip: argAtoms(options.args[1]),
+    content: "text"
+  })),
+  serialize: (atom, options) => options.skipStyles ? atom.bodyToLatex(options) : `\\texttip{${atom.bodyToLatex(options)}}{${Atom.serialize(
+    [atom.tooltip],
+    __spreadProps(__spreadValues({}, options), {
+      defaultMode: "text"
+    })
+  )}}`
 });
 defineFunction("error", "{:math}", {
-  createAtom: (_name, args, style) => new Atom({ args, body: argAtoms(args[0]), style }),
+  createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), { body: argAtoms(options.args[0]) })),
   serialize: (atom, options) => `\\error{${atom.bodyToLatex(options)}}`,
   render: (atom, context) => atom.createBox(context, { classes: "ML__error" })
 });
 defineFunction("ensuremath", "{:math}", {
-  createAtom: (command, args, style) => new Atom({
-    type: "minner",
-    command,
-    body: argAtoms(args[0]),
-    mode: "math",
-    style
-  }),
-  serialize: (atom, options) => `${atom.command}{${atom.bodyToLatex(options)}}`
+  createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), { body: argAtoms(options.args[0]) })),
+  serialize: (atom, options) => `${atom.command}{${atom.bodyToLatex(__spreadProps(__spreadValues({}, options), { defaultMode: "math" }))}}`
 });
 defineFunction("color", "{:value}", {
   applyStyle: (_name, args, context) => {
@@ -29454,10 +31141,10 @@ defineFunction("textcolor", "{:value}{content:auto*}", {
   }
 });
 defineFunction("boxed", "{content:math}", {
-  createAtom: (name, args, style) => new BoxAtom(name, argAtoms(args[0]), {
-    framecolor: { string: "black" },
-    style
-  })
+  createAtom: (options) => new BoxAtom(__spreadProps(__spreadValues({}, options), {
+    body: argAtoms(options.args[0]),
+    framecolor: { string: "black" }
+  }))
 });
 defineFunction("colorbox", "{:value}{:text*}", {
   applyStyle: (_name, args, context) => {
@@ -29475,40 +31162,43 @@ defineFunction(
   "{frame-color:value}{background-color:value}{content:text}",
   {
     applyMode: "text",
-    createAtom: (name, args, style) => {
+    createAtom: (options) => {
       var _a3, _b3;
-      return new BoxAtom(name, argAtoms(args[2]), {
-        framecolor: (_a3 = args[0]) != null ? _a3 : { string: "blue" },
-        backgroundcolor: (_b3 = args[1]) != null ? _b3 : { string: "yellow" },
-        style
-      });
+      return new BoxAtom(__spreadProps(__spreadValues({}, options), {
+        body: argAtoms(options.args[2]),
+        framecolor: (_a3 = options.args[0]) != null ? _a3 : { string: "blue" },
+        backgroundcolor: (_b3 = options.args[1]) != null ? _b3 : { string: "yellow" }
+      }));
     },
     serialize: (atom, options) => {
       var _a3, _b3;
-      return latexCommand(
+      return options.skipStyles ? atom.bodyToLatex(__spreadProps(__spreadValues({}, options), { defaultMode: "text" })) : latexCommand(
         atom.command,
         (_a3 = serializeLatexValue(atom.framecolor)) != null ? _a3 : "",
         (_b3 = serializeLatexValue(atom.backgroundcolor)) != null ? _b3 : "",
-        atom.bodyToLatex(options)
+        atom.bodyToLatex(__spreadProps(__spreadValues({}, options), { defaultMode: "text" }))
       );
     }
   }
 );
 defineFunction("bbox", "[:bbox]{body:auto}", {
-  createAtom: (name, args, style) => {
+  createAtom: (options) => {
     var _a3;
-    const arg = args[0];
+    const arg = options.args[0];
+    const body = argAtoms(options.args[1]);
     if (!arg)
-      return new BoxAtom(name, argAtoms(args[1]), { style });
-    return new BoxAtom(name, argAtoms(args[1]), {
+      return new BoxAtom(__spreadProps(__spreadValues({}, options), { body }));
+    return new BoxAtom(__spreadProps(__spreadValues({}, options), {
+      body,
       padding: arg.padding,
       border: arg.border,
-      backgroundcolor: (_a3 = arg.backgroundcolor) != null ? _a3 : void 0,
-      style
-    });
+      backgroundcolor: (_a3 = arg.backgroundcolor) != null ? _a3 : void 0
+    }));
   },
   serialize: (atom, options) => {
     var _a3, _b3;
+    if (options.skipStyles)
+      return atom.bodyToLatex(options);
     let result = atom.command;
     if (Number.isFinite(atom.padding) || atom.border !== void 0 || atom.backgroundcolor !== void 0) {
       const bboxParameters = [];
@@ -29527,22 +31217,18 @@ defineFunction(
   ["displaystyle", "textstyle", "scriptstyle", "scriptscriptstyle"],
   "{:rest}",
   {
-    createAtom: (command, args, style) => new Atom({ command, body: argAtoms(args[0]), style }),
+    createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), { body: argAtoms(options.args[0]) })),
     render: (atom, context) => {
       const ctx = new Context(
         { parent: context, mathstyle: atom.command.slice(1) },
         atom.style
       );
-      const box = Atom.createBox(ctx, atom.body, {
-        type: "lift",
-        mode: "math",
-        style: atom.style
-      });
+      const box = Atom.createBox(ctx, atom.body, { type: "lift" });
       if (atom.caret)
         box.caret = atom.caret;
       return atom.bind(context, box);
     },
-    serialize: (atom, options) => `{${joinLatex([atom.command, atom.bodyToLatex(options)])}}`
+    serialize: (atom, options) => options.skipStyles ? atom.bodyToLatex(options) : `{${joinLatex([atom.command, atom.bodyToLatex(options)])}}`
   }
 );
 defineFunction(
@@ -29612,7 +31298,7 @@ defineFunction("bf", "{:rest}", {
 });
 defineFunction(["boldsymbol", "bm"], "{:math}", {
   applyMode: "math",
-  createAtom: (command, args, style) => new Atom({ command, body: argAtoms(args[0]), style }),
+  createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), { body: argAtoms(options.args[0]) })),
   serialize: (atom, options) => `${atom.command}{${atom.bodyToLatex(options)}}`,
   render: (atom, context) => atom.createBox(context, { classes: "ML__boldsymbol" })
 });
@@ -29740,13 +31426,11 @@ defineFunction("mathscr", "{:math*}", {
 });
 defineFunction("mbox", "{:text}", {
   ifMode: "math",
-  createAtom: (command, args, style) => new Atom({
+  createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), {
     type: "mord",
-    command,
-    style,
-    body: argAtoms(args[0]),
+    body: argAtoms(options.args[0]),
     mode: "math"
-  }),
+  })),
   serialize: (atom, options) => latexCommand(
     "\\mbox",
     atom.bodyToLatex(__spreadProps(__spreadValues({}, options), { defaultMode: "text" }))
@@ -29757,15 +31441,9 @@ defineFunction("text", "{:text}", {
   applyMode: "text"
 });
 defineFunction(["class", "htmlClass"], "{name:string}{content:auto}", {
-  createAtom: (command, args, style) => new Atom({
-    command,
-    args,
-    body: argAtoms(args[1]),
-    style
-  }),
+  createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), { body: argAtoms(options.args[1]) })),
   serialize: (atom, options) => {
-    var _a3;
-    if (!((_a3 = atom.args) == null ? void 0 : _a3[0]))
+    if (!atom.args[0] || options.skipStyles)
       return atom.bodyToLatex(options);
     return `${atom.command}{${atom.args[0]}}{${atom.bodyToLatex(
       options
@@ -29777,15 +31455,10 @@ defineFunction(["class", "htmlClass"], "{name:string}{content:auto}", {
   }
 });
 defineFunction(["cssId", "htmlId"], "{id:string}{content:auto}", {
-  createAtom: (command, args, style) => new Atom({
-    command,
-    args,
-    body: argAtoms(args[1]),
-    style
-  }),
+  createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), { body: argAtoms(options.args[1]) })),
   serialize: (atom, options) => {
     var _a3;
-    if (!((_a3 = atom.args) == null ? void 0 : _a3[0]))
+    if (!((_a3 = atom.args) == null ? void 0 : _a3[0]) || options.skipStyles)
       return atom.bodyToLatex(options);
     return `${atom.command}{${atom.args[0]}}{${atom.bodyToLatex(
       options
@@ -29799,15 +31472,10 @@ defineFunction(["cssId", "htmlId"], "{id:string}{content:auto}", {
   }
 });
 defineFunction("htmlData", "{data:string}{content:auto}", {
-  createAtom: (command, args, style) => new Atom({
-    command,
-    body: argAtoms(args[1]),
-    args,
-    style
-  }),
+  createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), { body: argAtoms(options.args[1]) })),
   serialize: (atom, options) => {
     var _a3;
-    if (!((_a3 = atom.args) == null ? void 0 : _a3[0]))
+    if (!((_a3 = atom.args) == null ? void 0 : _a3[0]) || options.skipStyles)
       return atom.bodyToLatex(options);
     return `\\htmlData{${atom.args[0]}}{${atom.bodyToLatex(
       options
@@ -29821,15 +31489,10 @@ defineFunction("htmlData", "{data:string}{content:auto}", {
   }
 });
 defineFunction(["style", "htmlStyle"], "{data:string}{content:auto}", {
-  createAtom: (command, args, style) => new Atom({
-    command,
-    args,
-    body: argAtoms(args[1]),
-    style
-  }),
+  createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), { body: argAtoms(options.args[1]) })),
   serialize: (atom, options) => {
     var _a3;
-    if (!((_a3 = atom.args) == null ? void 0 : _a3[0]))
+    if (!((_a3 = atom.args) == null ? void 0 : _a3[0]) || options.skipStyles)
       return atom.bodyToLatex(options);
     return `${atom.command}{${atom.args[0]}}{${atom.bodyToLatex(
       options
@@ -29843,13 +31506,13 @@ defineFunction(["style", "htmlStyle"], "{data:string}{content:auto}", {
   }
 });
 defineFunction("em", "{:rest}", {
-  createAtom: (command, args, style) => new Atom({ command, body: argAtoms(args[0]), args, style }),
-  serialize: (atom, options) => `{\\em ${atom.bodyToLatex(options)}}`,
+  createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), { body: argAtoms(options.args[0]) })),
+  serialize: (atom, options) => options.skipStyles ? atom.bodyToLatex(options) : `{\\em ${atom.bodyToLatex(options)}}`,
   render: (atom, context) => atom.createBox(context, { classes: "ML__emph", boxType: "lift" })
 });
 defineFunction("emph", "{:auto}", {
-  createAtom: (command, args, style) => new Atom({ command, body: argAtoms(args[0]), args, style }),
-  serialize: (atom, options) => `\\emph{${atom.bodyToLatex(options)}}`,
+  createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), { body: argAtoms(options.args[1]) })),
+  serialize: (atom, options) => options.skipStyles ? atom.bodyToLatex(options) : `\\emph{${atom.bodyToLatex(options)}}`,
   render: (atom, context) => atom.createBox(context, { classes: "ML__emph", boxType: "lift" })
 });
 var DELIMITER_SIZES = {
@@ -29891,13 +31554,13 @@ defineFunction(
   ],
   "{:delim}",
   {
-    createAtom: (name, args, style) => {
+    createAtom: (options) => {
       var _a3;
-      return new SizedDelimAtom(name, (_a3 = args[0]) != null ? _a3 : ".", {
-        size: DELIMITER_SIZES[name].size,
-        delimType: DELIMITER_SIZES[name].mclass,
-        style
-      });
+      return new SizedDelimAtom(__spreadProps(__spreadValues({}, options), {
+        delim: (_a3 = options.args[0]) != null ? _a3 : ".",
+        size: DELIMITER_SIZES[options.command].size,
+        delimType: DELIMITER_SIZES[options.command].mclass
+      }));
     }
   }
 );
@@ -29910,28 +31573,79 @@ defineFunction(
   ],
   "{width:value}",
   {
-    createAtom: (name, args, style) => {
+    createAtom: (options) => {
       var _a3;
-      return new SpacingAtom(name, style, (_a3 = args[0]) != null ? _a3 : { dimension: 0 });
+      return new SpacingAtom(__spreadProps(__spreadValues({}, options), {
+        width: (_a3 = options.args[0]) != null ? _a3 : { dimension: 0 }
+      }));
     }
   }
 );
 defineFunction(["mkern", "kern", "mskip", "hskip", "mspace"], "{width:value}", {
-  createAtom: (name, args, style) => {
+  createAtom: (options) => {
     var _a3;
-    return new SpacingAtom(name, style, (_a3 = args[0]) != null ? _a3 : { dimension: 0 });
+    return new SpacingAtom(__spreadProps(__spreadValues({}, options), {
+      width: (_a3 = options.args[0]) != null ? _a3 : { dimension: 0 }
+    }));
   }
 });
+defineFunction("mathchoice", "{:math}{:math}{:math}{:math}", {
+  // display, text, script and scriptscript
+  createAtom: (options) => new Atom(options),
+  render: (atom, context) => {
+    let i = 0;
+    const d = context.mathstyle.id;
+    if (d === T || d === Tc)
+      i = 1;
+    if (d === S || d === Sc)
+      i = 2;
+    if (d === SS || d === SSc)
+      i = 3;
+    const body = argAtoms(atom.args[i]);
+    return Atom.createBox(context, body);
+  },
+  serialize: (atom, options) => `\\mathchoice{${Atom.serialize(
+    atom.args[0],
+    options
+  )}}{${Atom.serialize(atom.args[1], options)}}{${Atom.serialize(
+    atom.args[2],
+    options
+  )}}{${Atom.serialize(atom.args[3], options)}}`
+});
 defineFunction("mathop", "{:auto}", {
-  createAtom: (name, args, style) => new OperatorAtom(name, argAtoms(args[0]), {
+  createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), {
+    type: "mop",
+    body: argAtoms(options.args[0]),
     limits: "over-under",
     isFunction: true,
-    hasArgument: true,
-    style
-  })
-});
-defineFunction("mathchoice", "{:math}{:math}{:math}{:math}", {
-  createAtom: (_name, args) => new ChoiceAtom(args.map((x) => argAtoms(x)))
+    captureSelection: true
+  })),
+  render: (atom, context) => {
+    var _a3;
+    let base = Atom.createBox(context, atom.body);
+    if (atom.superscript || atom.subscript) {
+      const limits = (_a3 = atom.subsupPlacement) != null ? _a3 : "auto";
+      base = limits === "over-under" || limits === "auto" && context.isDisplayStyle ? atom.attachLimits(context, { base }) : atom.attachSupsub(context, { base });
+    }
+    return new Box(atom.bind(context, base), {
+      type: "op",
+      isSelected: atom.isSelected,
+      classes: "op-group"
+    });
+  },
+  serialize: (atom, options) => {
+    const result = [latexCommand(atom.command, atom.bodyToLatex(options))];
+    if (atom.explicitSubsupPlacement) {
+      if (atom.subsupPlacement === "over-under")
+        result.push("\\limits");
+      if (atom.subsupPlacement === "adjacent")
+        result.push("\\nolimits");
+      if (atom.subsupPlacement === "auto")
+        result.push("\\displaylimits");
+    }
+    result.push(atom.supsubToLatex(options));
+    return joinLatex(result);
+  }
 });
 defineFunction(
   [
@@ -29945,7 +31659,7 @@ defineFunction(
   ],
   "{:auto}",
   {
-    createAtom: (name, args, style) => new OperatorAtom(name, argAtoms(args[0]), {
+    createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), {
       type: {
         "\\mathbin": "mbin",
         "\\mathrel": "mrel",
@@ -29954,43 +31668,66 @@ defineFunction(
         "\\mathpunct": "mpunct",
         "\\mathord": "mord",
         "\\mathinner": "minner"
-      }[name],
-      hasArgument: true,
-      style
-    })
+      }[options.command],
+      body: argAtoms(options.args[0]),
+      captureSelection: true
+    }))
   }
 );
 defineFunction(["operatorname", "operatorname*"], "{operator:math}", {
-  createAtom: (name, args, style) => {
-    const result = new OperatorAtom(name, argAtoms(args[0]), {
-      isFunction: true,
-      hasArgument: true,
-      limits: name === "\\operatorname" ? "adjacent" : "over-under",
-      style
-    });
-    result.captureSelection = true;
-    if (result.body) {
-      result.body.forEach((x) => {
-        var _a3;
-        if (x.type !== "first") {
-          x.type = "mord";
-          x.value = (_a3 = { "\u2217": "*", "\u2212": "-" }[x.value]) != null ? _a3 : x.value;
-          x.isFunction = false;
-          if (!x.style.variant && !x.style.variantStyle) {
-            x.style.variant = "main";
-            x.style.variantStyle = "up";
-          }
+  createAtom: (options) => {
+    const body = argAtoms(options.args[0]).map((x) => {
+      var _a3;
+      if (x.type !== "first") {
+        x.type = "mord";
+        x.value = (_a3 = { "\u2217": "*", "\u2212": "-" }[x.value]) != null ? _a3 : x.value;
+        x.isFunction = false;
+        if (!x.style.variant && !x.style.variantStyle) {
+          x.style.variant = "main";
+          x.style.variantStyle = "up";
         }
-      });
+      }
+      return x;
+    });
+    return new Atom(__spreadProps(__spreadValues({}, options), {
+      type: "mop",
+      body,
+      isFunction: true,
+      limits: options.command === "\\operatorname" ? "adjacent" : "over-under"
+    }));
+  },
+  render: (atom, context) => {
+    var _a3;
+    let base = Atom.createBox(context, atom.body);
+    if (atom.superscript || atom.subscript) {
+      const limits = (_a3 = atom.subsupPlacement) != null ? _a3 : "auto";
+      base = limits === "over-under" || limits === "auto" && context.isDisplayStyle ? atom.attachLimits(context, { base }) : atom.attachSupsub(context, { base });
     }
-    return result;
+    return new Box(atom.bind(context, base), {
+      type: "op",
+      isSelected: atom.isSelected,
+      classes: "op-group"
+    });
+  },
+  serialize: (atom, options) => {
+    const result = [latexCommand(atom.command, atom.bodyToLatex(options))];
+    if (atom.explicitSubsupPlacement) {
+      if (atom.subsupPlacement === "over-under")
+        result.push("\\limits");
+      if (atom.subsupPlacement === "adjacent")
+        result.push("\\nolimits");
+      if (atom.subsupPlacement === "auto")
+        result.push("\\displaylimits");
+    }
+    result.push(atom.supsubToLatex(options));
+    return joinLatex(result);
   }
 });
-defineFunction("unicode", "{charcode:value}", {
-  createAtom: (command, args, style) => new Atom({ command, args, style }),
+defineFunction(["char", "unicode"], "{charcode:value}", {
+  createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), { type: options.mode === "text" ? "text" : "mord" })),
   serialize: (atom) => {
     var _a3;
-    return `\\unicode${serializeLatexValue(
+    return `${atom.command}${serializeLatexValue(
       (_a3 = atom.args[0]) != null ? _a3 : { number: 10067, base: "hexadecimal" }
     )}`;
   },
@@ -30003,50 +31740,96 @@ defineFunction("unicode", "{charcode:value}", {
   }
 });
 defineFunction("rule", "[raise:value]{width:value}{thickness:value}", {
-  createAtom: (name, args, style) => {
+  createAtom: (options) => new Atom(options),
+  render: (atom, context) => {
     var _a3, _b3, _c2;
-    return new RuleAtom(name, {
-      shift: (_a3 = args[0]) != null ? _a3 : { dimension: 0 },
-      width: (_b3 = args[1]) != null ? _b3 : { dimension: 1, unit: "em" },
-      height: (_c2 = args[2]) != null ? _c2 : { dimension: 1, unit: "em" },
-      style
+    const ctx = new Context(
+      { parent: context, mathstyle: "textstyle" },
+      atom.style
+    );
+    const shift = ctx.toEm((_a3 = atom.args[0]) != null ? _a3 : { dimension: 0 });
+    const width = ctx.toEm((_b3 = atom.args[1]) != null ? _b3 : { dimension: 10 });
+    const height = ctx.toEm((_c2 = atom.args[2]) != null ? _c2 : { dimension: 10 });
+    const result = new Box(null, {
+      classes: "rule",
+      type: "ord",
+      width,
+      height: height + shift,
+      depth: -shift
     });
+    result.setStyle("border-right-width", width, "em");
+    result.setStyle("border-top-width", height, "em");
+    result.setStyle("border-color", atom.style.color);
+    result.setStyle("vertical-align", shift, "em");
+    if (atom.isSelected)
+      result.setStyle("opacity", "50%");
+    atom.bind(ctx, result);
+    if (atom.caret)
+      result.caret = atom.caret;
+    return result.wrap(context);
+  },
+  serialize: (atom) => `\\rule${atom.args[0] ? `[${serializeLatexValue(atom.args[0])}]` : ""}{${serializeLatexValue(atom.args[1])}}{${serializeLatexValue(
+    atom.args[2]
+  )}}`
+});
+defineFunction(["overline", "underline"], "{:auto}", {
+  createAtom: (options) => new Atom(options),
+  render: (atom, parentContext) => {
+    const position = atom.command.substring(1);
+    const context = new Context(
+      { parent: parentContext, mathstyle: "cramp" },
+      atom.style
+    );
+    const inner = Atom.createBox(context, atom.body);
+    if (!inner)
+      return null;
+    const ruleWidth = context.metrics.defaultRuleThickness / context.scalingFactor;
+    const line = new Box(null, { classes: position + "-line" });
+    line.height = ruleWidth;
+    line.maxFontSize = ruleWidth * 1.125 * context.scalingFactor;
+    let stack;
+    if (position === "overline") {
+      stack = new VBox({
+        shift: 0,
+        children: [{ box: inner }, 3 * ruleWidth, { box: line }, ruleWidth]
+      });
+    } else {
+      stack = new VBox({
+        top: inner.height,
+        children: [ruleWidth, { box: line }, 3 * ruleWidth, { box: inner }]
+      });
+    }
+    if (atom.caret)
+      stack.caret = atom.caret;
+    return new Box(stack, { classes: position, type: "ignore" });
   }
 });
-defineFunction("overline", "{:auto}", {
-  createAtom: (name, args, style) => new LineAtom(name, argAtoms(args[0]), {
-    position: "overline",
-    style
-  })
-});
-defineFunction("underline", "{:auto}", {
-  createAtom: (name, args, style) => new LineAtom(name, argAtoms(args[0]), {
-    position: "underline",
-    style
-  })
-});
-defineFunction("overset", "{above:auto}{base:auto}", {
-  createAtom: (name, args, style) => new OverunderAtom(name, {
-    above: argAtoms(args[0]),
-    body: argAtoms(args[1]),
-    skipBoundary: false,
-    style,
-    boxType: atomsBoxType(argAtoms(args[1]))
-  }),
+defineFunction("overset", "{:auto}{base:auto}", {
+  createAtom: (options) => {
+    const body = argAtoms(options.args[1]);
+    return new OverunderAtom(__spreadProps(__spreadValues({}, options), {
+      above: argAtoms(options.args[0]),
+      body,
+      skipBoundary: false,
+      boxType: atomsBoxType(body)
+    }));
+  },
   serialize: (atom, options) => latexCommand(
     atom.command,
     atom.aboveToLatex(options),
     atom.bodyToLatex(options)
   )
 });
-defineFunction("underset", "{below:auto}{base:auto}", {
-  createAtom: (name, args, style) => new OverunderAtom(name, {
-    below: argAtoms(args[0]),
-    body: argAtoms(args[1]),
-    skipBoundary: false,
-    style,
-    boxType: atomsBoxType(argAtoms(args[1]))
-  }),
+defineFunction("underset", "{:auto}{base:auto}", {
+  createAtom: (options) => {
+    const body = argAtoms(options.args[1]);
+    return new OverunderAtom(__spreadProps(__spreadValues({}, options), {
+      below: argAtoms(options.args[0]),
+      body,
+      skipBoundary: false,
+      boxType: atomsBoxType(body)
+    }));
+  },
   serialize: (atom, options) => latexCommand(
     atom.command,
     atom.belowToLatex(options),
@@ -30054,17 +31837,19 @@ defineFunction("underset", "{below:auto}{base:auto}", {
   )
 });
 defineFunction("overunderset", "{above:auto}{below:auto}{base:auto}", {
-  createAtom: (name, args, style) => new OverunderAtom(name, {
-    above: argAtoms(args[0]),
-    below: argAtoms(args[1]),
-    body: argAtoms(args[2]),
-    skipBoundary: false,
-    style,
-    boxType: atomsBoxType(argAtoms(args[2]))
-  }),
+  createAtom: (options) => {
+    const body = argAtoms(options.args[2]);
+    return new OverunderAtom(__spreadProps(__spreadValues({}, options), {
+      above: argAtoms(options.args[0]),
+      below: argAtoms(options.args[1]),
+      body,
+      skipBoundary: false,
+      boxType: atomsBoxType(body)
+    }));
+  },
   serialize: (atom, options) => latexCommand(
     atom.command,
-    atom.aboveToLatex(options),
+    atom.belowToLatex(options),
     atom.bodyToLatex(options)
   )
 });
@@ -30072,14 +31857,13 @@ defineFunction(
   ["stackrel", "stackbin"],
   "[below:auto]{above:auto}{base:auto}",
   {
-    createAtom: (name, args, style) => new OverunderAtom(name, {
-      body: argAtoms(args[2]),
-      above: argAtoms(args[1]),
-      below: argAtoms(args[0]),
+    createAtom: (options) => new OverunderAtom(__spreadProps(__spreadValues({}, options), {
+      body: argAtoms(options.args[2]),
+      above: argAtoms(options.args[1]),
+      below: argAtoms(options.args[0]),
       skipBoundary: false,
-      style,
-      boxType: name === "\\stackrel" ? "rel" : "bin"
-    }),
+      boxType: options.command === "\\stackrel" ? "rel" : "bin"
+    })),
     serialize: (atom, options) => latexCommand(
       atom.command,
       atom.aboveToLatex(options),
@@ -30088,56 +31872,48 @@ defineFunction(
   }
 );
 defineFunction("smash", "[:string]{:auto}", {
-  createAtom: (name, args, style) => {
+  createAtom: (options) => {
     var _a3, _b3, _c2, _d2;
-    return new PhantomAtom(name, argAtoms(args[1]), {
-      smashHeight: (_b3 = (_a3 = args[0]) == null ? void 0 : _a3.includes("t")) != null ? _b3 : true,
-      smashDepth: (_d2 = (_c2 = args[0]) == null ? void 0 : _c2.includes("b")) != null ? _d2 : true,
-      style
-    });
+    return new PhantomAtom(__spreadProps(__spreadValues({}, options), {
+      body: argAtoms(options.args[1]),
+      smashHeight: (_b3 = (_a3 = options.args[0]) == null ? void 0 : _a3.includes("t")) != null ? _b3 : true,
+      smashDepth: (_d2 = (_c2 = options.args[0]) == null ? void 0 : _c2.includes("b")) != null ? _d2 : true
+    }));
   }
 });
 defineFunction(["vphantom"], "{:auto}", {
-  createAtom: (name, args, style) => new PhantomAtom(name, argAtoms(args[0]), {
+  createAtom: (options) => new PhantomAtom(__spreadProps(__spreadValues({}, options), {
+    body: argAtoms(options.args[0]),
     isInvisible: true,
-    smashWidth: true,
-    style
-  })
+    smashWidth: true
+  }))
 });
 defineFunction(["hphantom"], "{:auto}", {
-  createAtom: (name, args, style) => new PhantomAtom(name, argAtoms(args[0]), {
+  createAtom: (options) => new PhantomAtom(__spreadProps(__spreadValues({}, options), {
+    body: argAtoms(options.args[0]),
     isInvisible: true,
     smashHeight: true,
-    smashDepth: true,
-    style
-  })
+    smashDepth: true
+  }))
 });
 defineFunction(["phantom"], "{:auto}", {
-  createAtom: (name, args, style) => new PhantomAtom(name, argAtoms(args[0]), {
-    isInvisible: true,
-    style
-  })
+  createAtom: (options) => new PhantomAtom(__spreadProps(__spreadValues({}, options), {
+    body: argAtoms(options.args[0]),
+    isInvisible: true
+  }))
 });
 defineFunction("not", "{:math}", {
-  createAtom: (command, args, style) => {
-    const arg = argAtoms(args[0]);
-    if (args.length < 1 || args[0] === null || arg.length === 0) {
-      return new Atom({
-        type: "mrel",
-        command,
-        args,
-        style,
-        value: "\uE020"
-      });
-    }
-    const result = new Atom({
-      command,
-      body: [new OverlapAtom("", "\uE020", { align: "right", style }), ...arg],
-      args,
-      style,
+  createAtom: (options) => {
+    const body = argAtoms(options.args[0]);
+    if (body.length === 0)
+      return new Atom(__spreadProps(__spreadValues({}, options), { type: "mrel", value: "\uE020" }));
+    return new Atom(__spreadProps(__spreadValues({}, options), {
+      body: [
+        new OverlapAtom(__spreadProps(__spreadValues({}, options), { body: "\uE020", align: "right" })),
+        ...body
+      ],
       captureSelection: true
-    });
-    return result;
+    }));
   },
   serialize: (atom, options) => {
     const arg = atom.args[0];
@@ -30159,54 +31935,96 @@ defineFunction("not", "{:math}", {
   }
 });
 defineFunction(["ne", "neq"], "", {
-  createAtom: (command, _args, style) => new Atom({
+  createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), {
     type: "mrel",
     body: [
-      new OverlapAtom("", "\uE020", {
+      new OverlapAtom(__spreadProps(__spreadValues({}, options), {
+        body: "\uE020",
         align: "right",
-        style,
         boxType: "rel"
-      }),
-      new Atom({ style, value: "=" })
+      })),
+      new Atom(__spreadProps(__spreadValues({}, options), { value: "=" }))
     ],
-    captureSelection: true,
-    command,
-    style
-  }),
+    captureSelection: true
+  })),
   serialize: (atom) => atom.command
 });
 defineFunction("rlap", "{:auto}", {
-  createAtom: (name, args, style) => new OverlapAtom(name, argAtoms(args[0]), {
-    align: "right",
-    style
-  })
+  createAtom: (options) => new OverlapAtom(__spreadProps(__spreadValues({}, options), {
+    body: argAtoms(options.args[0]),
+    align: "right"
+  }))
 });
 defineFunction("llap", "{:auto}", {
-  createAtom: (name, args, style) => new OverlapAtom(name, argAtoms(args[0]), { style })
+  createAtom: (options) => new OverlapAtom(__spreadProps(__spreadValues({}, options), {
+    body: argAtoms(options.args[0]),
+    align: "left"
+  }))
 });
-defineFunction("mathllap", "{:auto}", {
-  createAtom: (name, args, style) => new OverlapAtom(name, argAtoms(args[0]), { style })
+defineFunction("mathrlap", "{:math}", {
+  createAtom: (options) => new OverlapAtom(__spreadProps(__spreadValues({}, options), {
+    body: argAtoms(options.args[0]),
+    align: "left"
+  }))
 });
-defineFunction("mathrlap", "{:auto}", {
-  createAtom: (name, args, style) => new OverlapAtom(name, argAtoms(args[0]), {
-    align: "right",
-    style
-  })
+defineFunction("mathllap", "{:math}", {
+  createAtom: (options) => new OverlapAtom(__spreadProps(__spreadValues({}, options), {
+    body: argAtoms(options.args[0]),
+    align: "left"
+  }))
 });
 defineFunction("raisebox", "{:value}{:text}", {
-  createAtom: (name, args, style) => {
+  createAtom: (options) => {
     var _a3;
-    return new BoxAtom(name, argAtoms(args[1]), {
+    return new BoxAtom(__spreadProps(__spreadValues({}, options), {
+      body: argAtoms(options.args[1]),
       padding: { dimension: 0 },
-      raise: (_a3 = args[0]) != null ? _a3 : { dimension: 0 },
-      style
-    });
+      offset: (_a3 = options.args[0]) != null ? _a3 : { dimension: 0 }
+    }));
   },
   serialize: (atom, options) => {
     var _a3;
     return latexCommand(
       "\\raisebox",
-      (_a3 = serializeLatexValue(atom.raise)) != null ? _a3 : "0pt",
+      (_a3 = serializeLatexValue(atom.offset)) != null ? _a3 : "0pt",
+      atom.bodyToLatex(options)
+    );
+  }
+});
+defineFunction("raise", "{:value}{:auto}", {
+  createAtom: (options) => {
+    var _a3;
+    return new BoxAtom(__spreadProps(__spreadValues({}, options), {
+      body: argAtoms(options.args[1]),
+      padding: { dimension: 0 },
+      offset: (_a3 = options.args[0]) != null ? _a3 : { dimension: 0 }
+    }));
+  },
+  serialize: (atom, options) => {
+    var _a3;
+    return latexCommand(
+      "\\raise",
+      (_a3 = serializeLatexValue(atom.offset)) != null ? _a3 : "0pt",
+      atom.bodyToLatex(options)
+    );
+  }
+});
+defineFunction("lower", "{:value}{:auto}", {
+  createAtom: (options) => {
+    var _a3;
+    return new BoxAtom(__spreadProps(__spreadValues({}, options), {
+      body: argAtoms(options.args[1]),
+      padding: { dimension: 0 },
+      offset: (_a3 = multiplyLatexValue(options.args[0], -1)) != null ? _a3 : { dimension: 0 }
+    }));
+  },
+  serialize: (atom, options) => {
+    var _a3, _b3;
+    return latexCommand(
+      "\\lower",
+      (_b3 = serializeLatexValue(
+        multiplyLatexValue((_a3 = atom.offset) != null ? _a3 : { dimension: 0 }, -1)
+      )) != null ? _b3 : "0pt",
       atom.bodyToLatex(options)
     );
   }
@@ -30334,7 +32152,7 @@ newSymbols([
   ["\\rmoustache", 9137, "mclose"]
   // defineSymbol('\\ne', 0x2260, 'mrel'],
   // defineSymbol('\\neq', 0x2260, 'mrel'],
-  // DefineSymbol( '\\longequal', 0xF7D9,  'mrel',  MAIN],   // NOTE: Not TeX
+  // defineSymbol( '\\longequal', 0xF7D9,  'mrel',  MAIN],   // NOTE: Not TeX
 ]);
 newSymbols(
   [
@@ -30779,10 +32597,10 @@ newSymbols(
   "space"
 );
 defineFunction(["!", ",", ":", ";", "enskip", "enspace", "quad", "qquad"], "", {
-  createAtom: (command, _args, style) => new SpacingAtom(command, style)
+  createAtom: (options) => new SpacingAtom(options)
 });
 defineFunction("space", "", {
-  createAtom: (_command, _args, style) => new SpacingAtom("space", style)
+  createAtom: (options) => new SpacingAtom(options)
 });
 newSymbols(
   [
@@ -31078,8 +32896,7 @@ function validateStyle(mathfield, style) {
 function selectGroup(model) {
   var _a3, _b3, _c2, _d2, _e, _f;
   if (getMode(model, model.position) === "text") {
-    let start = Math.min(model.anchor, model.position);
-    let end = Math.max(model.anchor, model.position);
+    let [start, end] = range(model.selection);
     let done = false;
     while (!done && start > 0) {
       const atom = model.at(start);
@@ -31106,8 +32923,7 @@ function selectGroup(model) {
   } else {
     const atom = model.at(model.position);
     if (atom.isDigit()) {
-      let start = Math.min(model.anchor, model.position);
-      let end = Math.max(model.anchor, model.position);
+      let [start, end] = range(model.selection);
       while ((_a3 = model.at(start)) == null ? void 0 : _a3.isDigit())
         start -= 1;
       while ((_b3 = model.at(end)) == null ? void 0 : _b3.isDigit())
@@ -31115,8 +32931,7 @@ function selectGroup(model) {
       model.setSelection(start, end - 1);
     } else {
       if (atom.style.variant || atom.style.variantStyle) {
-        let start = Math.min(model.anchor, model.position);
-        let end = Math.max(model.anchor, model.position);
+        let [start, end] = range(model.selection);
         let x = (_c2 = model.at(start)) == null ? void 0 : _c2.style;
         while (x && x.variant === atom.style.variant && x.variantStyle === atom.style.variantStyle) {
           start -= 1;
@@ -31453,6 +33268,347 @@ function offsetFromPoint(mathfield, x, y, options) {
   return result;
 }
 
+// src/editor-mathfield/mode-editor-math.ts
+var MathModeEditor = class extends ModeEditor {
+  constructor() {
+    super("math");
+  }
+  onPaste(mathfield, data) {
+    if (!data)
+      return false;
+    if (!contentWillChange(mathfield.model, {
+      data: typeof data === "string" ? data : null,
+      dataTransfer: typeof data === "string" ? null : data,
+      inputType: "insertFromPaste"
+    }))
+      return false;
+    let text = "";
+    let format = "auto";
+    let json = typeof data !== "string" ? data.getData("application/json+mathlive") : "";
+    if (json) {
+      try {
+        const atomJson = JSON.parse(json);
+        if (atomJson && Array.isArray(atomJson)) {
+          mathfield.snapshot();
+          const atoms = fromJson(atomJson);
+          const { model } = mathfield;
+          if (!model.selectionIsCollapsed)
+            model.deleteAtoms(range(model.selection));
+          const cursor = model.at(model.position);
+          if (cursor.parent instanceof ArrayAtom) {
+            console.assert(cursor.parentBranch !== void 0);
+            const columns = [];
+            let buffer = [];
+            if (atoms[0].type === "first")
+              atoms.shift();
+            if (atoms[atoms.length - 1].type === "first")
+              atoms.pop();
+            for (const atom of atoms) {
+              if (atom.type === "first" && buffer.length > 0) {
+                columns.push(buffer);
+                buffer = [atom];
+              } else
+                buffer.push(atom);
+            }
+            if (buffer.length > 0)
+              columns.push(buffer);
+            let currentRow = Number(cursor.parentBranch[0]);
+            let currentColumn = Number(cursor.parentBranch[1]);
+            const maxColumns = cursor.parent.maxColumns;
+            while (cursor.parent.colCount - currentColumn < columns.length && cursor.parent.colCount < maxColumns)
+              cursor.parent.addColumn();
+            cursor.parent.addChildrenAfter(columns[0], cursor);
+            for (let i = 1; i < columns.length; i++) {
+              currentColumn++;
+              if (currentColumn >= maxColumns) {
+                currentColumn = 0;
+                cursor.parent.addRowAfter(currentRow);
+                currentRow++;
+              }
+              cursor.parent.setCell(currentRow, currentColumn, columns[i]);
+            }
+          } else {
+            cursor.parent.addChildrenAfter(
+              atoms.filter((a) => a.type !== "first"),
+              cursor
+            );
+          }
+          model.position = model.offsetOf(atoms[atoms.length - 1]);
+          contentDidChange(model, { inputType: "insertFromPaste" });
+          requestUpdate(mathfield);
+          return true;
+        }
+      } catch (e) {
+      }
+    }
+    json = typeof data !== "string" ? data.getData("application/json") : "";
+    if (json && window.MathfieldElement.computeEngine) {
+      try {
+        const expr = JSON.parse(json);
+        if (typeof expr === "object" && "latex" in expr && expr.latex)
+          text = expr.latex;
+        if (!text) {
+          const box = window.MathfieldElement.computeEngine.box(expr);
+          if (box && !box.has("Error"))
+            text = box.latex;
+        }
+        if (!text)
+          format = "latex";
+      } catch (e) {
+      }
+    }
+    if (!text && typeof data !== "string") {
+      text = data.getData("application/x-latex");
+      if (text)
+        format = "latex";
+    }
+    if (!text)
+      text = typeof data === "string" ? data : data.getData("text/plain");
+    if (text) {
+      let wasLatex;
+      [wasLatex, text] = trimModeShiftCommand(text);
+      if (format === "auto" && wasLatex)
+        format = "latex";
+      mathfield.stopCoalescingUndo();
+      mathfield.stopRecording();
+      if (this.insert(mathfield.model, text, { format })) {
+        mathfield.startRecording();
+        mathfield.snapshot("paste");
+        requestUpdate(mathfield);
+      }
+      mathfield.startRecording();
+      return true;
+    }
+    return false;
+  }
+  insert(model, input, options) {
+    var _a3, _b3;
+    const data = typeof input === "string" ? input : (_b3 = (_a3 = window.MathfieldElement.computeEngine) == null ? void 0 : _a3.box(input).latex) != null ? _b3 : "";
+    if (!options.silenceNotifications && !contentWillChange(model, { data, inputType: "insertText" }))
+      return false;
+    if (!options.insertionMode)
+      options.insertionMode = "replaceSelection";
+    if (!options.selectionMode)
+      options.selectionMode = "placeholder";
+    if (!options.format)
+      options.format = "auto";
+    const { silenceNotifications } = model;
+    if (options.silenceNotifications)
+      model.silenceNotifications = true;
+    const contentWasChanging = model.silenceNotifications;
+    model.silenceNotifications = true;
+    const args = {};
+    args[0] = options.insertionMode === "replaceAll" ? "" : model.getValue(model.selection, "latex-unstyled");
+    args["?"] = "\\placeholder{}";
+    args["@"] = args["?"];
+    if (options.insertionMode === "replaceSelection" && !model.selectionIsCollapsed)
+      model.deleteAtoms(range(model.selection));
+    else if (options.insertionMode === "replaceAll") {
+      model.root.setChildren([], "body");
+      model.position = 0;
+    } else if (options.insertionMode === "insertBefore")
+      model.collapseSelection("backward");
+    else if (options.insertionMode === "insertAfter")
+      model.collapseSelection("forward");
+    if (!model.at(model.position).isLastSibling && model.at(model.position + 1).type === "placeholder") {
+      model.deleteAtoms([model.position, model.position + 1]);
+    } else if (model.at(model.position).type === "placeholder") {
+      model.deleteAtoms([model.position - 1, model.position]);
+    }
+    if (args[0]) {
+      args["@"] = args[0];
+    } else if (typeof input === "string" && /(^|[^\\])#@/.test(input)) {
+      const offset = getImplicitArgOffset(model);
+      if (offset >= 0) {
+        args["@"] = model.getValue(offset, model.position, "latex-unstyled");
+        model.deleteAtoms([offset, model.position]);
+      }
+    }
+    if (!args[0])
+      args[0] = args["?"];
+    let usedArg = false;
+    const argFunction = (arg) => {
+      usedArg = true;
+      return args[arg];
+    };
+    const [format, newAtoms] = convertStringToAtoms(
+      model,
+      input,
+      argFunction,
+      options
+    );
+    if (!newAtoms)
+      return false;
+    const { parent } = model.at(model.position);
+    if (format !== "latex" && model.mathfield.options.removeExtraneousParentheses && parent instanceof LeftRightAtom && parent.leftDelim === "(" && parent.hasEmptyBranch("body") && newAtoms.length === 1 && newAtoms[0].type === "genfrac") {
+      const newParent = parent.parent;
+      const branch = parent.parentBranch;
+      newParent.removeChild(parent);
+      newParent.setChildren(newAtoms, branch);
+    }
+    const hadEmptyBody = parent.hasEmptyBranch("body");
+    const cursor = model.at(model.position);
+    cursor.parent.addChildrenAfter(newAtoms, cursor);
+    if (format === "latex" && typeof input === "string") {
+      if (!parent.parent && hadEmptyBody && !usedArg)
+        parent.verbatimLatex = input;
+    }
+    model.silenceNotifications = contentWasChanging;
+    const lastNewAtom = newAtoms[newAtoms.length - 1];
+    if (options.selectionMode === "placeholder") {
+      const placeholder = newAtoms.flatMap((x) => [x, ...x.children]).find((x) => x.type === "placeholder");
+      if (placeholder) {
+        const placeholderOffset = model.offsetOf(placeholder);
+        model.setSelection(placeholderOffset - 1, placeholderOffset);
+        model.announce("move");
+      } else if (lastNewAtom) {
+        model.position = model.offsetOf(lastNewAtom);
+      }
+    } else if (options.selectionMode === "before") {
+    } else if (options.selectionMode === "after") {
+      if (lastNewAtom)
+        model.position = model.offsetOf(lastNewAtom);
+    } else if (options.selectionMode === "item")
+      model.setSelection(model.anchor, model.offsetOf(lastNewAtom));
+    contentDidChange(model, { data, inputType: "insertText" });
+    model.silenceNotifications = silenceNotifications;
+    return true;
+  }
+};
+function convertStringToAtoms(model, s, args, options) {
+  var _a3;
+  let format = void 0;
+  let result = [];
+  if (typeof s !== "string" || options.format === "math-json") {
+    const ce = window.MathfieldElement.computeEngine;
+    if (!ce)
+      return ["math-json", []];
+    [format, s] = ["latex", ce.box(s).latex];
+    result = parseLatex(s, { context: model.mathfield.context });
+  } else if (typeof s === "string" && options.format === "ascii-math") {
+    [format, s] = parseMathString(s, {
+      format: "ascii-math",
+      inlineShortcuts: model.mathfield.options.inlineShortcuts
+    });
+    result = parseLatex(s, { context: model.mathfield.context });
+    if (format !== "latex" && model.mathfield.options.removeExtraneousParentheses)
+      simplifyParen(result);
+  } else if (options.format === "auto" || ((_a3 = options.format) == null ? void 0 : _a3.startsWith("latex"))) {
+    if (options.format === "auto") {
+      [format, s] = parseMathString(s, {
+        format: "auto",
+        inlineShortcuts: model.mathfield.options.inlineShortcuts
+      });
+    }
+    if (options.format === "latex")
+      [, s] = trimModeShiftCommand(s);
+    result = parseLatex(s, {
+      context: model.mathfield.context,
+      args
+    });
+    if (options.format !== "latex" && model.mathfield.options.removeExtraneousParentheses)
+      simplifyParen(result);
+  }
+  applyStyleToUnstyledAtoms(result, options.style);
+  return [format != null ? format : "latex", result];
+}
+function removeParen(atoms) {
+  if (!atoms)
+    return null;
+  console.assert(atoms[0].type === "first");
+  if (atoms.length > 1)
+    return null;
+  const atom = atoms[0];
+  if (atom instanceof LeftRightAtom && atom.leftDelim === "(" && atom.rightDelim === ")")
+    return atom.removeBranch("body");
+  return null;
+}
+function simplifyParen(atoms) {
+  if (!atoms)
+    return;
+  for (let i = 0; atoms[i]; i++) {
+    const atom = atoms[i];
+    if (atom instanceof LeftRightAtom && atom.leftDelim === "(") {
+      let genFracCount = 0;
+      let genFracIndex = 0;
+      let nonGenFracCount = 0;
+      for (let j = 0; atom.body[j]; j++) {
+        if (atom.body[j].type === "genfrac") {
+          genFracCount++;
+          genFracIndex = j;
+        }
+        nonGenFracCount++;
+      }
+      if (nonGenFracCount === 0 && genFracCount === 1) {
+        atoms[i] = atom.body[genFracIndex];
+      }
+    }
+  }
+  for (const atom of atoms) {
+    for (const branch of atom.branches) {
+      if (!atom.hasEmptyBranch(branch)) {
+        simplifyParen(atom.branch(branch));
+        const newChildren = removeParen(atom.branch(branch));
+        if (newChildren)
+          atom.setChildren(newChildren, branch);
+      }
+    }
+    if (atom instanceof ArrayAtom)
+      for (const x of atom.cells)
+        simplifyParen(x);
+  }
+}
+function getImplicitArgOffset(model) {
+  let atom = model.at(model.position);
+  if (atom.mode === "text") {
+    while (!atom.isFirstSibling && atom.mode === "text")
+      atom = atom.leftSibling;
+    return model.offsetOf(atom);
+  }
+  const atomAtCursor = atom;
+  let afterDelim = false;
+  if (atom.type === "mclose") {
+    const delim = LEFT_DELIM[atom.value];
+    while (!atom.isFirstSibling && !(atom.type === "mopen" && atom.value === delim))
+      atom = atom.leftSibling;
+    if (!atom.isFirstSibling)
+      atom = atom.leftSibling;
+    afterDelim = true;
+  } else if (atom.type === "leftright") {
+    atom = atom.leftSibling;
+    afterDelim = true;
+  }
+  if (afterDelim) {
+    while (!atom.isFirstSibling && (atom.isFunction || isImplicitArg(atom)))
+      atom = atom.leftSibling;
+  } else {
+    const delimiterStack = [];
+    while (!atom.isFirstSibling && (isImplicitArg(atom) || delimiterStack.length > 0)) {
+      if (atom.type === "mclose")
+        delimiterStack.unshift(atom.value);
+      if (atom.type === "mopen" && delimiterStack.length > 0 && atom.value === LEFT_DELIM[delimiterStack[0]])
+        delimiterStack.shift();
+      atom = atom.leftSibling;
+    }
+  }
+  if (atomAtCursor === atom)
+    return -1;
+  return model.offsetOf(atom);
+}
+function isImplicitArg(atom) {
+  if (atom.isDigit())
+    return true;
+  if (atom.type && /^(mord|surd|msubsup|leftright|mop|mclose)$/.test(atom.type)) {
+    if (atom.isExtensibleSymbol)
+      return false;
+    if (atom.isFunction)
+      return false;
+    return true;
+  }
+  return false;
+}
+new MathModeEditor();
+
 // src/editor-mathfield/mode-editor-text.ts
 var TextModeEditor = class extends ModeEditor {
   constructor() {
@@ -31534,9 +33690,6 @@ function convertStringToAtoms2(s, context) {
   return parseLatex(s, { context, parseMode: "text" });
 }
 new TextModeEditor();
-
-// css/environment-popover.less
-var environment_popover_default = "#mathlive-environment-popover.is-visible {\n  visibility: visible;\n}\n#mathlive-environment-popover {\n  --private-panel-height: var(--environment-panel-height, 70px);\n  position: absolute;\n  width: calc(var(--private-panel-height) * 2);\n  height: var(--private-panel-height);\n  border-radius: 4px;\n  border: 1.5px solid var(--keyboard-accent-color, #0c75d8);\n  background-color: var(--variant-panel-background, #fff);\n  box-shadow: 0 0 30px 0 var(--environment-shadow, rgba(0, 0, 0, 0.4));\n  pointer-events: all;\n  visibility: hidden;\n}\n#mathlive-environment-popover .MLEP__array-buttons {\n  height: calc(var(--private-panel-height) * 5/4);\n  width: calc(var(--private-panel-height) * 5/4);\n  margin-left: calc(0px - var(--private-panel-height) * 0.16);\n  margin-top: calc(0px - var(--private-panel-height) * 0.19);\n}\n#mathlive-environment-popover .MLEP__array-buttons .font {\n  fill: white;\n}\n#mathlive-environment-popover .MLEP__array-buttons circle {\n  fill: #7f7f7f;\n  transition: fill 300ms;\n}\n#mathlive-environment-popover .MLEP__array-buttons .MLEP__array-insert-background {\n  fill-opacity: 1;\n  fill: var(--variant-panel-background, #fff);\n  stroke: var(--keyboard-accent-color, #0c75d8);\n  stroke-width: 3px;\n}\n#mathlive-environment-popover .MLEP__array-buttons line {\n  stroke: var(--keyboard-accent-color, #0c75d8);\n  stroke-opacity: 0;\n  stroke-width: 40;\n  pointer-events: none;\n  transition: stroke-opacity 300ms;\n  stroke-linecap: round;\n}\n#mathlive-environment-popover .MLEP__array-buttons g[data-command]:hover circle {\n  fill: var(--keyboard-accent-color, #0c75d8);\n}\n#mathlive-environment-popover .MLEP__array-buttons g[data-command]:hover line {\n  stroke-opacity: 1;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls {\n  height: 100%;\n  width: 50%;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options {\n  width: var(--private-panel-height);\n  height: var(--private-panel-height);\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: space-around;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg {\n  pointer-events: all;\n  margin-top: 2px;\n  width: calc(var(--private-panel-height) / 3 * 28 / 24);\n  height: calc(var(--private-panel-height) / 3 - 2px);\n  border-radius: calc(var(--private-panel-height) / 25);\n  background-color: var(--keycap-background, white);\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg:hover {\n  background-color: var(--keycap-background-hover, #f5f5f7);\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg path,\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg line {\n  stroke: var(--keycap-text, #e3e4e8);\n  stroke-width: 2;\n  stroke-linecap: round;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg rect,\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg path {\n  fill-opacity: 0;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg.active {\n  pointer-events: none;\n  background-color: var(--keycap-background-active, #f5f5f7);\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg.active path,\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg.active line {\n  stroke: var(--keyboard-accent-color, #0c75d8);\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg.active circle {\n  fill: var(--keyboard-accent-color, #0c75d8);\n}\n";
 
 // src/editor/environment-popover.ts
 var padding = 4;
@@ -31709,11 +33862,8 @@ function showEnvironmentPopover(mf) {
   let panel = document.getElementById("mathlive-environment-popover");
   if (!panel) {
     panel = getSharedElement("mathlive-environment-popover");
-    injectStylesheet(
-      "mathlive-environment-popover-stylesheet",
-      environment_popover_default
-    );
-    injectStylesheet("mathlive-core-stylesheet", core_default);
+    injectStylesheet("environment-popover");
+    injectStylesheet("core");
     panel.setAttribute("aria-hidden", "true");
   }
   let flexbox;
@@ -31783,7 +33933,7 @@ function showEnvironmentPopover(mf) {
   });
   const position = (_d2 = mf.field) == null ? void 0 : _d2.getBoundingClientRect();
   if (position) {
-    panel.style.top = `${position.top - panel.clientHeight - 15}px`;
+    panel.style.top = `${window.scrollY + (position.top - panel.clientHeight - 15)}px`;
     panel.style.left = `${position.left + 20}px`;
     panel.classList.add("is-visible");
   }
@@ -31796,10 +33946,10 @@ function disposeEnvironmentPopover() {
   if (!document.getElementById("mathlive-environment-popover"))
     return;
   releaseSharedElement("mathlive-environment-popover");
-  releaseStylesheet("mathlive-environment-popover-stylesheet");
-  releaseStylesheet("mathlive-core-stylesheet");
+  releaseStylesheet("environment-popover");
+  releaseStylesheet("core");
 }
-function updateEnvironmemtPopover(mf) {
+function updateEnvironmentPopover(mf) {
   if (!mf.hasFocus())
     return;
   let visible = false;
@@ -31885,11 +34035,13 @@ var MathfieldPrivate = class {
     markup.push("<span part=content class=ML__content>");
     markup.push(contentMarkup(this));
     markup.push("</span>");
-    markup.push(
-      `<div part=virtual-keyboard-toggle class=ML__virtual-keyboard-toggle role=button ${this.hasEditableContent ? "" : 'style="display:none;"'}data-ML__tooltip="${localize("tooltip.toggle virtual keyboard")}">`
-    );
-    markup.push(DEFAULT_KEYBOARD_TOGGLE_GLYPH);
-    markup.push("</div>");
+    if (window.mathVirtualKeyboard) {
+      markup.push(
+        `<div part=virtual-keyboard-toggle class=ML__virtual-keyboard-toggle role=button ${this.hasEditableContent ? "" : 'style="display:none;"'}data-ML__tooltip="${localize("tooltip.toggle virtual keyboard")}">`
+      );
+      markup.push(DEFAULT_KEYBOARD_TOGGLE_GLYPH);
+      markup.push("</div>");
+    }
     markup.push("</span>");
     markup.push("<span class=ML__sr-only>");
     markup.push(
@@ -31901,7 +34053,7 @@ var MathfieldPrivate = class {
     );
     if (!this.element.children) {
       console.error(
-        `%cMathLive 0.93.0: Something went wrong and the mathfield could not be created.%c
+        `%cMathLive 0.94.5: Something went wrong and the mathfield could not be created.%c
 If you are using Vue, this may be because you are using the runtime-only build of Vue. Make sure to include \`runtimeCompiler: true\` in your Vue configuration. There may a warning from Vue in the log above.`,
         "color:red;font-family:system-ui;font-size:1.2rem;font-weight:bold",
         "color:inherit;font-family:system-ui;font-size:inherit;font-weight:inherit"
@@ -31973,7 +34125,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
     window.mathVirtualKeyboard.connect();
     if (window.mathVirtualKeyboard.visible)
       window.mathVirtualKeyboard.update(makeProxy(this));
-    updateEnvironmemtPopover(this);
+    updateEnvironmentPopover(this);
   }
   disconnectFromVirtualKeyboard() {
     if (!this.connectedToVirtualKeyboard)
@@ -32096,7 +34248,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
       this._keybindings = keybindings;
       if (errors.length > 0) {
         console.error(
-          `MathLive 0.93.0: Invalid keybindings for current keyboard layout`,
+          `MathLive 0.94.5: Invalid keybindings for current keyboard layout`,
           errors
         );
       }
@@ -32114,7 +34266,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
       if (this.hasFocus() && window.mathVirtualKeyboard.visible)
         this.executeCommand("hideVirtualKeyboard");
     }
-    const content = this.model.root.serialize({
+    const content = Atom.serialize([this.model.root], {
       expandMacro: false,
       defaultMode: this.options.defaultMode
     });
@@ -32184,7 +34336,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
         break;
       case "virtual-keyboard-toggle":
         if (this.hasFocus())
-          updateEnvironmemtPopover(this);
+          updateEnvironmentPopover(this);
         break;
       case "resize":
         if (this.geometryChangeTimer)
@@ -32281,11 +34433,11 @@ If you are using Vue, this may be because you are using the runtime-only build o
     const ce = window.MathfieldElement.computeEngine;
     if (!ce) {
       console.error(
-        `MathLive 0.93.0:  no compute engine available. Make sure the Compute Engine library is loaded.`
+        `MathLive 0.94.5:  no compute engine available. Make sure the Compute Engine library is loaded.`
       );
       return null;
     }
-    return ce.box(ce.parse(this.model.getValue()));
+    return ce.box(ce.parse(this.model.getValue("latex-unstyled")));
   }
   /** Make sure the caret is visible within the matfield.
    * If using mathfield element, make sure the mathfield element is visible in
@@ -32553,14 +34705,14 @@ If you are using Vue, this may be because you are using the runtime-only build o
     );
     console.assert(
       prompt !== void 0,
-      `MathLive 0.93.0:  no prompts with matching ID found`
+      `MathLive 0.94.5:  no prompts with matching ID found`
     );
     return prompt;
   }
   getPromptValue(id, format) {
     const prompt = this.getPrompt(id);
     if (!prompt) {
-      console.error(`MathLive 0.93.0: unknown prompt ${id}`);
+      console.error(`MathLive 0.94.5: unknown prompt ${id}`);
       return "";
     }
     const first = this.model.offsetOf(prompt.firstChild);
@@ -32588,7 +34740,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
     if (value !== void 0) {
       const prompt = this.getPrompt(id);
       if (!prompt) {
-        console.error(`MathLive 0.93.0: unknown prompt ${id}`);
+        console.error(`MathLive 0.94.5: unknown prompt ${id}`);
         return;
       }
       const branchRange = this.model.getBranchRange(
@@ -32607,7 +34759,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
   setPromptState(id, state, locked) {
     const prompt = this.getPrompt(id);
     if (!prompt) {
-      console.error(`MathLive 0.93.0: unknown prompt ${id}`);
+      console.error(`MathLive 0.94.5: unknown prompt ${id}`);
       return;
     }
     if (state === "undefined")
@@ -32647,7 +34799,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
   getPromptState(id) {
     const prompt = this.getPrompt(id);
     if (!prompt) {
-      console.error(`MathLive 0.93.0: unknown prompt ${id}`);
+      console.error(`MathLive 0.94.5: unknown prompt ${id}`);
       return [void 0, true];
     }
     return [prompt.correctness, prompt.locked];
@@ -32741,7 +34893,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
     );
     if (window.mathVirtualKeyboard.visible)
       window.mathVirtualKeyboard.update(makeProxy(this));
-    updateEnvironmemtPopover(this);
+    updateEnvironmentPopover(this);
   }
   onContentWillChange(options) {
     var _a3, _b3, _c2;
@@ -32845,9 +34997,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
   }
   onCompositionEnd(composition) {
     removeComposition(this.model);
-    onInput(this, composition, {
-      simulateKeystroke: true
-    });
+    onInput(this, composition, { simulateKeystroke: true });
   }
   onCut(ev) {
     if (!this.isSelectionEditable) {
@@ -32882,7 +35032,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
   }
   onGeometryChange() {
     updateSuggestionPopoverPosition(this);
-    updateEnvironmemtPopover(this);
+    updateEnvironmentPopover(this);
   }
   onWheel(ev) {
     const wheelDelta = 5 * ev.deltaX;
@@ -32898,16 +35048,12 @@ If you are using Vue, this may be because you are using the runtime-only build o
     ev.stopPropagation();
   }
   getHTMLElement(atom) {
-    var _a3;
     let target = atom;
     while (!target.id && target.hasChildren)
       target = atom.children[0];
-    if (target.id) {
-      return (_a3 = this.fieldContent) == null ? void 0 : _a3.querySelector(
-        `[data-atom-id="${target.id}"]`
-      );
-    }
-    throw new TypeError("Could not get an ID from atom");
+    return this.fieldContent.querySelector(
+      `[data-atom-id="${target.id}"]`
+    );
   }
   get context() {
     var _a3, _b3;
@@ -33390,7 +35536,7 @@ function defaultReadAloudHook(element, text) {
     return;
   if (window.MathfieldElement.speechEngine !== "amazon") {
     console.error(
-      `MathLive 0.93.0: Use Amazon TTS Engine for synchronized highlighting`
+      `MathLive 0.94.5: Use Amazon TTS Engine for synchronized highlighting`
     );
     if (typeof window.MathfieldElement.speakHook === "function")
       window.MathfieldElement.speakHook(text);
@@ -33398,7 +35544,7 @@ function defaultReadAloudHook(element, text) {
   }
   if (!window.AWS) {
     console.error(
-      `MathLive 0.93.0: AWS SDK not loaded. See https://www.npmjs.com/package/aws-sdk`
+      `MathLive 0.94.5: AWS SDK not loaded. See https://www.npmjs.com/package/aws-sdk`
     );
     return;
   }
@@ -33416,7 +35562,7 @@ function defaultReadAloudHook(element, text) {
   polly.synthesizeSpeech(parameters, (err, data) => {
     if (err) {
       console.trace(
-        `MathLive 0.93.0: \`polly.synthesizeSpeech()\` error: ${err}`
+        `MathLive 0.94.5: \`polly.synthesizeSpeech()\` error: ${err}`
       );
       return;
     }
@@ -33438,7 +35584,7 @@ function defaultReadAloudHook(element, text) {
     polly.synthesizeSpeech(parameters, (err2, data2) => {
       if (err2) {
         console.trace(
-          `MathLive 0.93.0: \`polly.synthesizeSpeech("${text}") error:${err2}`
+          `MathLive 0.94.5: \`polly.synthesizeSpeech("${text}") error:${err2}`
         );
         return;
       }
@@ -33505,32 +35651,11 @@ function defaultReadAloudHook(element, text) {
   });
 }
 
-// css/mathfield.less
-var mathfield_default = "@keyframes ML__caret-blink {\n  0%,\n  100% {\n    opacity: 1;\n  }\n  50% {\n    opacity: 0;\n  }\n}\n.ML__caret:after {\n  content: '';\n  border: none;\n  border-radius: 2px;\n  border-right: 2px solid var(--caret-color, var(--ML__caret-color));\n  margin-right: -2px;\n  position: relative;\n  left: -1px;\n  animation: ML__caret-blink 1.05s step-end forwards infinite;\n}\n.ML__text-caret:after {\n  content: '';\n  border: none;\n  border-radius: 1px;\n  border-right: 1px solid var(--caret-color, var(--ML__caret-color));\n  margin-right: -1px;\n  position: relative;\n  left: 0;\n  animation: ML__caret-blink 1.05s step-end forwards infinite;\n}\n.ML__latex-caret:after {\n  content: '_';\n  border: none;\n  margin-right: 0;\n  margin-right: calc(-1ex - 2px);\n  position: relative;\n  color: var(--caret-color, var(--ML__caret-color));\n  animation: ML__caret-blink 1.05s step-end forwards infinite;\n}\n.ML__container {\n  display: inline-flex;\n  flex-flow: row;\n  justify-content: space-between;\n  align-items: flex-end;\n  min-height: 39px;\n  /* Need some room for the virtual keyboard toggle */\n  width: 100%;\n  /* Encourage browsers to consider allocating a hardware accelerated\n   layer for this element. */\n  isolation: isolate;\n  /* Prevent the browser from trying to interpret touch gestures in the field */\n  /* \"Disabling double-tap to zoom removes the need for browsers to\n        delay the generation of click events when the user taps the screen.\" */\n  touch-action: none;\n  --ML__selection-background-color: hsl(var(--hue, 212), 97%, 85%);\n  --ML__text-highlight-background-color: hsla(var(--hue, 212), 40%, 50%, 0.1);\n  --ML__contains-highlight-background-color: hsl(var(--hue, 212), 40%, 95%);\n  --ML__selection-color: currentColor;\n  --ML__caret-color: hsl(var(--hue, 212), 40%, 49%);\n  --ML__smart-fence-color: currentColor;\n  --ML__latex-color: var(--primary, hsl(var(--hue, 212), 40%, 50%));\n  --ML__correct-color: #10a000;\n  --ML__incorrect-color: #a01b00;\n  --ML__placeholder-color: hsl(var(--hue, 212), 40%, 49%);\n}\n/* This is the actual field content (formula) */\n.ML__content {\n  display: flex;\n  align-items: center;\n  align-self: center;\n  position: relative;\n  overflow: hidden;\n  padding: 2px 0 2px 1px;\n  width: 100%;\n}\n.ML__virtual-keyboard-toggle {\n  box-sizing: border-box;\n  display: flex;\n  align-self: center;\n  align-items: center;\n  flex-shrink: 0;\n  flex-direction: column;\n  justify-content: center;\n  width: 34px;\n  height: 34px;\n  padding: 0;\n  margin-right: 4px;\n  cursor: pointer;\n  /* Avoid some weird blinking with :hover */\n  border-radius: 8px;\n  border: 1px solid transparent;\n  transition: background 0.2s cubic-bezier(0.64, 0.09, 0.08, 1);\n  color: var(--primary, hsl(var(--hue, 212), 40%, 50%));\n  fill: currentColor;\n  background: transparent;\n}\n.ML__virtual-keyboard-toggle:hover {\n  background: hsla(0, 0%, 70%, 0.3);\n  color: #333;\n  fill: currentColor;\n}\n.ML__virtual-keyboard-toggle > span {\n  display: flex;\n  align-self: center;\n  align-items: center;\n}\n/* The invisible element used to capture keyboard events. We're just trying\n really hard to make sure it doesn't show. */\n.ML__keyboard-sink {\n  display: inline-block;\n  resize: none;\n  outline: none;\n  border: none;\n  /* Need these for Microsoft Edge */\n  position: fixed;\n  clip: rect(0 0 0 0);\n  /* Need this to prevent iOS Safari from auto-zooming */\n  font-size: 1em;\n  font-family: KaTeX_Main;\n}\n.ML__focused .ML__text {\n  background: var(--highlight-text, var(--ML__text-highlight-background-color));\n}\n/* When using smartFence, the anticipated closing fence is displayed\nwith this style */\n.ML__smart-fence__close {\n  opacity: var(--smart-fence-opacity, 0.5);\n  color: var(--smart-fence-color, var(--ML__smart-fence-color));\n}\n.ML__focused .ML__selection {\n  background: var(--selection-background-color-focused, var(--selection-background-color, var(--ML__selection-background-color))) !important;\n}\n.ML__focused .ML__selected,\n.ML__focused .ML__selected .ML__contains-caret,\n.ML__focused .ML__selected .ML__smart-fence__close,\n.ML__focused .ML__selected .ML__placeholder {\n  color: var(--selection-color-focused, var(--selection-color, var(--ML__selection-color))) !important;\n}\n.ML__selection {\n  box-sizing: border-box;\n  background: var(--selection-background-color, var(--ML__selection-background-color)) !important;\n}\n.ML__selected,\n.ML__selected .ML__contains-caret,\n.ML__selected .ML__smart-fence__close,\n.ML__selected .ML__placeholder {\n  color: var(--selection-color, var(--ML__selection-color));\n  opacity: 1;\n}\n.ML__contains-caret.ML__close,\n.ML__contains-caret.ML__open,\n.ML__contains-caret > .ML__close,\n.ML__contains-caret > .ML__open,\n.ML__contains-caret .ML__sqrt-sign,\n.ML__contains-caret .ML__sqrt-line {\n  color: var(--caret-color, var(--ML__caret-color));\n}\n.ML__contains-highlight {\n  background: var(--contains-highlight-backround-color, var(--ML__contains-highlight));\n  box-sizing: border-box;\n}\n.ML__latex {\n  font-family: 'IBM Plex Mono', 'Source Code Pro', Consolas, 'Roboto Mono', Menlo, 'Bitstream Vera Sans Mono', 'DejaVu Sans Mono', Monaco, Courier, monospace;\n  font-weight: 400;\n  color: var(--latex-color, var(--ML__latex-color));\n}\n.ML__suggestion {\n  opacity: 0.5;\n}\n.ML__virtual-keyboard-toggle.is-visible.is-pressed:hover {\n  background: hsl(var(--hue, 212), 25%, 35%);\n  color: #fafafa;\n  fill: currentColor;\n}\n.ML__virtual-keyboard-toggle:focus {\n  outline: none;\n  border-radius: 8px;\n  border: 2px solid var(--primary, hsl(var(--hue, 212), 40%, 50%));\n}\n.ML__virtual-keyboard-toggle.is-pressed,\n.ML__virtual-keyboard-toggle.is-active:hover,\n.ML__virtual-keyboard-toggle.is-active {\n  background: hsl(var(--hue, 212), 25%, 35%);\n  color: #fafafa;\n  fill: currentColor;\n}\n/* This class is used to implement the `\\mathtip` and `\\texttip` commands\n   For UI elements, see `[data-ML__tooltip]`\n*/\n.ML__tooltip-container {\n  position: relative;\n  transform: scale(0);\n}\n.ML__tooltip-container .ML__tooltip-content {\n  position: fixed;\n  display: inline-table;\n  visibility: hidden;\n  z-index: 2;\n  width: max-content;\n  max-width: 400px;\n  padding: 12px 12px;\n  border-radius: 8px;\n  background: #616161;\n  color: #fff;\n  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);\n  opacity: 0;\n  transition: opacity 0.15s cubic-bezier(0.4, 0, 1, 1);\n}\n.ML__tooltip-container .ML__tooltip-content .ML__text {\n  white-space: normal;\n}\n.ML__tooltip-container .ML__tooltip-content .ML__base {\n  display: contents;\n}\n.ML__tooltip-container:hover .ML__tooltip-content {\n  visibility: visible;\n  opacity: 1;\n  font-size: 0.75em;\n  transform: scale(1) translate(0, 3em);\n}\n/* Add an attribute 'data-ML__tooltip' to automatically show a\n   tooltip over a element on hover.\n   Use 'data-position=\"top\"' to place the tooltip above the\n   element rather than below.\n   Use 'data-delay' to delay the triggering of the tooltip.\n*/\n[data-ML__tooltip] {\n  position: relative;\n}\n[data-ML__tooltip][data-placement='top']::after {\n  top: inherit;\n  bottom: 100%;\n}\n[data-ML__tooltip]::after {\n  content: attr(data-ML__tooltip);\n  position: absolute;\n  display: none;\n  z-index: 2;\n  right: 110%;\n  left: calc(100% + 8px);\n  width: max-content;\n  max-width: 200px;\n  padding: 8px 8px;\n  border-radius: 2px;\n  background: #616161;\n  color: #fff;\n  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);\n  text-align: center;\n  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;\n  font-style: normal;\n  font-weight: 400;\n  font-size: 12px;\n  /* Phone */\n  opacity: 0;\n  transform: scale(0.5);\n  transition: all 0.15s cubic-bezier(0.4, 0, 1, 1);\n}\n@media only screen and (max-width: 767px) {\n  [data-ML__tooltip]::after {\n    padding: 8px 16px;\n    font-size: 16px;\n  }\n}\n:not(.tracking) [data-ML__tooltip]:hover {\n  position: relative;\n}\n:not(.tracking) [data-ML__tooltip]:hover::after {\n  visibility: visible;\n  display: inline-table;\n  opacity: 1;\n  transform: scale(1);\n}\n[data-ML__tooltip][data-delay]::after {\n  transition-delay: 0s;\n}\n[data-ML__tooltip][data-delay]:hover::after {\n  transition-delay: 1s;\n  /* attr(data-delay); Should work. But doesn't. */\n}\n";
-
 // src/public/mathfield-element.ts
 if (!isBrowser()) {
   console.error(
-    `MathLive 0.93.0: this version of the MathLive library is for use in the browser. A subset of the API is available on the server side in the "mathlive-ssr" library. If using server side rendering (with React for example) you may want to do a dynamic import of the MathLive library inside a \`useEffect()\` call.`
+    `MathLive 0.94.5: this version of the MathLive library is for use in the browser. A subset of the API is available on the server side in the "mathlive-ssr" library. If using server side rendering (with React for example) you may want to do a dynamic import of the MathLive library inside a \`useEffect()\` call.`
   );
-}
-var MATHFIELD_TEMPLATE = isBrowser() ? document.createElement("template") : null;
-if (MATHFIELD_TEMPLATE) {
-  MATHFIELD_TEMPLATE.innerHTML = `<style>
-  :host { display: inline-block; background-color: field; color: fieldtext; border-width: 1px; border-style: solid; border-color: #acacac; border-radius: 2px; padding:4px; pointer-events: none;}
-  :host([hidden]) { display: none; }
-  :host([disabled]), :host([disabled]:focus), :host([disabled]:focus-within) { outline: none; opacity:  .5; }
-  :host(:focus), :host(:focus-within) {
-    outline: Highlight auto 1px;    /* For Firefox */
-    outline: -webkit-focus-ring-color auto 1px;
-  }
-  :host([readonly]:focus), :host([readonly]:focus-within),
-  :host([read-only]:focus), :host([read-only]:focus-within) {
-    outline: none;
-  }
-  ${core_default}${mathfield_default}
-  </style>
-  <span style="pointer-events:auto"></span><slot style="display:none"></slot>`;
 }
 var gDeferredState = /* @__PURE__ */ new WeakMap();
 var AUDIO_FEEDBACK_VOLUME = 0.5;
@@ -33627,12 +35752,11 @@ var _MathfieldElement = class extends HTMLElement {
               `Option \`${key}\` cannot be used as a constructor option. Use ${DEPRECATED_OPTIONS[key]}`
             );
           }
-        } else
-          warnings.push(`Unexpected option \`${key}\``);
+        }
       }
       if (warnings.length > 0) {
         console.group(
-          `%cMathLive 0.93.0: %cInvalid Options`,
+          `%cMathLive 0.94.5: %cInvalid Options`,
           "color:#12b; font-size: 1.1rem",
           "color:#db1111; font-size: 1.1rem"
         );
@@ -33652,9 +35776,12 @@ var _MathfieldElement = class extends HTMLElement {
       this._internals.ariaMultiLine = "false";
     }
     this.attachShadow({ mode: "open", delegatesFocus: true });
-    this.shadowRoot.append(MATHFIELD_TEMPLATE.content.cloneNode(true));
-    const slot = this.shadowRoot.querySelector("slot:not([name])");
-    this._slotValue = slot.assignedNodes().map((x) => x.nodeType === 3 ? x.textContent : "").join("").trim();
+    this.shadowRoot.adoptedStyleSheets = [
+      getStylesheet("core"),
+      getStylesheet("mathfield"),
+      getStylesheet("mathfield-element")
+    ];
+    this.shadowRoot.innerHTML = `<span style="pointer-events:auto"></span><slot style="display:none"></slot>`;
     if (options)
       this._setOptions(options);
   }
@@ -33990,7 +36117,7 @@ var _MathfieldElement = class extends HTMLElement {
         this._computeEngine = new ComputeEngineCtor();
       else {
         console.error(
-          `MathLive 0.93.0: The CortexJS Compute Engine library is not available.
+          `MathLive 0.94.5: The CortexJS Compute Engine library is not available.
           
           Load the library, for example with:
           
@@ -34031,14 +36158,19 @@ var _MathfieldElement = class extends HTMLElement {
     const soundsDirectory = this.soundsDirectory;
     if (soundsDirectory === void 0 || soundsDirectory === null || soundsDirectory === "null" || soundFile === "none" || soundFile === "null")
       return;
-    const response = await fetch(
-      await resolveUrl(`${soundsDirectory}/${soundFile}`)
-    );
-    const arrayBuffer = await response.arrayBuffer();
-    const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-    this.audioBuffers[sound] = audioBuffer;
+    try {
+      const response = await fetch(
+        await resolveUrl(`${soundsDirectory}/${soundFile}`)
+      );
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+      this.audioBuffers[sound] = audioBuffer;
+    } catch (e) {
+    }
   }
   static async playSound(name) {
+    if (this.audioContext.state === "suspended" || this.audioContext.state === "interrupted")
+      await this.audioContext.resume();
     if (!this.audioBuffers[name])
       await this.loadSound(name);
     if (!this.audioBuffers[name])
@@ -34121,7 +36253,7 @@ var _MathfieldElement = class extends HTMLElement {
       return void 0;
     if (!window[Symbol.for("io.cortexjs.compute-engine")]) {
       console.error(
-        `MathLive 0.93.0: The CortexJS Compute Engine library is not available.
+        `MathLive 0.94.5: The CortexJS Compute Engine library is not available.
         
         Load the library, for example with:
         
@@ -34139,7 +36271,7 @@ var _MathfieldElement = class extends HTMLElement {
       this._mathfield.setValue(latex);
     if (!window[Symbol.for("io.cortexjs.compute-engine")]) {
       console.error(
-        `MathLive 0.93.0: The CortexJS Compute Engine library is not available.
+        `MathLive 0.94.5: The CortexJS Compute Engine library is not available.
         
         Load the library, for example with:
         
@@ -34163,7 +36295,7 @@ var _MathfieldElement = class extends HTMLElement {
   }
   getOptions(keys) {
     console.warn(
-      `%cMathLive 0.93.0: %cDeprecated Usage%c
+      `%cMathLive 0.94.5: %cDeprecated Usage%c
       \`mf.getOptions()\` is deprecated. Read the property directly on the mathfield instead.
       See https://cortexjs.io/mathlive/changelog/ for details.`,
       "color:#12b; font-size: 1.1rem",
@@ -34210,7 +36342,7 @@ var _MathfieldElement = class extends HTMLElement {
    */
   getOption(key) {
     console.warn(
-      `%cMathLive 0.93.0: %cDeprecated Usage%c
+      `%cMathLive 0.94.5: %cDeprecated Usage%c
       \`mf.getOption()\` is deprecated. Read the property directly on the mathfield instead.
       See https://cortexjs.io/mathlive/changelog/ for details.`,
       "color:#12b; font-size: 1.1rem",
@@ -34248,7 +36380,7 @@ var _MathfieldElement = class extends HTMLElement {
    */
   setOptions(options) {
     console.group(
-      `%cMathLive 0.93.0: %cDeprecated Usage`,
+      `%cMathLive 0.94.5: %cDeprecated Usage`,
       "color:#12b; font-size: 1.1rem",
       "color:#db1111; font-size: 1.1rem"
     );
@@ -34937,7 +37069,7 @@ var _MathfieldElement = class extends HTMLElement {
   }
 };
 var MathfieldElement = _MathfieldElement;
-MathfieldElement.version = "0.93.0";
+MathfieldElement.version = "0.94.5";
 MathfieldElement._fontsDirectory = "./fonts";
 MathfieldElement._soundsDirectory = "./sounds";
 /**
@@ -35035,7 +37167,7 @@ var _a2, _b2, _c, _d;
 if (isBrowser() && !((_a2 = window.customElements) == null ? void 0 : _a2.get("math-field"))) {
   (_c = window[_b2 = Symbol.for("io.cortexjs.mathlive")]) != null ? _c : window[_b2] = {};
   const global = window[Symbol.for("io.cortexjs.mathlive")];
-  global.version = "0.93.0";
+  global.version = "0.94.5";
   window.MathfieldElement = MathfieldElement;
   (_d = window.customElements) == null ? void 0 : _d.define("math-field", MathfieldElement);
 }
@@ -35053,6 +37185,7 @@ function convertLatexToMarkup(text, options) {
     mathstyle: options.mathstyle
   });
   const root = new Atom({
+    mode: "math",
     type: "root",
     body: parseLatex(text, {
       context,
@@ -35097,7 +37230,7 @@ function serializeMathJsonToLatex(json) {
       gComputeEngine = new ComputeEngineCtor();
     else {
       console.error(
-        `MathLive 0.93.0: The CortexJS Compute Engine library is not available.
+        `MathLive 0.94.5: The CortexJS Compute Engine library is not available.
         
         Load the library, for example with:
         
@@ -35246,7 +37379,7 @@ function createMathMLNode(latex, options) {
     span.innerHTML = window.MathfieldElement.createHTML(html);
   } catch (error) {
     console.error(
-      `MathLive 0.93.0:  Could not convert "${latex}"' to MathML with ${error}`
+      `MathLive 0.94.5:  Could not convert "${latex}"' to MathML with ${error}`
     );
     span.textContent = latex;
   }
@@ -35490,7 +37623,7 @@ function autoRenderMathInElement(element, options) {
       (_d2 = optionsPrivate.processMathJSONScriptType) != null ? _d2 : ""
     );
     void loadFonts();
-    injectStylesheet("mathlive-core-stylesheet", core_default);
+    injectStylesheet("core");
     scanElement(element, optionsPrivate);
   } catch (error) {
     if (error instanceof Error)
@@ -35507,6 +37640,8 @@ function autoRenderMathInElement(element, options) {
 // src/virtual-keyboard/commands.ts
 function switchKeyboardLayer(layerName) {
   const keyboard = VirtualKeyboard.singleton;
+  if (!keyboard)
+    return false;
   keyboard.show();
   hideVariantsPanel();
   keyboard.currentLayer = layerName;
@@ -35546,7 +37681,7 @@ function globalMathLive() {
 }
 function makeSharedVirtualKeyboard() {
   console.warn(
-    `%cMathLive 0.93.0: %cmakeSharedVirtualKeyboard() is deprecated. 
+    `%cMathLive 0.94.5: %cmakeSharedVirtualKeyboard() is deprecated. 
     Use \`window.mathVirtualKeyboard\` to access the virtual keyboard instance.
     See https://cortexjs.io/mathlive/changelog/ for details.`,
     "color:#12b; font-size: 1.1rem",
@@ -35579,7 +37714,7 @@ function renderMathInElement(element, options) {
   autoRenderMathInElement(el, optionsPrivate);
 }
 var version = {
-  mathlive: "0.93.0"
+  mathlive: "0.94.5"
 };
 export {
   MathfieldElement,

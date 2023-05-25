@@ -1,4 +1,4 @@
-/* 0.93.0 */export type MathstyleName = 'displaystyle' | 'textstyle' | 'scriptstyle' | 'scriptscriptstyle';
+/* 0.94.5 */export type MathstyleName = 'displaystyle' | 'textstyle' | 'scriptstyle' | 'scriptscriptstyle';
 export type NormalizedMacroDictionary = Record<string, MacroDefinition>;
 export type ArgumentType = ParseMode | ('bbox' | 'colspec' | 'delim' | 'value' | 'rest' | 'string' | 'balanced-string' | 'expression' | 'auto');
 export type Token = string;
@@ -128,7 +128,7 @@ export type MacroDefinition = {
 };
 export type MacroPackageDefinition = {
     package: Record<string, string | MacroDefinition>;
-    expand?: boolean;
+    primitive?: boolean;
     captureSelection?: boolean;
 };
 /**
@@ -146,7 +146,6 @@ export type Glue = {
 export type DimensionUnit = 'pt' | 'mm' | 'cm' | 'ex' | 'px' | 'em' | 'bp' | 'dd' | 'pc' | 'in' | 'mu' | 'fil' | 'fill' | 'filll';
 /**
  * A dimension is used to specify the size of things
- *
  */
 export type Dimension = {
     dimension: number;
@@ -199,7 +198,7 @@ The code above will support the following notation:
  * * [Macros Example](/mathlive/guides/macros/)
  */
 export type MacroDictionary = Record<string, string | Partial<MacroDefinition> | MacroPackageDefinition>;
-export type BoxCSSProperties = 'background-color' | 'border' | 'border-bottom' | 'border-color' | 'border-left' | 'border-radius' | 'border-right' | 'border-right-width' | 'border-top' | 'border-top-width' | 'box-sizing' | 'color' | 'display' | 'font-family' | 'left' | 'font-size' | 'height' | 'line-height' | 'margin' | 'margin-top' | 'margin-left' | 'margin-right' | 'opacity' | 'padding' | 'position' | 'top' | 'bottom' | 'vertical-align' | 'width' | 'z-index';
+export type BoxCSSProperties = 'background-color' | 'border' | 'border-bottom' | 'border-color' | 'border-left' | 'border-radius' | 'border-right' | 'border-right-width' | 'border-top' | 'border-top-width' | 'box-sizing' | 'color' | 'display' | 'font-family' | 'left' | 'height' | 'line-height' | 'margin-top' | 'margin-left' | 'margin-right' | 'opacity' | 'padding' | 'padding-left' | 'padding-right' | 'position' | 'top' | 'bottom' | 'vertical-align' | 'width' | 'z-index';
 export type MatrixEnvironment = 'matrix' | 'matrix*' | 'pmatrix' | 'pmatrix*' | 'bmatrix' | 'bmatrix*' | 'Bmatrix' | 'Bmatrix*' | 'vmatrix' | 'vmatrix*' | 'Vmatrix' | 'Vmatrix*';
 export type CasesEnvironment = 'cases' | 'dcases' | 'rcases';
 export type TabularEnvironment = 'array' | 'equation' | 'equation*' | 'subequations' | 'multline' | 'align' | 'align*' | 'aligned' | 'eqnarray' | 'split' | 'gather' | 'gathered' | 'lines' | 'multline' | 'multline*' | 'cases' | 'dcases' | 'rcases' | 'smallmatrix' | 'smallmatrix*' | CasesEnvironment | MatrixEnvironment;
