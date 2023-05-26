@@ -11709,1241 +11709,33 @@ function getLocalDOMRect(el) {
   return new DOMRect(offsetLeft, offsetTop, width, height);
 }
 
-// css/mathfield.less
-var mathfield_default = `@keyframes ML__caret-blink {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
-  }
-}
-.ML__container {
-  display: inline-flex;
-  flex-flow: row;
-  justify-content: space-between;
-  align-items: flex-end;
-  min-height: 39px;
-  /* Need some room for the virtual keyboard toggle */
-  width: 100%;
-  /* Encourage browsers to consider allocating a hardware accelerated
-   layer for this element. */
-  isolation: isolate;
-  /* Prevent the browser from trying to interpret touch gestures in the field */
-  /* "Disabling double-tap to zoom removes the need for browsers to
-        delay the generation of click events when the user taps the screen." */
-  touch-action: none;
-  --_caret-color: var(--caret-color, hsl(var(--_hue), 40%, 49%));
-  --_selection-color: var(--selection-color, #000);
-  --_selection-background-color: var(--selection-background-color, hsl(var(--_hue), 70%, 85%));
-  --_text-highlight-background-color: var(--highlight-text, hsla(var(--_hue), 40%, 50%, 0.1));
-  --_contains-highlight-background-color: var(--contains-highlight-backround-color, hsl(var(--_hue), 40%, 95%));
-  --_smart-fence-color: var(--smart-fence-color, currentColor);
-  --_smart-fence-opacity: var(--smart-fence-opacity, 0.5);
-  --_latex-color: var(--latex-color, hsl(var(--_hue), 40%, 50%));
-  --_correct-color: var(--correct-color, #10a000);
-  --_incorrect-color: var(--incorrect-color, #a01b00);
-  --_composition-background-color: var(--composition-background-color, #fff1c2);
-  --_composition-text-color: var(--composition-text-color, black);
-  --_composition-underline-color: var(--composition-underline-color, transparent);
-}
-/* This is the actual field content (formula) */
-.ML__content {
-  display: flex;
-  align-items: center;
-  align-self: center;
-  position: relative;
-  overflow: hidden;
-  padding: 2px 0 2px 1px;
-  width: 100%;
-}
-.ML__virtual-keyboard-toggle {
-  box-sizing: border-box;
-  display: flex;
-  align-self: center;
-  align-items: center;
-  flex-shrink: 0;
-  flex-direction: column;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  margin-right: 4px;
-  cursor: pointer;
-  /* Avoid some weird blinking with :hover */
-  border-radius: 8px;
-  border: 1px solid transparent;
-  transition: background 0.2s cubic-bezier(0.64, 0.09, 0.08, 1);
-  color: hsl(var(--_hue), 40%, 50%);
-  fill: currentColor;
-  background: transparent;
-}
-.ML__virtual-keyboard-toggle:hover {
-  background: hsla(0, 0%, 70%, 0.3);
-  color: #333;
-  fill: currentColor;
-}
-.ML__virtual-keyboard-toggle > span {
-  display: flex;
-  align-self: center;
-  align-items: center;
-}
-/* The invisible element used to capture keyboard events. We're just trying
- really hard to make sure it doesn't show. */
-.ML__keyboard-sink {
-  display: inline-block;
-  resize: none;
-  outline: none;
-  border: none;
-  /* Need these for Microsoft Edge */
-  position: fixed;
-  clip: rect(0 0 0 0);
-  /* Need this to prevent iOS Safari from auto-zooming */
-  font-size: 1em;
-  font-family: KaTeX_Main;
-}
-.ML__composition {
-  background: var(--_composition-background-color);
-  color: var(--_composition-text-color);
-  text-decoration: underline var(--_composition-underline-color);
-}
-.ML__caret:after {
-  content: '';
-  border: none;
-  border-radius: 2px;
-  border-right: 2px solid var(--_caret-color);
-  margin-right: -2px;
-  position: relative;
-  left: -1px;
-  animation: ML__caret-blink 1.05s step-end forwards infinite;
-}
-.ML__text-caret:after {
-  content: '';
-  border: none;
-  border-radius: 1px;
-  border-right: 1px solid var(--_caret-color);
-  margin-right: -1px;
-  position: relative;
-  left: 0;
-  animation: ML__caret-blink 1.05s step-end forwards infinite;
-}
-.ML__latex-caret:after {
-  content: '_';
-  border: none;
-  margin-right: 0;
-  margin-right: calc(-1ex - 2px);
-  position: relative;
-  color: var(--_caret-color);
-  animation: ML__caret-blink 1.05s step-end forwards infinite;
-}
-.ML__focused .ML__text {
-  background: var(--_text-highlight-background-color);
-}
-/* When using smartFence, the anticipated closing fence is displayed
-with this style */
-.ML__smart-fence__close {
-  opacity: var(--_smart-fence-opacity);
-  color: var(--_smart-fence-color);
-}
-.ML__selected,
-.ML__focused .ML__selected .ML__contains-caret,
-.ML__focused .ML__selected .ML__smart-fence__close,
-.ML__focused .ML__selected .ML__placeholder {
-  color: var(--_selection-color);
-  opacity: 1;
-}
-.ML__selection {
-  box-sizing: border-box;
-  background: var(--_selection-background-color) !important;
-}
-.ML__contains-caret.ML__close,
-.ML__contains-caret.ML__open,
-.ML__contains-caret > .ML__close,
-.ML__contains-caret > .ML__open,
-.ML__contains-caret .ML__sqrt-sign,
-.ML__contains-caret .ML__sqrt-line {
-  color: var(--_caret-color);
-}
-.ML__contains-highlight {
-  background: var(--_contains-highlight-background-color);
-  box-sizing: border-box;
-}
-.ML__latex {
-  font-family: 'Berkeley Mono', 'IBM Plex Mono', 'Source Code Pro', Consolas, 'Roboto Mono', Menlo, 'Bitstream Vera Sans Mono', 'DejaVu Sans Mono', Monaco, Courier, monospace;
-  font-weight: 400;
-  color: var(--_latex-color);
-}
-.ML__suggestion {
-  opacity: 0.5;
-}
-.ML__virtual-keyboard-toggle.is-visible.is-pressed:hover {
-  background: hsl(var(--_hue), 25%, 35%);
-  color: #fafafa;
-  fill: currentColor;
-}
-.ML__virtual-keyboard-toggle:focus {
-  outline: none;
-  border-radius: 8px;
-  border: 2px solid hsl(var(--_hue), 40%, 50%);
-}
-.ML__virtual-keyboard-toggle.is-pressed,
-.ML__virtual-keyboard-toggle.is-active:hover,
-.ML__virtual-keyboard-toggle.is-active {
-  background: hsl(var(--_hue), 25%, 35%);
-  color: #fafafa;
-  fill: currentColor;
-}
-/* Add an attribute 'data-ML__tooltip' to automatically show a
-   tooltip over a element on hover.
-   Use 'data-position="top"' to place the tooltip above the
-   element rather than below.
-   Use 'data-delay' to delay the triggering of the tooltip.
-*/
-[data-ML__tooltip] {
-  position: relative;
-}
-[data-ML__tooltip][data-placement='top']::after {
-  top: inherit;
-  bottom: 100%;
-}
-[data-ML__tooltip]::after {
-  content: attr(data-ML__tooltip);
-  position: absolute;
-  display: none;
-  z-index: 2;
-  right: 110%;
-  left: calc(100% + 8px);
-  width: max-content;
-  max-width: 200px;
-  padding: 8px 8px;
-  border-radius: 2px;
-  background: #616161;
-  color: #fff;
-  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-  text-align: center;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 12px;
-  /* Phone */
-  opacity: 0;
-  transform: scale(0.5);
-  transition: all 0.15s cubic-bezier(0.4, 0, 1, 1);
-}
-@media only screen and (max-width: 767px) {
-  [data-ML__tooltip]::after {
-    padding: 8px 16px;
-    font-size: 16px;
-  }
-}
-:not(.tracking) [data-ML__tooltip]:hover {
-  position: relative;
-}
-:not(.tracking) [data-ML__tooltip]:hover::after {
-  visibility: visible;
-  display: inline-table;
-  opacity: 1;
-  transform: scale(1);
-}
-[data-ML__tooltip][data-delay]::after {
-  transition-delay: 0s;
-}
-[data-ML__tooltip][data-delay]:hover::after {
-  transition-delay: 1s;
-  /* attr(data-delay); Should work. But doesn't. */
-}
-.ML__prompt {
-  border-radius: 2px;
-}
-.ML__editablePromptBox {
-  outline: 1px solid #acacac;
-  border-radius: 2px;
-  z-index: -1;
-}
-.ML__focusedPromptBox {
-  outline: highlight auto 1px;
-}
-.ML__lockedPromptBox {
-  background-color: rgba(142, 142, 141, 0.4);
-  z-index: -1;
-}
-.ML__correctPromptBox {
-  outline: 1px solid var(--_correct-color);
-  box-shadow: 0 0 5px var(--_correct-color);
-}
-.ML__incorrectPromptBox {
-  outline: 1px solid var(--_incorrect-color);
-  box-shadow: 0 0 5px var(--_incorrect-color);
-}
-`;
-
-// css/core.less
-var core_default = ".ML__container {\n  min-height: auto !important;\n  --_hue: var(--hue, 212);\n  --_placeholder-color: var(--placeholder-color, hsl(var(--_hue), 40%, 49%));\n  --_placeholder-opacity: var(--placeholder-opacity, 0.4);\n  --_text-font-family: var(--text-font-family, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif);\n}\n.ML__sr-only {\n  position: absolute;\n  width: 1px;\n  height: 1px;\n  margin: -1px;\n  padding: 0;\n  overflow: hidden;\n  clip: rect(0, 0, 0, 0);\n  clip-path: inset(50%);\n  white-space: nowrap;\n  border: 0;\n}\n.ML__is-inline {\n  display: inline-block;\n}\n.ML__base {\n  visibility: inherit;\n  display: inline-block;\n  position: relative;\n  cursor: text;\n  padding: 0;\n  margin: 0;\n  box-sizing: content-box;\n  border: 0;\n  outline: 0;\n  vertical-align: baseline;\n  font-weight: inherit;\n  font-family: inherit;\n  font-style: inherit;\n  text-decoration: none;\n  width: min-content;\n}\n.ML__strut,\n.ML__strut--bottom {\n  display: inline-block;\n  min-height: 0.5em;\n}\n.ML__small-delim {\n  font-family: KaTeX_Main;\n}\n/* Text mode */\n.ML__text {\n  font-family: var(--_text-font-family);\n  white-space: pre;\n}\n/* Use cmr for 'math upright' */\n.ML__cmr {\n  font-family: KaTeX_Main;\n  font-style: normal;\n}\n.ML__mathit {\n  font-family: KaTeX_Math;\n  /* The KaTeX_Math font is italic by default, so the font-style below is only \n     useful when a fallback font is used\n  */\n  font-style: italic;\n}\n.ML__mathbf {\n  font-family: KaTeX_Main;\n  font-weight: bold;\n}\n/* Lowercase greek symbols should stick to math font when \\mathbf is applied \n   to match TeX idiosyncratic behavior */\n.lcGreek.ML__mathbf {\n  font-family: KaTeX_Math;\n  font-weight: normal;\n}\n.ML__mathbfit {\n  font-family: KaTeX_Math;\n  font-weight: bold;\n  font-style: italic;\n}\n.ML__ams {\n  font-family: KaTeX_AMS;\n}\n/* Blackboard */\n.ML__bb {\n  font-family: KaTeX_AMS;\n}\n.ML__cal {\n  font-family: KaTeX_Caligraphic;\n}\n.ML__frak {\n  font-family: KaTeX_Fraktur;\n}\n.ML__tt {\n  font-family: KaTeX_Typewriter;\n}\n.ML__script {\n  font-family: KaTeX_Script;\n}\n.ML__sans {\n  font-family: KaTeX_SansSerif;\n}\n.ML__series_ul {\n  font-weight: 100;\n}\n.ML__series_el {\n  font-weight: 100;\n}\n.ML__series_l {\n  font-weight: 200;\n}\n.ML__series_sl {\n  font-weight: 300;\n}\n.ML__series_sb {\n  font-weight: 500;\n}\n.ML__bold,\n.ML__boldsymbol {\n  font-weight: 700;\n}\n.ML__series_eb {\n  font-weight: 800;\n}\n.ML__series_ub {\n  font-weight: 900;\n}\n.ML__series_uc {\n  font-stretch: ultra-condensed;\n}\n.ML__series_ec {\n  font-stretch: extra-condensed;\n}\n.ML__series_c {\n  font-stretch: condensed;\n}\n.ML__series_sc {\n  font-stretch: semi-condensed;\n}\n.ML__series_sx {\n  font-stretch: semi-expanded;\n}\n.ML__series_x {\n  font-stretch: expanded;\n}\n.ML__series_ex {\n  font-stretch: extra-expanded;\n}\n.ML__series_ux {\n  font-stretch: ultra-expanded;\n}\n.ML__it {\n  font-style: italic;\n}\n.ML__shape_ol {\n  -webkit-text-stroke: 1px black;\n  text-stroke: 1px black;\n  color: transparent;\n}\n.ML__shape_sc {\n  font-variant: small-caps;\n}\n.ML__shape_sl {\n  font-style: oblique;\n}\n/* First level emphasis */\n.ML__emph {\n  color: #bc2612;\n}\n/* Second level emphasis */\n.ML__emph .ML__emph {\n  color: #0c7f99;\n}\n.ML__highlight {\n  color: #007cb2;\n  background: #edd1b0;\n}\n.ML__center {\n  text-align: center;\n}\n.ML__label_padding {\n  padding: 0 0.5em;\n}\n.ML__frac-line {\n  width: 100%;\n  min-height: 1px;\n}\n.ML__frac-line:after {\n  content: '';\n  display: block;\n  margin-top: max(-1px, -0.04em);\n  min-height: max(1px, 0.04em);\n  /* Ensure the line is visible when printing even if \"turn off background images\" is on*/\n  -webkit-print-color-adjust: exact;\n  print-color-adjust: exact;\n  /* There's a bug since Chrome 62 where \n      sub-pixel border lines don't draw at some zoom \n      levels (110%, 90%). \n      Setting the min-height used to work around it, but that workaround\n      broke in Chrome 84 or so.\n      Setting the background (and the min-height) seems to work for now.\n      */\n  background: currentColor;\n  box-sizing: content-box;\n  /* Vuetify sets the box-sizing to inherit \n            causes the fraction line to not draw at all sizes (see #26) */\n  /* On some versions of Firefox on Windows, the line fails to \n            draw at some zoom levels, but setting the transform triggers\n            the hardware accelerated path, which works */\n  transform: translate(0, 0);\n}\n.ML__sqrt {\n  display: inline-block;\n}\n.ML__sqrt-sign {\n  display: inline-block;\n  position: relative;\n}\n.ML__sqrt-line {\n  display: inline-block;\n  height: max(1px, 0.04em);\n  width: 100%;\n}\n.ML__sqrt-line:before {\n  content: '';\n  display: block;\n  margin-top: min(-1px, -0.04em);\n  min-height: max(1px, 0.04em);\n  /* Ensure the line is visible when printing even if \"turn off background images\" is on*/\n  -webkit-print-color-adjust: exact;\n  print-color-adjust: exact;\n  background: currentColor;\n  /* On some versions of Firefox on Windows, the line fails to \n            draw at some zoom levels, but setting the transform triggers\n            the hardware accelerated path, which works */\n  transform: translate(0, 0);\n}\n.ML__sqrt-line:after {\n  border-bottom-width: 1px;\n  content: ' ';\n  display: block;\n  margin-top: -0.1em;\n}\n.ML__sqrt-index {\n  margin-left: 0.27777778em;\n  margin-right: -0.55555556em;\n}\n.ML__delim-size1 {\n  font-family: KaTeX_Size1;\n}\n.ML__delim-size2 {\n  font-family: KaTeX_Size2;\n}\n.ML__delim-size3 {\n  font-family: KaTeX_Size3;\n}\n.ML__delim-size4 {\n  font-family: KaTeX_Size4;\n}\n.ML__delim-mult .delim-size1 > span {\n  font-family: KaTeX_Size1;\n}\n.ML__delim-mult .delim-size4 > span {\n  font-family: KaTeX_Size4;\n}\n.ML__accent-body > span {\n  font-family: KaTeX_Main;\n  width: 0;\n}\n.ML__accent-vec {\n  position: relative;\n  left: 0.24em;\n}\n.ML__mathlive {\n  display: inline-block;\n  direction: ltr;\n  text-align: left;\n  text-indent: 0;\n  text-rendering: auto;\n  font-family: KaTeX_Main, 'Times New Roman', serif;\n  font-style: normal;\n  font-size-adjust: none;\n  font-stretch: normal;\n  font-variant-caps: normal;\n  letter-spacing: normal;\n  line-height: 1.2;\n  word-wrap: normal;\n  word-spacing: normal;\n  white-space: nowrap;\n  text-shadow: none;\n  -webkit-user-select: none;\n  user-select: none;\n  width: min-content;\n}\n.ML__mathlive .style-wrap {\n  position: relative;\n}\n.ML__mathlive .mfrac,\n.ML__mathlive .left-right {\n  display: inline-block;\n}\n.ML__mathlive .vlist-t {\n  display: inline-table;\n  table-layout: fixed;\n  border-collapse: collapse;\n}\n.ML__mathlive .vlist-r {\n  display: table-row;\n}\n.ML__mathlive .vlist {\n  display: table-cell;\n  vertical-align: bottom;\n  position: relative;\n}\n.ML__mathlive .vlist > span {\n  display: block;\n  height: 0;\n  position: relative;\n}\n.ML__mathlive .vlist > span > span {\n  display: inline-block;\n}\n.ML__mathlive .vlist > span > .pstrut {\n  overflow: hidden;\n  width: 0;\n}\n.ML__mathlive .vlist-t2 {\n  margin-right: -2px;\n}\n.ML__mathlive .vlist-s {\n  display: table-cell;\n  vertical-align: bottom;\n  font-size: 1px;\n  width: 2px;\n  min-width: 2px;\n}\n.ML__mathlive .msubsup {\n  text-align: left;\n}\n.ML__mathlive .negativethinspace {\n  display: inline-block;\n  margin-left: -0.16667em;\n  height: 0.71em;\n}\n.ML__mathlive .thinspace {\n  display: inline-block;\n  width: 0.16667em;\n  height: 0.71em;\n}\n.ML__mathlive .mediumspace {\n  display: inline-block;\n  width: 0.22222em;\n  height: 0.71em;\n}\n.ML__mathlive .thickspace {\n  display: inline-block;\n  width: 0.27778em;\n  height: 0.71em;\n}\n.ML__mathlive .enspace {\n  display: inline-block;\n  width: 0.5em;\n  height: 0.71em;\n}\n.ML__mathlive .quad {\n  display: inline-block;\n  width: 1em;\n  height: 0.71em;\n}\n.ML__mathlive .qquad {\n  display: inline-block;\n  width: 2em;\n  height: 0.71em;\n}\n.ML__mathlive .llap,\n.ML__mathlive .rlap {\n  width: 0;\n  position: relative;\n  display: inline-block;\n}\n.ML__mathlive .llap > .inner,\n.ML__mathlive .rlap > .inner {\n  position: absolute;\n}\n.ML__mathlive .llap > .fix,\n.ML__mathlive .rlap > .fix {\n  display: inline-block;\n}\n.ML__mathlive .llap > .inner {\n  right: 0;\n}\n.ML__mathlive .rlap > .inner {\n  left: 0;\n}\n.ML__mathlive .rule {\n  display: inline-block;\n  border: solid 0;\n  position: relative;\n  box-sizing: border-box;\n}\n.ML__mathlive .overline .overline-line,\n.ML__mathlive .underline .underline-line {\n  width: 100%;\n}\n.ML__mathlive .overline .overline-line:before,\n.ML__mathlive .underline .underline-line:before {\n  content: '';\n  border-bottom-style: solid;\n  border-bottom-width: max(1px, 0.04em);\n  -webkit-print-color-adjust: exact;\n  print-color-adjust: exact;\n  display: block;\n}\n.ML__mathlive .overline .overline-line:after,\n.ML__mathlive .underline .underline-line:after {\n  border-bottom-style: solid;\n  border-bottom-width: max(1px, 0.04em);\n  -webkit-print-color-adjust: exact;\n  print-color-adjust: exact;\n  content: '';\n  display: block;\n  margin-top: -1px;\n}\n.ML__mathlive .stretchy {\n  display: block;\n  position: absolute;\n  width: 100%;\n  left: 0;\n  overflow: hidden;\n}\n.ML__mathlive .stretchy:before,\n.ML__mathlive .stretchy:after {\n  content: '';\n}\n.ML__mathlive .stretchy svg {\n  display: block;\n  position: absolute;\n  width: 100%;\n  height: inherit;\n  fill: currentColor;\n  stroke: currentColor;\n  fill-rule: nonzero;\n  fill-opacity: 1;\n  stroke-width: 1;\n  stroke-linecap: butt;\n  stroke-linejoin: miter;\n  stroke-miterlimit: 4;\n  stroke-dasharray: none;\n  stroke-dashoffset: 0;\n  stroke-opacity: 1;\n}\n.ML__mathlive .slice-1-of-2 {\n  display: inline-flex;\n  position: absolute;\n  left: 0;\n  width: 50.2%;\n  overflow: hidden;\n}\n.ML__mathlive .slice-2-of-2 {\n  display: inline-flex;\n  position: absolute;\n  right: 0;\n  width: 50.2%;\n  overflow: hidden;\n}\n.ML__mathlive .slice-1-of-3 {\n  display: inline-flex;\n  position: absolute;\n  left: 0;\n  width: 25.1%;\n  overflow: hidden;\n}\n.ML__mathlive .slice-2-of-3 {\n  display: inline-flex;\n  position: absolute;\n  left: 25%;\n  width: 50%;\n  overflow: hidden;\n}\n.ML__mathlive .slice-3-of-3 {\n  display: inline-flex;\n  position: absolute;\n  right: 0;\n  width: 25.1%;\n  overflow: hidden;\n}\n.ML__mathlive .slice-1-of-1 {\n  display: inline-flex;\n  position: absolute;\n  width: 100%;\n  left: 0;\n  overflow: hidden;\n}\n.ML__mathlive .nulldelimiter {\n  display: inline-block;\n}\n.ML__mathlive .op-group {\n  display: inline-block;\n}\n.ML__mathlive .op-symbol {\n  position: relative;\n}\n.ML__mathlive .op-symbol.small-op {\n  font-family: KaTeX_Size1;\n}\n.ML__mathlive .op-symbol.large-op {\n  font-family: KaTeX_Size2;\n}\n.ML__mathlive .mtable .vertical-separator {\n  display: inline-block;\n  min-width: 1px;\n  box-sizing: border-box;\n}\n.ML__mathlive .mtable .arraycolsep {\n  display: inline-block;\n}\n.ML__mathlive .mtable .col-align-m > .vlist-t {\n  text-align: center;\n}\n.ML__mathlive .mtable .col-align-c > .vlist-t {\n  text-align: center;\n}\n.ML__mathlive .mtable .col-align-l > .vlist-t {\n  text-align: left;\n}\n.ML__mathlive .mtable .col-align-r > .vlist-t {\n  text-align: right;\n}\n.ML__error {\n  display: inline-block;\n  background-image: radial-gradient(ellipse at center, hsl(341, 100%, 40%), rgba(0, 0, 0, 0) 70%);\n  background-color: hsla(341, 100%, 40%, 0.1);\n  background-repeat: repeat-x;\n  background-size: 3px 3px;\n  padding-bottom: 3px;\n  background-position: 0 100%;\n}\n.ML__error > .ML__error {\n  background: transparent;\n  padding: 0;\n}\n.ML__placeholder {\n  color: var(--_placeholder-color);\n  opacity: var(--_placeholder-opacity);\n  padding-left: 0.4ex;\n  padding-right: 0.4ex;\n  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;\n}\n.ML__notation {\n  position: absolute;\n  box-sizing: border-box;\n  line-height: 0;\n}\n/* This class is used to implement the `\\mathtip` and `\\texttip` commands\n   For UI elements, see `[data-ML__tooltip]`\n*/\n.ML__tooltip-container {\n  position: relative;\n  transform: scale(0);\n}\n.ML__tooltip-container .ML__tooltip-content {\n  position: fixed;\n  display: inline-table;\n  visibility: hidden;\n  z-index: 2;\n  width: max-content;\n  max-width: 400px;\n  padding: 12px 12px;\n  border-radius: 8px;\n  background: #616161;\n  --_selection-color: #fff;\n  color: #fff;\n  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);\n  opacity: 0;\n  transition: opacity 0.15s cubic-bezier(0.4, 0, 1, 1);\n}\n.ML__tooltip-container .ML__tooltip-content .ML__text {\n  white-space: normal;\n}\n.ML__tooltip-container .ML__tooltip-content .ML__base {\n  display: contents;\n}\n.ML__tooltip-container:hover .ML__tooltip-content {\n  visibility: visible;\n  opacity: 1;\n  font-size: 0.75em;\n  transform: scale(1) translate(0, 3em);\n}\n";
-
-// css/environment-popover.less
-var environment_popover_default = "#mathlive-environment-popover.is-visible {\n  visibility: visible;\n}\n#mathlive-environment-popover {\n  --_environment-panel-height: var(--environment-panel-height, 70px);\n  --_accent-color: var(--accent-color, #0c75d8);\n  --_background: var(--environment-panel-background, #0c75d8);\n  --_button-background: var(--environment-panel-button-background, white);\n  --_button-background-hover: var(--environment-panel-button-background-hover, #f5f5f7);\n  --_button-background-active: var(--environment-panel-button-background-active, #f5f5f7);\n  --_button-text: var(--environment-panel-button-text, #e3e4e8);\n  position: absolute;\n  width: calc(var(--_environment-panel-height) * 2);\n  height: var(--_environment-panel-height);\n  border-radius: 4px;\n  border: 1.5px solid var(--_accent-color);\n  background-color: var(--_background);\n  box-shadow: 0 0 30px 0 var(--environment-shadow, rgba(0, 0, 0, 0.4));\n  pointer-events: all;\n  visibility: hidden;\n}\n#mathlive-environment-popover .MLEP__array-buttons {\n  height: calc(var(--_environment-panel-height) * 5/4);\n  width: calc(var(--_environment-panel-height) * 5/4);\n  margin-left: calc(0px - var(--_environment-panel-height) * 0.16);\n  margin-top: calc(0px - var(--_environment-panel-height) * 0.19);\n}\n#mathlive-environment-popover .MLEP__array-buttons .font {\n  fill: white;\n}\n#mathlive-environment-popover .MLEP__array-buttons circle {\n  fill: #7f7f7f;\n  transition: fill 300ms;\n}\n#mathlive-environment-popover .MLEP__array-buttons .MLEP__array-insert-background {\n  fill-opacity: 1;\n  fill: var(--_background);\n  stroke: var(--_accent-color);\n  stroke-width: 3px;\n}\n#mathlive-environment-popover .MLEP__array-buttons line {\n  stroke: var(--_accent-color);\n  stroke-opacity: 0;\n  stroke-width: 40;\n  pointer-events: none;\n  transition: stroke-opacity 300ms;\n  stroke-linecap: round;\n}\n#mathlive-environment-popover .MLEP__array-buttons g[data-command]:hover circle {\n  fill: var(--_accent-color);\n}\n#mathlive-environment-popover .MLEP__array-buttons g[data-command]:hover line {\n  stroke-opacity: 1;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls {\n  height: 100%;\n  width: 50%;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options {\n  width: var(--_environment-panel-height);\n  height: var(--_environment-panel-height);\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: space-around;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg {\n  pointer-events: all;\n  margin-top: 2px;\n  width: calc(var(--_environment-panel-height) / 3 * 28 / 24);\n  height: calc(var(--_environment-panel-height) / 3 - 2px);\n  border-radius: calc(var(--_environment-panel-height) / 25);\n  background-color: var(--_button-background);\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg:hover {\n  background-color: var(--_button-background-hover);\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg path,\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg line {\n  stroke: var(--_button-text);\n  stroke-width: 2;\n  stroke-linecap: round;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg rect,\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg path {\n  fill-opacity: 0;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg.active {\n  pointer-events: none;\n  background-color: var(--_button-background-active);\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg.active path,\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg.active line {\n  stroke: var(--_accent-color);\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg.active circle {\n  fill: var(--_accent-color);\n}\n";
-
-// css/suggestion-popover.less
-var suggestion_popover_default = `/* The element that display info while in latex mode */
-#mathlive-suggestion-popover {
-  background-color: rgba(97, 97, 97);
-  color: #fff;
-  text-align: center;
-  border-radius: 8px;
-  position: fixed;
-  z-index: 1;
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-}
-#mathlive-suggestion-popover.top-tip::after {
-  content: '';
-  position: absolute;
-  top: -15px;
-  left: calc(50% - 15px);
-  width: 0;
-  height: 0;
-  border-left: 15px solid transparent;
-  border-right: 15px solid transparent;
-  border-bottom: 15px solid rgba(97, 97, 97);
-  font-size: 1rem;
-}
-#mathlive-suggestion-popover.bottom-tip::after {
-  content: '';
-  position: absolute;
-  bottom: -15px;
-  left: calc(50% - 15px);
-  width: 0;
-  height: 0;
-  border-left: 15px solid transparent;
-  border-right: 15px solid transparent;
-  border-top: 15px solid rgba(97, 97, 97);
-  font-size: 1rem;
-}
-#mathlive-suggestion-popover.is-animated {
-  transition: all 0.2s cubic-bezier(0.64, 0.09, 0.08, 1);
-  animation: ML__fade-in cubic-bezier(0, 0, 0.2, 1) 0.15s;
-}
-#mathlive-suggestion-popover.is-visible {
-  display: flex;
-}
-@keyframes ML__fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-/* The wrapper class for the entire content of the popover panel */
-#mathlive-suggestion-popover ul {
-  display: flex;
-  flex-flow: column;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  align-items: flex-start;
-  max-height: 400px;
-  overflow-y: auto;
-}
-#mathlive-suggestion-popover li {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  margin: 8px;
-  padding: 8px;
-  width: calc(100% - 16px - 16px);
-  column-gap: 1em;
-  border-radius: 8px;
-  cursor: pointer;
-  /* Since the content can be clicked on, provide feedback on hover */
-}
-#mathlive-suggestion-popover li a {
-  color: #5ea6fd;
-  padding-top: 0.3em;
-  margin-top: 0.4em;
-  display: block;
-}
-#mathlive-suggestion-popover li a:hover {
-  color: #5ea6fd;
-  text-decoration: underline;
-}
-#mathlive-suggestion-popover li:hover,
-#mathlive-suggestion-popover li.is-pressed,
-#mathlive-suggestion-popover li.is-active {
-  background: rgba(255, 255, 255, 0.1);
-}
-/* The command inside a popover (inside a #mathlive-suggestion-popover) */
-.ML__popover__command {
-  font-size: 1.6rem;
-  font-family: KaTeX_Main;
-}
-.ML__popover__current {
-  background: #5ea6fd;
-  color: #fff;
-}
-.ML__popover__latex {
-  font-family: 'IBM Plex Mono', 'Source Code Pro', Consolas, 'Roboto Mono', Menlo, 'Bitstream Vera Sans Mono', 'DejaVu Sans Mono', Monaco, Courier, monospace;
-  align-self: center;
-}
-/* The keyboard shortcuts for a symbol as displayed in the popover */
-.ML__popover__keybinding {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  font-size: 0.8em;
-  opacity: 0.7;
-}
-/* Style for the character that joins the modifiers of a keyboard shortcut 
-(usually a "+" sign)*/
-.ML__shortcut-join {
-  opacity: 0.5;
-}
-`;
-
-// css/keystroke-caption.less
-var keystroke_caption_default = "/* The element that displays the keys as the user type them */\n#mathlive-keystroke-caption-panel {\n  visibility: hidden;\n  /*min-width: 160px;*/\n  /*background-color: rgba(97, 97, 200, .95);*/\n  background: var(--secondary, hsl(var(--_hue), 19%, 26%));\n  border-color: var(--secondary-border, hsl(0, 0%, 91%));\n  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);\n  text-align: center;\n  border-radius: 6px;\n  padding: 16px;\n  position: absolute;\n  z-index: 1;\n  display: flex;\n  flex-direction: row-reverse;\n  justify-content: center;\n  --keystroke: white;\n  --on-keystroke: #555;\n  --keystroke-border: #f7f7f7;\n}\n@media (prefers-color-scheme: dark) {\n  body:not([theme='light']) #mathlive-keystroke-caption-panel {\n    --keystroke: hsl(var(--_hue), 50%, 30%);\n    --on-keystroke: hsl(0, 0%, 98%);\n    --keystroke-border: hsl(var(--_hue), 50%, 25%);\n  }\n}\nbody[theme='dark'] #mathlive-keystroke-caption-panel {\n  --keystroke: hsl(var(--_hue), 50%, 30%);\n  --on-keystroke: hsl(0, 0%, 98%);\n  --keystroke-border: hsl(var(--_hue), 50%, 25%);\n}\n#mathlive-keystroke-caption-panel > span {\n  min-width: 14px;\n  /*height: 8px;*/\n  margin: 0 8px 0 0;\n  padding: 4px;\n  background-color: var(--keystroke);\n  color: var(--on-keystroke);\n  fill: currentColor;\n  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;\n  font-size: 1em;\n  border-radius: 6px;\n  border: 2px solid var(--keystroke-border);\n  /*box-shadow: 0 7px 14px rgba(0,0,0,0.25), 0 5px 5px rgba(0,0,0,0.22);*/\n}\n";
-
-// css/virtual-keyboard.less
-var virtual_keyboard_default = `.ML__keyboard {
-  --_keyboard-height: 0;
-  --_keyboard-zindex: var(--keyboard-zindex, 105);
-  --_accent-color: var(--keyboard-accent-color, #0c75d8);
-  --_background: var(--keyboard-background, #cacfd7);
-  --_border: var(--keyboard-border, #ddd);
-  --_padding-horizontal: var(--keyboard-padding-horizontal, 0px);
-  --_padding-top: var(--keyboard-padding-top, 5px);
-  --_padding-bottom: var(--keyboard-padding-bottom, 0px);
-  --_row-padding-left: var(--keyboard-row-padding-left, 0px);
-  --_row-padding-left: var(--keyboard-row-padding-right, 0px);
-  --_toolbar-text: var(--keyboard-toolbar-text, #2c2e2f);
-  --_toolbar-text-active: var(--keyboard-toolbar-text-active, var(--_accent-color));
-  --_toolbar-background: var(--keyboard-toolbar-background, transparent);
-  --_toolbar-background-hover: var(--keyboard-toolbar-background-hover, #eee);
-  --_toolbar-background-selected: var(--keyboard-toolbar-background-selected, transparent);
-  --_horizontal-rule: var(--keyboard-horizontal-rule, 1px solid #fff);
-  --_keycap-background: var(--keycap-background, white);
-  --_keycap-background-hover: var(--keycap-background, #f5f5f7);
-  --_keycap-background-active: var(--keycap-background-active, var(--_accent-color));
-  --_keycap-background-pressed: var(--keycap-background-pressed, var(--_accent-color));
-  --_keycap-border: var(--keycap-border, #e5e6e9);
-  --_keycap-border-bottom: var(--keycap-border-bottom, #8d8f92);
-  --_keycap-text: var(--keycap-text, #000);
-  --_keycap-text-active: var(--keycap-text-active, #fff);
-  --_keycap-text-hover: var(--keycap-text-hover, var(--_keycap-text));
-  --_keycap-text-pressed: var(--keycap-text-pressed, #fff);
-  --_keycap-shift-text: var(--keycap-shift-text, var(--_accent-color));
-  --_keycap-primary-background: var(--keycap-primary-background, var(--_accent-color));
-  --_keycap-primary-text: var(--keycap-primary-text, #ddd);
-  --_keycap-primary-background-hover: var(--keycap-primary-background-hover, #0d80f2);
-  --_keycap-secondary-background: var(--keycap-secondary-background, #a0a9b8);
-  --_keycap-secondary-background-hover: var(--keycap-secondary-background-hover, #7d8795);
-  --_keycap-secondary-text: var(--keycap-secondary-text, #060707);
-  --_keycap-secondary-border: var(--keycap-secondary-border, #c5c9d0);
-  --_keycap-secondary-border-bottom: var(--keycap-secondary-border-bottom, #989da6);
-  --_keycap-height: var(--keycap-height, 60px);
-  /* Keycap width (incl. margin) */
-  --_keycap-max-width: var(--keycap-max-width, 100px);
-  --_keycap-gap: var(--keycap-gap, 8px);
-  --_keycap-font-size: var(--keycap-font-size, clamp(16px, 4cqw, 24px));
-  --_keycap-small-font-size: var(--keycap-small-font-size, calc(var(--keycap-font-size) * 0.8));
-  --_keycap-extra-small-font-size: var(--keycap-extra-small-font-size, calc(var(--keycap-font-size) / 1.42));
-  --_variant-panel-background: var(--variant-panel-background, #fff);
-  --_variant-keycap-text: var(--variant-keycap-textvar, var(--_keycap-text));
-  --_variant-keycap-text-active: var(--variant-keycap-text-active, var(--_keycap-text-active));
-  --_variant-keycap-background-active: var(--variant-keycap-background-active, var(--_accent-color));
-  --_variant-keycap-length: var(--variant-keycap-length, 70px);
-  --_variant-keycap-font-size: var(--variant-keycap-font-size, 30px);
-  --_variant-keycap-aside-font-size: var(--variant-keycap-aside-font-size, 12px);
-  --_keycap-shift-font-size: var(--variant-keycap-font-size, 16px);
-  --_keycap-shift-color: var(--keycap-shift-color, var(--_accent-color));
-  --_box-placeholder-color: var(--box-placeholder-color, var(--_accent-color));
-}
-.if-can-undo,
-.if-can-redo,
-.if-can-copy,
-.if-can-cut,
-.if-can-paste {
-  opacity: 0.4;
-  pointer-events: none;
-}
-.can-undo .if-can-undo,
-.can-redo .if-can-redo,
-.can-copy .if-can-copy,
-.can-cut .if-can-cut,
-.can-paste .if-can-paste {
-  opacity: 1;
-  pointer-events: all;
-}
-body > .ML__keyboard {
-  position: fixed;
-  --_padding-bottom: calc(var(--_padding-bottom) + env(safe-area-inset-bottom, 0));
-}
-body > .ML__keyboard.is-visible > .MLK__backdrop {
-  box-shadow: 0 -5px 6px rgba(0, 0, 0, 0.08);
-  border-top: 1px solid var(--_border);
-}
-body > .ML__keyboard.backdrop-is-transparent.is-visible > .MLK__backdrop {
-  box-shadow: none;
-  border: none;
-}
-body > .ML__keyboard.is-visible.animate > .MLK__backdrop {
-  transition: 0.28s cubic-bezier(0, 0, 0.2, 1);
-  transition-property: transform, opacity;
-  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
-}
-.ML__keyboard {
-  position: relative;
-  overflow: hidden;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  z-index: var(--_keyboard-zindex);
-  box-sizing: border-box;
-  outline: none;
-  border: none;
-  margin: 0;
-  padding: 0;
-  line-height: 1;
-  overflow-wrap: unset;
-  text-align: left;
-  vertical-align: baseline;
-  cursor: auto;
-  white-space: pre;
-  box-shadow: none;
-  opacity: 1;
-  transform: none;
-  pointer-events: none;
-}
-.ML__keyboard :where(div) {
-  box-sizing: border-box;
-  outline: none;
-  border: none;
-  margin: 0;
-  padding: 0;
-  line-height: 1;
-  overflow-wrap: unset;
-  text-align: left;
-  vertical-align: baseline;
-  cursor: auto;
-  white-space: pre;
-  box-shadow: none;
-  transform: none;
-}
-.MLK__backdrop {
-  position: absolute;
-  bottom: calc(-1 * var(--_keyboard-height));
-  width: 100%;
-  height: var(--_keyboard-height);
-  box-sizing: border-box;
-  padding-top: var(--_padding-top);
-  padding-bottom: var(--_padding-bottom);
-  padding-left: var(--_padding-horizontal);
-  padding-right: var(--_padding-horizontal);
-  opacity: 0;
-  visibility: hidden;
-  transform: translate(0, 0);
-  background: var(--_background);
-}
-.backdrop-is-transparent .MLK__backdrop {
-  background: transparent;
-}
-/* If a custom layout has a custom container/backdrop
-  (backdrop-is-transparent), make sure to let pointer event go through. */
-.backdrop-is-transparent .MLK__plate {
-  background: transparent;
-  pointer-events: none;
-}
-/* If a custom layout has a custom container/backdrop, make sure to 
-   allow pointer events on it. */
-.backdrop-is-transparent .MLK__layer > div > div {
-  pointer-events: all;
-}
-.ML__keyboard.is-visible > .MLK__backdrop {
-  transform: translate(0, calc(-1 * var(--_keyboard-height)));
-  opacity: 1;
-  visibility: visible;
-}
-.caps-lock-indicator {
-  display: none;
-  width: 8px;
-  height: 8px;
-  background: #0cbc0c;
-  box-shadow: inset 0 0 4px 0 #13ca13, 0 0 4px 0 #a9ef48;
-  border-radius: 8px;
-  right: 8px;
-  top: 8px;
-  position: absolute;
-}
-.ML__keyboard.is-caps-lock .caps-lock-indicator {
-  display: block;
-}
-.ML__keyboard.is-caps-lock .shift {
-  background: var(--_keycap-background-active);
-  color: var(--_keycap-text-active);
-}
-.MLK__plate {
-  position: absolute;
-  top: 0;
-  left: var(--_padding-horizontal);
-  width: calc(100% - 2 * var(--_padding-horizontal));
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  container-type: inline-size;
-  touch-action: none;
-  -webkit-user-select: none;
-  user-select: none;
-  pointer-events: all;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  font-size: 16px;
-  /* Size of toolbar labels */
-  font-weight: 400;
-  text-shadow: none;
-}
-.ML__box-placeholder {
-  color: var(--_box-placeholder-color);
-}
-.MLK__tex {
-  font-family: KaTeX_Main, KaTeX_Math, 'Cambria Math', 'Asana Math', OpenSymbol, Symbola, STIX, Times, serif !important;
-}
-.MLK__tex-math {
-  font-family: KaTeX_Math, KaTeX_Main, 'Cambria Math', 'Asana Math', OpenSymbol, Symbola, STIX, Times, serif !important;
-  font-style: italic;
-}
-.MLK__layer {
-  display: none;
-  outline: none;
-}
-.MLK__layer.is-visible {
-  display: flex;
-  flex-flow: column;
-}
-/* Keyboard layouts are made or rows of keys... */
-.MLK__rows {
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  border-collapse: separate;
-  clear: both;
-  border: 0;
-  margin: 0;
-  margin-bottom: var(--_keycap-gap);
-  gap: var(--_keycap-gap);
-  /* If the styling include, e.g., some shadows, they will be
-  cut off by the overflow. In that case, set the padding to 
-  compensate. */
-  padding-left: var(--_row-padding-left);
-  padding-right: var(--_row-padding-right);
-  overflow-x: auto;
-  touch-action: none;
-}
-.MLK__rows > .row {
-  display: flex;
-  flex-flow: row;
-  justify-content: center;
-  width: 100%;
-  gap: var(--_keycap-gap);
-  margin: 0;
-  padding: 0;
-  /* For the alignment of the text on some modifiers (e.g. shift) */
-  /* Extra spacing between two adjacent keys */
-  /** A regular keycap */
-}
-.MLK__rows > .row .tex {
-  font-family: KaTeX_Math, KaTeX_Main, 'Cambria Math', 'Asana Math', OpenSymbol, Symbola, STIX, Times, serif !important;
-}
-.MLK__rows > .row .tex-math {
-  font-family: KaTeX_Math, 'Cambria Math', 'Asana Math', OpenSymbol, Symbola, STIX, Times, serif !important;
-}
-.MLK__rows > .row .big-op {
-  font-size: calc(1.25 * var(--_keycap-font-size));
-}
-.MLK__rows > .row .small {
-  font-size: var(--_keycap-small-font-size);
-}
-.MLK__rows > .row .bottom {
-  justify-content: flex-end;
-}
-.MLK__rows > .row .left {
-  align-items: flex-start;
-  padding-left: 12px;
-}
-.MLK__rows > .row .right {
-  align-items: flex-end;
-  padding-right: 12px;
-}
-.MLK__rows > .row .w0 {
-  width: 0;
-}
-.MLK__rows > .row .w5 {
-  width: calc(min(var(--_keycap-max-width, 100px), 10cqw) / 2 - var(--_keycap-gap));
-}
-.MLK__rows > .row .w15 {
-  width: calc(1.5 * min(var(--_keycap-max-width, 100px), 10cqw) - var(--_keycap-gap));
-}
-.MLK__rows > .row .w20 {
-  width: calc(2 * min(var(--_keycap-max-width, 100px), 10cqw) - var(--_keycap-gap));
-}
-.MLK__rows > .row .w40 {
-  width: calc(4 * min(var(--private-keycap-max-width, 100px), 10cqw) - var(--private-keycap-gap));
-}
-.MLK__rows > .row .w50 {
-  width: calc(5 * min(var(--_keycap-max-width, 100px), 10cqw) - var(--_keycap-gap));
-}
-.MLK__rows > .row .MLK__keycap.w50 {
-  font-size: 80%;
-  padding-top: 10px;
-  font-weight: 100;
-}
-.MLK__rows > .row .separator {
-  background: transparent;
-  border: none;
-  pointer-events: none;
-}
-.MLK__rows > .row .horizontal-rule {
-  height: 6px;
-  margin-top: 3px;
-  margin-bottom: 0;
-  width: 100%;
-  border-radius: 0;
-  border-top: var(--_horizontal-rule);
-}
-.MLK__rows > .row .ghost {
-  background: var(--_toolbar-background);
-  border: none;
-  color: var(--_toolbar-text);
-}
-.MLK__rows > .row .ghost:hover {
-  background: var(--_toolbar-background-hover);
-}
-.MLK__rows > .row .bigfnbutton {
-  font-size: var(--_keycap-extra-small-font-size);
-}
-.MLK__rows > .row .shift,
-.MLK__rows > .row .action {
-  color: var(--_keycap-secondary-text);
-  background: var(--_keycap-secondary-background);
-  border-color: var(--_keycap-secondary-border);
-  border-bottom-color: var(--_keycap-secondary-border-bottom);
-  line-height: 0.8;
-  font-size: min(1rem, var(--_keycap-small-font-size));
-  font-weight: 600;
-  padding: 8px 12px 8px 12px;
-}
-.MLK__rows > .row .shift:hover,
-.MLK__rows > .row .action:hover {
-  background: var(--_keycap-secondary-background-hover);
-}
-.MLK__rows > .row .action.primary {
-  background: var(--_keycap-primary-background);
-  color: var(--_keycap-primary-text);
-}
-.MLK__rows > .row .action.primary:hover {
-  background: var(--_keycap-primary-background-hover);
-  color: var(--_keycap-primary-text);
-}
-.MLK__rows > .row .shift.selected,
-.MLK__rows > .row .action.selected {
-  color: var(--_toolbar-text-active);
-}
-.MLK__rows > .row .shift.selected.is-pressed,
-.MLK__rows > .row .action.selected.is-pressed,
-.MLK__rows > .row .shift.selected.is-active,
-.MLK__rows > .row .action.selected.is-active {
-  color: white;
-}
-.MLK__rows > .row .warning {
-  background: #cd0030;
-  color: white;
-}
-.MLK__rows > .row .warning svg.svg-glyph {
-  width: 24px;
-  height: 24px;
-  min-height: 24px;
-}
-.MLK__rows > .row div {
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  justify-content: space-evenly;
-  width: calc(min(var(--_keycap-max-width), 10cqw) - var(--_keycap-gap));
-  height: var(--_keycap-height);
-  box-sizing: border-box;
-  padding: 0;
-  vertical-align: top;
-  text-align: center;
-  float: left;
-  color: var(--_keycap-text);
-  fill: currentColor;
-  font-size: var(--_keycap-font-size);
-  background: var(--_keycap-background);
-  border: 1px solid var(--_keycap-border);
-  border-bottom-color: var(--_keycap-border-bottom);
-  border-radius: 6px;
-  cursor: pointer;
-  touch-action: none;
-  /* Keys with a variants panel */
-  position: relative;
-  overflow: hidden;
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-.MLK__rows > .row div:hover {
-  background: var(--_keycap-background-hover);
-}
-.MLK__rows > .row div .ML__mathlive {
-  pointer-events: none;
-  touch-action: none;
-}
-.MLK__rows > .row div svg.svg-glyph {
-  margin: 8px 0;
-  width: 20px;
-  height: 20px;
-  min-height: 20px;
-}
-.MLK__rows > .row div svg.svg-glyph-lg {
-  margin: 8px 0;
-  width: 24px;
-  height: 24px;
-  min-height: 24px;
-}
-.MLK__rows > .row div.MLK__tex-math {
-  font-size: 25px;
-}
-.MLK__rows > .row div.is-pressed {
-  background: var(--_keycap-background-pressed);
-  color: var(--_keycap-text-pressed);
-}
-.MLK__rows > .row div.MLK__keycap.is-active,
-.MLK__rows > .row div.action.is-active,
-.MLK__rows > .row div.MLK__keycap.is-pressed,
-.MLK__rows > .row div.action.is-pressed {
-  z-index: calc(var(--_keyboard-zindex) - 5);
-}
-.MLK__rows > .row div.MLK__keycap.is-active aside,
-.MLK__rows > .row div.action.is-active aside,
-.MLK__rows > .row div.MLK__keycap.is-pressed aside,
-.MLK__rows > .row div.action.is-pressed aside {
-  display: none;
-}
-.MLK__rows > .row div.MLK__keycap.is-active .MLK__shift,
-.MLK__rows > .row div.action.is-active .MLK__shift,
-.MLK__rows > .row div.MLK__keycap.is-pressed .MLK__shift,
-.MLK__rows > .row div.action.is-pressed .MLK__shift {
-  display: none;
-}
-.MLK__rows > .row div.shift.is-pressed,
-.MLK__rows > .row div.MLK__keycap.is-pressed,
-.MLK__rows > .row div.action.is-pressed {
-  background: var(--_keycap-background-pressed);
-  color: var(--_keycap-text-pressed);
-}
-.MLK__rows > .row div.shift.is-active,
-.MLK__rows > .row div.MLK__keycap.is-active,
-.MLK__rows > .row div.action.is-active {
-  background: var(--_keycap-background-active);
-  color: var(--_keycap-text-active);
-}
-.MLK__rows > .row div small {
-  color: var(--_keycap-secondary-text);
-}
-.MLK__rows > .row div aside {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  font-size: 10px;
-  line-height: 10px;
-  color: var(--_keycap-secondary-text);
-}
-/* Add an attribute 'data-tooltip' to display a tooltip on hover.
-Note there are a different set of tooltip rules for the keyboard toggle
-(it's in a different CSS tree) */
-.MLK__tooltip {
-  position: relative;
-}
-.MLK__tooltip::after {
-  position: absolute;
-  display: inline-table;
-  content: attr(data-tooltip);
-  top: inherit;
-  bottom: 100%;
-  width: max-content;
-  max-width: 200px;
-  padding: 8px 8px;
-  background: #616161;
-  color: #fff;
-  text-align: center;
-  z-index: 2;
-  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-  border-radius: 2px;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  font-weight: 400;
-  font-size: 12px;
-  transition: all 0.15s cubic-bezier(0.4, 0, 1, 1) 1s;
-  opacity: 0;
-  transform: scale(0.5);
-}
-.MLK__tooltip:hover {
-  position: relative;
-}
-.MLK__tooltip:hover::after {
-  opacity: 1;
-  transform: scale(1);
-}
-.MLK__toolbar {
-  align-self: center;
-  display: flex;
-  flex-flow: row;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 996px;
-  min-height: 32px;
-  /* Icons for undo/redo, etc. */
-}
-.MLK__toolbar svg {
-  height: 20px;
-  width: 20px;
-}
-.MLK__toolbar > .left {
-  position: relative;
-  display: flex;
-  justify-content: flex-start;
-  flex-flow: row;
-}
-.MLK__toolbar > .right {
-  display: flex;
-  justify-content: flex-end;
-  flex-flow: row;
-}
-.MLK__toolbar > div > div {
-  /* "button" in the toolbar */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--_toolbar-text);
-  fill: currentColor;
-  background: var(--_toolbar-background);
-  font-size: 135%;
-  padding: 4px 15px;
-  cursor: pointer;
-  width: max-content;
-  min-width: 42px;
-  min-height: 22px;
-  border: none;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-bottom: 8px;
-  padding-top: 8px;
-  margin-top: 7px;
-  margin-bottom: 8px;
-  margin-left: 4px;
-  margin-right: 4px;
-  border-radius: 8px;
-  box-shadow: none;
-  border-bottom: 2px solid transparent;
-}
-.MLK__toolbar > div > div:not(.disabled):not(.selected):hover {
-  background: var(--_toolbar-background-hover);
-}
-.MLK__toolbar > div > div.disabled svg,
-.MLK__toolbar > div > div.disabled:hover svg,
-.MLK__toolbar > div > div.disabled.is-pressed svg {
-  color: var(--_toolbar-text);
-  opacity: 0.2;
-}
-.MLK__toolbar > div > div:hover,
-.MLK__toolbar > div > div:active,
-.MLK__toolbar > div > div.is-pressed,
-.MLK__toolbar > div > div.is-active {
-  color: var(--_toolbar-text-active);
-}
-.MLK__toolbar > div > div.selected {
-  color: var(--_toolbar-text-active);
-  background: var(--_toolbar-background-selected);
-  border-radius: 0;
-  border-bottom-color: var(--_toolbar-text-active);
-  padding-bottom: 4px;
-  margin-bottom: 12px;
-}
-/* This is the element that displays variants on press+hold */
-.MLK__variant-panel {
-  visibility: hidden;
-  position: fixed;
-  display: flex;
-  flex-flow: row wrap-reverse;
-  justify-content: center;
-  align-content: center;
-  margin: 0;
-  padding: 0;
-  bottom: auto;
-  top: 0;
-  box-sizing: content-box;
-  transform: none;
-  z-index: calc(var(--_keyboard-zindex) + 1);
-  touch-action: none;
-  max-width: 350px;
-  background: var(--_variant-panel-background);
-  text-align: center;
-  border-radius: 6px;
-  padding: 6px;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-  transition: none;
-}
-.MLK__variant-panel.is-visible {
-  visibility: visible;
-}
-.MLK__variant-panel.compact {
-  --_variant-keycap-length: var(--variant-keycap-length, 50px);
-  --_variant-keycap-font-size: var(--variant-keycap-font-size, 24px);
-  --_variant-keycap-aside-font-size: var(--variant-keycap-aside-font-size, 10px);
-}
-.MLK__variant-panel .item {
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--_variant-keycap-font-size);
-  height: var(--_variant-keycap-length);
-  width: var(--_variant-keycap-length);
-  margin: 0;
-  box-sizing: border-box;
-  border-radius: 5px;
-  border: 1px solid transparent;
-  background: transparent;
-  pointer-events: all;
-  cursor: pointer;
-  color: var(--_variant-keycap-text);
-  fill: currentColor;
-}
-@media (max-height: 412px) {
-  .MLK__variant-panel .item {
-    --_variant-keycap-font-size: var(--variant-keycap-font-size, 24px);
-    --_variant-keycap-length: var(--variant-keycap-length, 50px);
-  }
-}
-.MLK__variant-panel .item .ML__mathlive {
-  pointer-events: none;
-}
-.MLK__variant-panel .item.is-active {
-  background: var(--_variant-keycap-background-active);
-  color: var(--_variant-keycap-text-active);
-}
-.MLK__variant-panel .item.is-pressed {
-  background: var(--_variant-keycap-background-pressed);
-  color: var(--_variant-keycap-text-pressed);
-}
-.MLK__variant-panel .item.small {
-  font-size: var(--_keycap-small-font-size);
-}
-.MLK__variant-panel .item.swatch-button {
-  box-sizing: border-box;
-  background: #fbfbfb;
-}
-.MLK__variant-panel .item.swatch-button > span {
-  display: inline-block;
-  margin: 6px;
-  width: calc(100% - 12px);
-  height: calc(100% - 12px);
-  border-radius: 50%;
-}
-.MLK__variant-panel .item.swatch-button:hover {
-  background: #f0f0f0;
-}
-.MLK__variant-panel .item.swatch-button:hover > span {
-  border-radius: 2px;
-}
-.MLK__variant-panel .item.box > div,
-.MLK__variant-panel .item.box > span {
-  border: 1px dashed rgba(0, 0, 0, 0.24);
-}
-.MLK__variant-panel .item .warning {
-  min-height: 60px;
-  min-width: 60px;
-  background: #cd0030;
-  color: white;
-  padding: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 5px;
-}
-.MLK__variant-panel .item .warning.is-pressed,
-.MLK__variant-panel .item .warning.is-active {
-  background: red;
-}
-.MLK__variant-panel .item .warning svg.svg-glyph {
-  width: 50px;
-  height: 50px;
-}
-.MLK__variant-panel .item aside {
-  font-size: var(--_variant-keycap-aside-font-size);
-  line-height: 12px;
-  opacity: 0.78;
-  padding-top: 2px;
-}
-.MLK__keycap {
-  position: relative;
-}
-.MLK__shift {
-  display: block;
-  position: absolute;
-  right: 4px;
-  top: 4px;
-  font-size: var(--_keycap-shift-font-size);
-  color: var(--_keycap-shift-color);
-}
-.hide-shift .MLK__shift {
-  display: none;
-}
-@media (max-width: 414px) {
-  .MLK__variant-panel {
-    max-width: 350px;
-    --_variant-keycap-font-size: var(--variant-keycap-font-size, 24px);
-    --_variant-keycap-length: var(--variant-keycap-length, 50px);
-  }
-}
-/* @xs breakpoint: iPhone 5 */
-@container (max-width: 414px) {
-  .MLK__rows {
-    --_keycap-gap: min(var(--_keycap-gap, 2px), 2px);
-    --_keycap-height: min(var(--_keycap-height, 42px), 42px);
-    --_keycap-max-width: min(var(--_keycap-max-width, 62px), 62px);
-  }
-  .MLK__toolbar > div > div {
-    font-size: 100%;
-    padding: 0;
-    margin-left: 2px;
-    margin-right: 2px;
-  }
-  .MLK__rows .shift,
-  .MLK__rows .action {
-    font-size: 65%;
-  }
-  .MLK__rows .warning svg.svg-glyph {
-    width: 14px;
-    height: 14px;
-    min-height: 14px;
-  }
-}
-@container (max-width: 744px) {
-  .MLK__rows {
-    --_keycap-gap: min(var(--keycap-gap, 2px), 2px);
-    --_keycap-height: min(var(--keycap-height, 52px), 52px);
-    --_keycap-max-width: min(var(--keycap-max-width, 62px), 62px);
-  }
-  .MLK__toolbar > div > div {
-    padding-left: 0;
-    padding-right: 0;
-  }
-  .MLK__tooltip::after {
-    padding: 8px 16px;
-    font-size: 16px;
-  }
-  .MLK__rows > .row > div.fnbutton {
-    font-size: 16px;
-  }
-  .MLK__rows > .row > div.bigfnbutton {
-    font-size: calc(var(--_keycap-extra-small-font-size) / 1.55);
-  }
-  .MLK__rows > .row > div.small {
-    font-size: 13px;
-  }
-  .MLK__rows > .row > div > aside {
-    display: none;
-  }
-  .MLK__shift {
-    display: none;
-  }
-}
-/* Medium breakpoint: larger phones */
-@container (max-width: 768px) {
-  .MLK__rows {
-    --_keycap-height: min(var(--keycap-height, 42px), 42px);
-  }
-  .MLK__rows > .row > div > small {
-    font-size: 14px;
-  }
-}
-@container (max-width: 1444px) {
-  .MLK__rows .if-wide {
-    display: none;
-  }
-}
-`;
-
 // src/common/stylesheet.ts
-var gStylesheets;
-function getStylesheet(id) {
-  if (!gStylesheets)
-    gStylesheets = {};
-  if (gStylesheets[id])
-    return gStylesheets[id];
-  gStylesheets[id] = new CSSStyleSheet();
-  let content = "";
-  switch (id) {
-    case "mathfield-element":
-      content = `
-    :host { display: inline-block; background-color: field; color: fieldtext; border-width: 1px; border-style: solid; border-color: #acacac; border-radius: 2px; padding:4px; pointer-events: none;}
-    :host([hidden]) { display: none; }
-    :host([disabled]), :host([disabled]:focus), :host([disabled]:focus-within) { outline: none; opacity:  .5; }
-    :host(:focus), :host(:focus-within) {
-      outline: Highlight auto 1px;    /* For Firefox */
-      outline: -webkit-focus-ring-color auto 1px;
-    }
-    :host([readonly]:focus), :host([readonly]:focus-within),
-    :host([read-only]:focus), :host([read-only]:focus-within) {
-      outline: none;
-    }`;
-      break;
-    case "core":
-      content = core_default;
-      break;
-    case "mathfield":
-      content = mathfield_default;
-      break;
-    case "environment-popover":
-      content = environment_popover_default;
-      break;
-    case "suggestion-popover":
-      content = suggestion_popover_default;
-      break;
-    case "keystroke-caption":
-      content = keystroke_caption_default;
-      break;
-    case "virtual-keyboard":
-      content = virtual_keyboard_default;
-      break;
-    default:
-      debugger;
-  }
-  gStylesheets[id].replaceSync(content);
-  return gStylesheets[id];
-}
-var gInjectedStylesheets;
-function injectStylesheet(id) {
+function injectStylesheet(id, css) {
   var _a3;
-  if (!gInjectedStylesheets)
-    gInjectedStylesheets = {};
-  if (((_a3 = gInjectedStylesheets[id]) != null ? _a3 : 0) !== 0)
-    gInjectedStylesheets[id] += 1;
-  else {
-    const stylesheet = getStylesheet(id);
-    document.adoptedStyleSheets = [...document.adoptedStyleSheets, stylesheet];
-    gInjectedStylesheets[id] = 1;
+  if (!css)
+    return;
+  const element_ = document.getElementById(id);
+  if (element_) {
+    const refCount = Number.parseInt((_a3 = element_.dataset.refcount) != null ? _a3 : "0");
+    element_.dataset.refcount = Number(refCount + 1).toString();
+  } else {
+    const styleNode = document.createElement("style");
+    styleNode.id = id;
+    styleNode.dataset.refcount = "1";
+    styleNode.append(document.createTextNode(css));
+    document.head.appendChild(styleNode);
   }
 }
 function releaseStylesheet(id) {
-  if (!(gInjectedStylesheets == null ? void 0 : gInjectedStylesheets[id]))
+  var _a3;
+  const element_ = document.getElementById(id);
+  if (!element_)
     return;
-  gInjectedStylesheets[id] -= 1;
-  if (gInjectedStylesheets[id] <= 0) {
-    console.log("releasign stylesheet ", id);
-    const stylesheet = gStylesheets[id];
-    document.adoptedStyleSheets = document.adoptedStyleSheets.filter(
-      (x) => x !== stylesheet
-    );
-  }
+  const refCount = Number.parseInt((_a3 = element_.dataset.refcount) != null ? _a3 : "0");
+  if (refCount <= 1)
+    element_.remove();
+  else
+    element_.dataset.refcount = Number(refCount - 1).toString();
 }
 
 // src/core-atoms/accent.ts
@@ -21413,6 +20205,126 @@ function normalizeKeybindings(keybindings, layout) {
   return [result, errors];
 }
 
+// css/suggestion-popover.less
+var suggestion_popover_default = `/* The element that display info while in latex mode */
+#mathlive-suggestion-popover {
+  background-color: rgba(97, 97, 97);
+  color: #fff;
+  text-align: center;
+  border-radius: 8px;
+  position: fixed;
+  z-index: 1;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+}
+#mathlive-suggestion-popover.top-tip::after {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: calc(50% - 15px);
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 15px solid rgba(97, 97, 97);
+  font-size: 1rem;
+}
+#mathlive-suggestion-popover.bottom-tip::after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: calc(50% - 15px);
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-top: 15px solid rgba(97, 97, 97);
+  font-size: 1rem;
+}
+#mathlive-suggestion-popover.is-animated {
+  transition: all 0.2s cubic-bezier(0.64, 0.09, 0.08, 1);
+  animation: ML__fade-in cubic-bezier(0, 0, 0.2, 1) 0.15s;
+}
+#mathlive-suggestion-popover.is-visible {
+  display: flex;
+}
+@keyframes ML__fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* The wrapper class for the entire content of the popover panel */
+#mathlive-suggestion-popover ul {
+  display: flex;
+  flex-flow: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-items: flex-start;
+  max-height: 400px;
+  overflow-y: auto;
+}
+#mathlive-suggestion-popover li {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 8px;
+  padding: 8px;
+  width: calc(100% - 16px - 16px);
+  column-gap: 1em;
+  border-radius: 8px;
+  cursor: pointer;
+  /* Since the content can be clicked on, provide feedback on hover */
+}
+#mathlive-suggestion-popover li a {
+  color: #5ea6fd;
+  padding-top: 0.3em;
+  margin-top: 0.4em;
+  display: block;
+}
+#mathlive-suggestion-popover li a:hover {
+  color: #5ea6fd;
+  text-decoration: underline;
+}
+#mathlive-suggestion-popover li:hover,
+#mathlive-suggestion-popover li.is-pressed,
+#mathlive-suggestion-popover li.is-active {
+  background: rgba(255, 255, 255, 0.1);
+}
+/* The command inside a popover (inside a #mathlive-suggestion-popover) */
+.ML__popover__command {
+  font-size: 1.6rem;
+  font-family: KaTeX_Main;
+}
+.ML__popover__current {
+  background: #5ea6fd;
+  color: #fff;
+}
+.ML__popover__latex {
+  font-family: 'IBM Plex Mono', 'Source Code Pro', Consolas, 'Roboto Mono', Menlo, 'Bitstream Vera Sans Mono', 'DejaVu Sans Mono', Monaco, Courier, monospace;
+  align-self: center;
+}
+/* The keyboard shortcuts for a symbol as displayed in the popover */
+.ML__popover__keybinding {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+/* Style for the character that joins the modifiers of a keyboard shortcut 
+(usually a "+" sign)*/
+.ML__shortcut-join {
+  opacity: 0.5;
+}
+`;
+
+// css/core.less
+var core_default = ".ML__container {\n  min-height: auto !important;\n  --_hue: var(--hue, 212);\n  --_placeholder-color: var(--placeholder-color, hsl(var(--_hue), 40%, 49%));\n  --_placeholder-opacity: var(--placeholder-opacity, 0.4);\n  --_text-font-family: var(--text-font-family, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif);\n}\n.ML__sr-only {\n  position: absolute;\n  width: 1px;\n  height: 1px;\n  margin: -1px;\n  padding: 0;\n  overflow: hidden;\n  clip: rect(0, 0, 0, 0);\n  clip-path: inset(50%);\n  white-space: nowrap;\n  border: 0;\n}\n.ML__is-inline {\n  display: inline-block;\n}\n.ML__base {\n  visibility: inherit;\n  display: inline-block;\n  position: relative;\n  cursor: text;\n  padding: 0;\n  margin: 0;\n  box-sizing: content-box;\n  border: 0;\n  outline: 0;\n  vertical-align: baseline;\n  font-weight: inherit;\n  font-family: inherit;\n  font-style: inherit;\n  text-decoration: none;\n  width: min-content;\n}\n.ML__strut,\n.ML__strut--bottom {\n  display: inline-block;\n  min-height: 0.5em;\n}\n.ML__small-delim {\n  font-family: KaTeX_Main;\n}\n/* Text mode */\n.ML__text {\n  font-family: var(--_text-font-family);\n  white-space: pre;\n}\n/* Use cmr for 'math upright' */\n.ML__cmr {\n  font-family: KaTeX_Main;\n  font-style: normal;\n}\n.ML__mathit {\n  font-family: KaTeX_Math;\n  /* The KaTeX_Math font is italic by default, so the font-style below is only \n     useful when a fallback font is used\n  */\n  font-style: italic;\n}\n.ML__mathbf {\n  font-family: KaTeX_Main;\n  font-weight: bold;\n}\n/* Lowercase greek symbols should stick to math font when \\mathbf is applied \n   to match TeX idiosyncratic behavior */\n.lcGreek.ML__mathbf {\n  font-family: KaTeX_Math;\n  font-weight: normal;\n}\n.ML__mathbfit {\n  font-family: KaTeX_Math;\n  font-weight: bold;\n  font-style: italic;\n}\n.ML__ams {\n  font-family: KaTeX_AMS;\n}\n/* Blackboard */\n.ML__bb {\n  font-family: KaTeX_AMS;\n}\n.ML__cal {\n  font-family: KaTeX_Caligraphic;\n}\n.ML__frak {\n  font-family: KaTeX_Fraktur;\n}\n.ML__tt {\n  font-family: KaTeX_Typewriter;\n}\n.ML__script {\n  font-family: KaTeX_Script;\n}\n.ML__sans {\n  font-family: KaTeX_SansSerif;\n}\n.ML__series_ul {\n  font-weight: 100;\n}\n.ML__series_el {\n  font-weight: 100;\n}\n.ML__series_l {\n  font-weight: 200;\n}\n.ML__series_sl {\n  font-weight: 300;\n}\n.ML__series_sb {\n  font-weight: 500;\n}\n.ML__bold,\n.ML__boldsymbol {\n  font-weight: 700;\n}\n.ML__series_eb {\n  font-weight: 800;\n}\n.ML__series_ub {\n  font-weight: 900;\n}\n.ML__series_uc {\n  font-stretch: ultra-condensed;\n}\n.ML__series_ec {\n  font-stretch: extra-condensed;\n}\n.ML__series_c {\n  font-stretch: condensed;\n}\n.ML__series_sc {\n  font-stretch: semi-condensed;\n}\n.ML__series_sx {\n  font-stretch: semi-expanded;\n}\n.ML__series_x {\n  font-stretch: expanded;\n}\n.ML__series_ex {\n  font-stretch: extra-expanded;\n}\n.ML__series_ux {\n  font-stretch: ultra-expanded;\n}\n.ML__it {\n  font-style: italic;\n}\n.ML__shape_ol {\n  -webkit-text-stroke: 1px black;\n  text-stroke: 1px black;\n  color: transparent;\n}\n.ML__shape_sc {\n  font-variant: small-caps;\n}\n.ML__shape_sl {\n  font-style: oblique;\n}\n/* First level emphasis */\n.ML__emph {\n  color: #bc2612;\n}\n/* Second level emphasis */\n.ML__emph .ML__emph {\n  color: #0c7f99;\n}\n.ML__highlight {\n  color: #007cb2;\n  background: #edd1b0;\n}\n.ML__center {\n  text-align: center;\n}\n.ML__label_padding {\n  padding: 0 0.5em;\n}\n.ML__frac-line {\n  width: 100%;\n  min-height: 1px;\n}\n.ML__frac-line:after {\n  content: '';\n  display: block;\n  margin-top: max(-1px, -0.04em);\n  min-height: max(1px, 0.04em);\n  /* Ensure the line is visible when printing even if \"turn off background images\" is on*/\n  -webkit-print-color-adjust: exact;\n  print-color-adjust: exact;\n  /* There's a bug since Chrome 62 where \n      sub-pixel border lines don't draw at some zoom \n      levels (110%, 90%). \n      Setting the min-height used to work around it, but that workaround\n      broke in Chrome 84 or so.\n      Setting the background (and the min-height) seems to work for now.\n      */\n  background: currentColor;\n  box-sizing: content-box;\n  /* Vuetify sets the box-sizing to inherit \n            causes the fraction line to not draw at all sizes (see #26) */\n  /* On some versions of Firefox on Windows, the line fails to \n            draw at some zoom levels, but setting the transform triggers\n            the hardware accelerated path, which works */\n  transform: translate(0, 0);\n}\n.ML__sqrt {\n  display: inline-block;\n}\n.ML__sqrt-sign {\n  display: inline-block;\n  position: relative;\n}\n.ML__sqrt-line {\n  display: inline-block;\n  height: max(1px, 0.04em);\n  width: 100%;\n}\n.ML__sqrt-line:before {\n  content: '';\n  display: block;\n  margin-top: min(-1px, -0.04em);\n  min-height: max(1px, 0.04em);\n  /* Ensure the line is visible when printing even if \"turn off background images\" is on*/\n  -webkit-print-color-adjust: exact;\n  print-color-adjust: exact;\n  background: currentColor;\n  /* On some versions of Firefox on Windows, the line fails to \n            draw at some zoom levels, but setting the transform triggers\n            the hardware accelerated path, which works */\n  transform: translate(0, 0);\n}\n.ML__sqrt-line:after {\n  border-bottom-width: 1px;\n  content: ' ';\n  display: block;\n  margin-top: -0.1em;\n}\n.ML__sqrt-index {\n  margin-left: 0.27777778em;\n  margin-right: -0.55555556em;\n}\n.ML__delim-size1 {\n  font-family: KaTeX_Size1;\n}\n.ML__delim-size2 {\n  font-family: KaTeX_Size2;\n}\n.ML__delim-size3 {\n  font-family: KaTeX_Size3;\n}\n.ML__delim-size4 {\n  font-family: KaTeX_Size4;\n}\n.ML__delim-mult .delim-size1 > span {\n  font-family: KaTeX_Size1;\n}\n.ML__delim-mult .delim-size4 > span {\n  font-family: KaTeX_Size4;\n}\n.ML__accent-body > span {\n  font-family: KaTeX_Main;\n  width: 0;\n}\n.ML__accent-vec {\n  position: relative;\n  left: 0.24em;\n}\n.ML__mathlive {\n  display: inline-block;\n  direction: ltr;\n  text-align: left;\n  text-indent: 0;\n  text-rendering: auto;\n  font-family: KaTeX_Main, 'Times New Roman', serif;\n  font-style: normal;\n  font-size-adjust: none;\n  font-stretch: normal;\n  font-variant-caps: normal;\n  letter-spacing: normal;\n  line-height: 1.2;\n  word-wrap: normal;\n  word-spacing: normal;\n  white-space: nowrap;\n  text-shadow: none;\n  -webkit-user-select: none;\n  user-select: none;\n  width: min-content;\n}\n.ML__mathlive .style-wrap {\n  position: relative;\n}\n.ML__mathlive .mfrac,\n.ML__mathlive .left-right {\n  display: inline-block;\n}\n.ML__mathlive .vlist-t {\n  display: inline-table;\n  table-layout: fixed;\n  border-collapse: collapse;\n}\n.ML__mathlive .vlist-r {\n  display: table-row;\n}\n.ML__mathlive .vlist {\n  display: table-cell;\n  vertical-align: bottom;\n  position: relative;\n}\n.ML__mathlive .vlist > span {\n  display: block;\n  height: 0;\n  position: relative;\n}\n.ML__mathlive .vlist > span > span {\n  display: inline-block;\n}\n.ML__mathlive .vlist > span > .pstrut {\n  overflow: hidden;\n  width: 0;\n}\n.ML__mathlive .vlist-t2 {\n  margin-right: -2px;\n}\n.ML__mathlive .vlist-s {\n  display: table-cell;\n  vertical-align: bottom;\n  font-size: 1px;\n  width: 2px;\n  min-width: 2px;\n}\n.ML__mathlive .msubsup {\n  text-align: left;\n}\n.ML__mathlive .negativethinspace {\n  display: inline-block;\n  margin-left: -0.16667em;\n  height: 0.71em;\n}\n.ML__mathlive .thinspace {\n  display: inline-block;\n  width: 0.16667em;\n  height: 0.71em;\n}\n.ML__mathlive .mediumspace {\n  display: inline-block;\n  width: 0.22222em;\n  height: 0.71em;\n}\n.ML__mathlive .thickspace {\n  display: inline-block;\n  width: 0.27778em;\n  height: 0.71em;\n}\n.ML__mathlive .enspace {\n  display: inline-block;\n  width: 0.5em;\n  height: 0.71em;\n}\n.ML__mathlive .quad {\n  display: inline-block;\n  width: 1em;\n  height: 0.71em;\n}\n.ML__mathlive .qquad {\n  display: inline-block;\n  width: 2em;\n  height: 0.71em;\n}\n.ML__mathlive .llap,\n.ML__mathlive .rlap {\n  width: 0;\n  position: relative;\n  display: inline-block;\n}\n.ML__mathlive .llap > .inner,\n.ML__mathlive .rlap > .inner {\n  position: absolute;\n}\n.ML__mathlive .llap > .fix,\n.ML__mathlive .rlap > .fix {\n  display: inline-block;\n}\n.ML__mathlive .llap > .inner {\n  right: 0;\n}\n.ML__mathlive .rlap > .inner {\n  left: 0;\n}\n.ML__mathlive .rule {\n  display: inline-block;\n  border: solid 0;\n  position: relative;\n  box-sizing: border-box;\n}\n.ML__mathlive .overline .overline-line,\n.ML__mathlive .underline .underline-line {\n  width: 100%;\n}\n.ML__mathlive .overline .overline-line:before,\n.ML__mathlive .underline .underline-line:before {\n  content: '';\n  border-bottom-style: solid;\n  border-bottom-width: max(1px, 0.04em);\n  -webkit-print-color-adjust: exact;\n  print-color-adjust: exact;\n  display: block;\n}\n.ML__mathlive .overline .overline-line:after,\n.ML__mathlive .underline .underline-line:after {\n  border-bottom-style: solid;\n  border-bottom-width: max(1px, 0.04em);\n  -webkit-print-color-adjust: exact;\n  print-color-adjust: exact;\n  content: '';\n  display: block;\n  margin-top: -1px;\n}\n.ML__mathlive .stretchy {\n  display: block;\n  position: absolute;\n  width: 100%;\n  left: 0;\n  overflow: hidden;\n}\n.ML__mathlive .stretchy:before,\n.ML__mathlive .stretchy:after {\n  content: '';\n}\n.ML__mathlive .stretchy svg {\n  display: block;\n  position: absolute;\n  width: 100%;\n  height: inherit;\n  fill: currentColor;\n  stroke: currentColor;\n  fill-rule: nonzero;\n  fill-opacity: 1;\n  stroke-width: 1;\n  stroke-linecap: butt;\n  stroke-linejoin: miter;\n  stroke-miterlimit: 4;\n  stroke-dasharray: none;\n  stroke-dashoffset: 0;\n  stroke-opacity: 1;\n}\n.ML__mathlive .slice-1-of-2 {\n  display: inline-flex;\n  position: absolute;\n  left: 0;\n  width: 50.2%;\n  overflow: hidden;\n}\n.ML__mathlive .slice-2-of-2 {\n  display: inline-flex;\n  position: absolute;\n  right: 0;\n  width: 50.2%;\n  overflow: hidden;\n}\n.ML__mathlive .slice-1-of-3 {\n  display: inline-flex;\n  position: absolute;\n  left: 0;\n  width: 25.1%;\n  overflow: hidden;\n}\n.ML__mathlive .slice-2-of-3 {\n  display: inline-flex;\n  position: absolute;\n  left: 25%;\n  width: 50%;\n  overflow: hidden;\n}\n.ML__mathlive .slice-3-of-3 {\n  display: inline-flex;\n  position: absolute;\n  right: 0;\n  width: 25.1%;\n  overflow: hidden;\n}\n.ML__mathlive .slice-1-of-1 {\n  display: inline-flex;\n  position: absolute;\n  width: 100%;\n  left: 0;\n  overflow: hidden;\n}\n.ML__mathlive .nulldelimiter {\n  display: inline-block;\n}\n.ML__mathlive .op-group {\n  display: inline-block;\n}\n.ML__mathlive .op-symbol {\n  position: relative;\n}\n.ML__mathlive .op-symbol.small-op {\n  font-family: KaTeX_Size1;\n}\n.ML__mathlive .op-symbol.large-op {\n  font-family: KaTeX_Size2;\n}\n.ML__mathlive .mtable .vertical-separator {\n  display: inline-block;\n  min-width: 1px;\n  box-sizing: border-box;\n}\n.ML__mathlive .mtable .arraycolsep {\n  display: inline-block;\n}\n.ML__mathlive .mtable .col-align-m > .vlist-t {\n  text-align: center;\n}\n.ML__mathlive .mtable .col-align-c > .vlist-t {\n  text-align: center;\n}\n.ML__mathlive .mtable .col-align-l > .vlist-t {\n  text-align: left;\n}\n.ML__mathlive .mtable .col-align-r > .vlist-t {\n  text-align: right;\n}\n.ML__error {\n  display: inline-block;\n  background-image: radial-gradient(ellipse at center, hsl(341, 100%, 40%), rgba(0, 0, 0, 0) 70%);\n  background-color: hsla(341, 100%, 40%, 0.1);\n  background-repeat: repeat-x;\n  background-size: 3px 3px;\n  padding-bottom: 3px;\n  background-position: 0 100%;\n}\n.ML__error > .ML__error {\n  background: transparent;\n  padding: 0;\n}\n.ML__placeholder {\n  color: var(--_placeholder-color);\n  opacity: var(--_placeholder-opacity);\n  padding-left: 0.4ex;\n  padding-right: 0.4ex;\n  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;\n}\n.ML__notation {\n  position: absolute;\n  box-sizing: border-box;\n  line-height: 0;\n}\n/* This class is used to implement the `\\mathtip` and `\\texttip` commands\n   For UI elements, see `[data-ML__tooltip]`\n*/\n.ML__tooltip-container {\n  position: relative;\n  transform: scale(0);\n}\n.ML__tooltip-container .ML__tooltip-content {\n  position: fixed;\n  display: inline-table;\n  visibility: hidden;\n  z-index: 2;\n  width: max-content;\n  max-width: 400px;\n  padding: 12px 12px;\n  border-radius: 8px;\n  background: #616161;\n  --_selection-color: #fff;\n  color: #fff;\n  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);\n  opacity: 0;\n  transition: opacity 0.15s cubic-bezier(0.4, 0, 1, 1);\n}\n.ML__tooltip-container .ML__tooltip-content .ML__text {\n  white-space: normal;\n}\n.ML__tooltip-container .ML__tooltip-content .ML__base {\n  display: contents;\n}\n.ML__tooltip-container:hover .ML__tooltip-content {\n  visibility: visible;\n  opacity: 1;\n  font-size: 0.75em;\n  transform: scale(1) translate(0, 3em);\n}\n";
+
 // src/virtual-keyboard/mathfield-proxy.ts
 function makeProxy(mf) {
   return {
@@ -21822,8 +20734,11 @@ function createSuggestionPopover(mf, html) {
   let panel = document.getElementById("mathlive-suggestion-popover");
   if (!panel) {
     panel = getSharedElement("mathlive-suggestion-popover");
-    injectStylesheet("suggestion-popover");
-    injectStylesheet("core");
+    injectStylesheet(
+      "mathlive-suggestion-popover-stylesheet",
+      suggestion_popover_default
+    );
+    injectStylesheet("mathlive-core-stylesheet", core_default);
     panel.addEventListener("pointerdown", (ev) => ev.preventDefault());
     panel.addEventListener("click", (ev) => {
       let el = ev.target;
@@ -21848,8 +20763,8 @@ function disposeSuggestionPopover() {
   if (!document.getElementById("mathlive-suggestion-popover"))
     return;
   releaseSharedElement("mathlive-suggestion-popover");
-  releaseStylesheet("suggestion-popover");
-  releaseStylesheet("core");
+  releaseStylesheet("mathlive-suggestion-popover-stylesheet");
+  releaseStylesheet("mathlive-core-stylesheet");
 }
 
 // src/common/script-url.ts
@@ -22512,6 +21427,774 @@ var VirtualKeyboardProxy = class {
     );
   }
 };
+
+// css/virtual-keyboard.less
+var virtual_keyboard_default = `.ML__keyboard {
+  --_keyboard-height: 0;
+  --_keyboard-zindex: var(--keyboard-zindex, 105);
+  --_accent-color: var(--keyboard-accent-color, #0c75d8);
+  --_background: var(--keyboard-background, #cacfd7);
+  --_border: var(--keyboard-border, #ddd);
+  --_padding-horizontal: var(--keyboard-padding-horizontal, 0px);
+  --_padding-top: var(--keyboard-padding-top, 5px);
+  --_padding-bottom: var(--keyboard-padding-bottom, 0px);
+  --_row-padding-left: var(--keyboard-row-padding-left, 0px);
+  --_row-padding-left: var(--keyboard-row-padding-right, 0px);
+  --_toolbar-text: var(--keyboard-toolbar-text, #2c2e2f);
+  --_toolbar-text-active: var(--keyboard-toolbar-text-active, var(--_accent-color));
+  --_toolbar-background: var(--keyboard-toolbar-background, transparent);
+  --_toolbar-background-hover: var(--keyboard-toolbar-background-hover, #eee);
+  --_toolbar-background-selected: var(--keyboard-toolbar-background-selected, transparent);
+  --_horizontal-rule: var(--keyboard-horizontal-rule, 1px solid #fff);
+  --_keycap-background: var(--keycap-background, white);
+  --_keycap-background-hover: var(--keycap-background, #f5f5f7);
+  --_keycap-background-active: var(--keycap-background-active, var(--_accent-color));
+  --_keycap-background-pressed: var(--keycap-background-pressed, var(--_accent-color));
+  --_keycap-border: var(--keycap-border, #e5e6e9);
+  --_keycap-border-bottom: var(--keycap-border-bottom, #8d8f92);
+  --_keycap-text: var(--keycap-text, #000);
+  --_keycap-text-active: var(--keycap-text-active, #fff);
+  --_keycap-text-hover: var(--keycap-text-hover, var(--_keycap-text));
+  --_keycap-text-pressed: var(--keycap-text-pressed, #fff);
+  --_keycap-shift-text: var(--keycap-shift-text, var(--_accent-color));
+  --_keycap-primary-background: var(--keycap-primary-background, var(--_accent-color));
+  --_keycap-primary-text: var(--keycap-primary-text, #ddd);
+  --_keycap-primary-background-hover: var(--keycap-primary-background-hover, #0d80f2);
+  --_keycap-secondary-background: var(--keycap-secondary-background, #a0a9b8);
+  --_keycap-secondary-background-hover: var(--keycap-secondary-background-hover, #7d8795);
+  --_keycap-secondary-text: var(--keycap-secondary-text, #060707);
+  --_keycap-secondary-border: var(--keycap-secondary-border, #c5c9d0);
+  --_keycap-secondary-border-bottom: var(--keycap-secondary-border-bottom, #989da6);
+  --_keycap-height: var(--keycap-height, 60px);
+  /* Keycap width (incl. margin) */
+  --_keycap-max-width: var(--keycap-max-width, 100px);
+  --_keycap-gap: var(--keycap-gap, 8px);
+  --_keycap-font-size: var(--keycap-font-size, clamp(16px, 4cqw, 24px));
+  --_keycap-small-font-size: var(--keycap-small-font-size, calc(var(--keycap-font-size) * 0.8));
+  --_keycap-extra-small-font-size: var(--keycap-extra-small-font-size, calc(var(--keycap-font-size) / 1.42));
+  --_variant-panel-background: var(--variant-panel-background, #fff);
+  --_variant-keycap-text: var(--variant-keycap-textvar, var(--_keycap-text));
+  --_variant-keycap-text-active: var(--variant-keycap-text-active, var(--_keycap-text-active));
+  --_variant-keycap-background-active: var(--variant-keycap-background-active, var(--_accent-color));
+  --_variant-keycap-length: var(--variant-keycap-length, 70px);
+  --_variant-keycap-font-size: var(--variant-keycap-font-size, 30px);
+  --_variant-keycap-aside-font-size: var(--variant-keycap-aside-font-size, 12px);
+  --_keycap-shift-font-size: var(--variant-keycap-font-size, 16px);
+  --_keycap-shift-color: var(--keycap-shift-color, var(--_accent-color));
+  --_box-placeholder-color: var(--box-placeholder-color, var(--_accent-color));
+}
+.if-can-undo,
+.if-can-redo,
+.if-can-copy,
+.if-can-cut,
+.if-can-paste {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.can-undo .if-can-undo,
+.can-redo .if-can-redo,
+.can-copy .if-can-copy,
+.can-cut .if-can-cut,
+.can-paste .if-can-paste {
+  opacity: 1;
+  pointer-events: all;
+}
+body > .ML__keyboard {
+  position: fixed;
+  --_padding-bottom: calc(var(--_padding-bottom) + env(safe-area-inset-bottom, 0));
+}
+body > .ML__keyboard.is-visible > .MLK__backdrop {
+  box-shadow: 0 -5px 6px rgba(0, 0, 0, 0.08);
+  border-top: 1px solid var(--_border);
+}
+body > .ML__keyboard.backdrop-is-transparent.is-visible > .MLK__backdrop {
+  box-shadow: none;
+  border: none;
+}
+body > .ML__keyboard.is-visible.animate > .MLK__backdrop {
+  transition: 0.28s cubic-bezier(0, 0, 0.2, 1);
+  transition-property: transform, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+}
+.ML__keyboard {
+  position: relative;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: var(--_keyboard-zindex);
+  box-sizing: border-box;
+  outline: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  overflow-wrap: unset;
+  text-align: left;
+  vertical-align: baseline;
+  cursor: auto;
+  white-space: pre;
+  box-shadow: none;
+  opacity: 1;
+  transform: none;
+  pointer-events: none;
+}
+.ML__keyboard :where(div) {
+  box-sizing: border-box;
+  outline: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  overflow-wrap: unset;
+  text-align: left;
+  vertical-align: baseline;
+  cursor: auto;
+  white-space: pre;
+  box-shadow: none;
+  transform: none;
+}
+.MLK__backdrop {
+  position: absolute;
+  bottom: calc(-1 * var(--_keyboard-height));
+  width: 100%;
+  height: var(--_keyboard-height);
+  box-sizing: border-box;
+  padding-top: var(--_padding-top);
+  padding-bottom: var(--_padding-bottom);
+  padding-left: var(--_padding-horizontal);
+  padding-right: var(--_padding-horizontal);
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(0, 0);
+  background: var(--_background);
+}
+.backdrop-is-transparent .MLK__backdrop {
+  background: transparent;
+}
+/* If a custom layout has a custom container/backdrop
+  (backdrop-is-transparent), make sure to let pointer event go through. */
+.backdrop-is-transparent .MLK__plate {
+  background: transparent;
+  pointer-events: none;
+}
+/* If a custom layout has a custom container/backdrop, make sure to 
+   allow pointer events on it. */
+.backdrop-is-transparent .MLK__layer > div > div {
+  pointer-events: all;
+}
+.ML__keyboard.is-visible > .MLK__backdrop {
+  transform: translate(0, calc(-1 * var(--_keyboard-height)));
+  opacity: 1;
+  visibility: visible;
+}
+.caps-lock-indicator {
+  display: none;
+  width: 8px;
+  height: 8px;
+  background: #0cbc0c;
+  box-shadow: inset 0 0 4px 0 #13ca13, 0 0 4px 0 #a9ef48;
+  border-radius: 8px;
+  right: 8px;
+  top: 8px;
+  position: absolute;
+}
+.ML__keyboard.is-caps-lock .caps-lock-indicator {
+  display: block;
+}
+.ML__keyboard.is-caps-lock .shift {
+  background: var(--_keycap-background-active);
+  color: var(--_keycap-text-active);
+}
+.MLK__plate {
+  position: absolute;
+  top: 0;
+  left: var(--_padding-horizontal);
+  width: calc(100% - 2 * var(--_padding-horizontal));
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  container-type: inline-size;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  pointer-events: all;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-size: 16px;
+  /* Size of toolbar labels */
+  font-weight: 400;
+  text-shadow: none;
+}
+.ML__box-placeholder {
+  color: var(--_box-placeholder-color);
+}
+.MLK__tex {
+  font-family: KaTeX_Main, KaTeX_Math, 'Cambria Math', 'Asana Math', OpenSymbol, Symbola, STIX, Times, serif !important;
+}
+.MLK__tex-math {
+  font-family: KaTeX_Math, KaTeX_Main, 'Cambria Math', 'Asana Math', OpenSymbol, Symbola, STIX, Times, serif !important;
+  font-style: italic;
+}
+.MLK__layer {
+  display: none;
+  outline: none;
+}
+.MLK__layer.is-visible {
+  display: flex;
+  flex-flow: column;
+}
+/* Keyboard layouts are made or rows of keys... */
+.MLK__rows {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  border-collapse: separate;
+  clear: both;
+  border: 0;
+  margin: 0;
+  margin-bottom: var(--_keycap-gap);
+  gap: var(--_keycap-gap);
+  /* If the styling include, e.g., some shadows, they will be
+  cut off by the overflow. In that case, set the padding to 
+  compensate. */
+  padding-left: var(--_row-padding-left);
+  padding-right: var(--_row-padding-right);
+  overflow-x: auto;
+  touch-action: none;
+}
+.MLK__rows > .row {
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+  width: 100%;
+  gap: var(--_keycap-gap);
+  margin: 0;
+  padding: 0;
+  /* For the alignment of the text on some modifiers (e.g. shift) */
+  /* Extra spacing between two adjacent keys */
+  /** A regular keycap */
+}
+.MLK__rows > .row .tex {
+  font-family: KaTeX_Math, KaTeX_Main, 'Cambria Math', 'Asana Math', OpenSymbol, Symbola, STIX, Times, serif !important;
+}
+.MLK__rows > .row .tex-math {
+  font-family: KaTeX_Math, 'Cambria Math', 'Asana Math', OpenSymbol, Symbola, STIX, Times, serif !important;
+}
+.MLK__rows > .row .big-op {
+  font-size: calc(1.25 * var(--_keycap-font-size));
+}
+.MLK__rows > .row .small {
+  font-size: var(--_keycap-small-font-size);
+}
+.MLK__rows > .row .bottom {
+  justify-content: flex-end;
+}
+.MLK__rows > .row .left {
+  align-items: flex-start;
+  padding-left: 12px;
+}
+.MLK__rows > .row .right {
+  align-items: flex-end;
+  padding-right: 12px;
+}
+.MLK__rows > .row .w0 {
+  width: 0;
+}
+.MLK__rows > .row .w5 {
+  width: calc(min(var(--_keycap-max-width, 100px), 10cqw) / 2 - var(--_keycap-gap));
+}
+.MLK__rows > .row .w15 {
+  width: calc(1.5 * min(var(--_keycap-max-width, 100px), 10cqw) - var(--_keycap-gap));
+}
+.MLK__rows > .row .w20 {
+  width: calc(2 * min(var(--_keycap-max-width, 100px), 10cqw) - var(--_keycap-gap));
+}
+.MLK__rows > .row .w40 {
+  width: calc(4 * min(var(--private-keycap-max-width, 100px), 10cqw) - var(--private-keycap-gap));
+}
+.MLK__rows > .row .w50 {
+  width: calc(5 * min(var(--_keycap-max-width, 100px), 10cqw) - var(--_keycap-gap));
+}
+.MLK__rows > .row .MLK__keycap.w50 {
+  font-size: 80%;
+  padding-top: 10px;
+  font-weight: 100;
+}
+.MLK__rows > .row .separator {
+  background: transparent;
+  border: none;
+  pointer-events: none;
+}
+.MLK__rows > .row .horizontal-rule {
+  height: 6px;
+  margin-top: 3px;
+  margin-bottom: 0;
+  width: 100%;
+  border-radius: 0;
+  border-top: var(--_horizontal-rule);
+}
+.MLK__rows > .row .ghost {
+  background: var(--_toolbar-background);
+  border: none;
+  color: var(--_toolbar-text);
+}
+.MLK__rows > .row .ghost:hover {
+  background: var(--_toolbar-background-hover);
+}
+.MLK__rows > .row .bigfnbutton {
+  font-size: var(--_keycap-extra-small-font-size);
+}
+.MLK__rows > .row .shift,
+.MLK__rows > .row .action {
+  color: var(--_keycap-secondary-text);
+  background: var(--_keycap-secondary-background);
+  border-color: var(--_keycap-secondary-border);
+  border-bottom-color: var(--_keycap-secondary-border-bottom);
+  line-height: 0.8;
+  font-size: min(1rem, var(--_keycap-small-font-size));
+  font-weight: 600;
+  padding: 8px 12px 8px 12px;
+}
+.MLK__rows > .row .shift:hover,
+.MLK__rows > .row .action:hover {
+  background: var(--_keycap-secondary-background-hover);
+}
+.MLK__rows > .row .action.primary {
+  background: var(--_keycap-primary-background);
+  color: var(--_keycap-primary-text);
+}
+.MLK__rows > .row .action.primary:hover {
+  background: var(--_keycap-primary-background-hover);
+  color: var(--_keycap-primary-text);
+}
+.MLK__rows > .row .shift.selected,
+.MLK__rows > .row .action.selected {
+  color: var(--_toolbar-text-active);
+}
+.MLK__rows > .row .shift.selected.is-pressed,
+.MLK__rows > .row .action.selected.is-pressed,
+.MLK__rows > .row .shift.selected.is-active,
+.MLK__rows > .row .action.selected.is-active {
+  color: white;
+}
+.MLK__rows > .row .warning {
+  background: #cd0030;
+  color: white;
+}
+.MLK__rows > .row .warning svg.svg-glyph {
+  width: 24px;
+  height: 24px;
+  min-height: 24px;
+}
+.MLK__rows > .row div {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: space-evenly;
+  width: calc(min(var(--_keycap-max-width), 10cqw) - var(--_keycap-gap));
+  height: var(--_keycap-height);
+  box-sizing: border-box;
+  padding: 0;
+  vertical-align: top;
+  text-align: center;
+  float: left;
+  color: var(--_keycap-text);
+  fill: currentColor;
+  font-size: var(--_keycap-font-size);
+  background: var(--_keycap-background);
+  border: 1px solid var(--_keycap-border);
+  border-bottom-color: var(--_keycap-border-bottom);
+  border-radius: 6px;
+  cursor: pointer;
+  touch-action: none;
+  /* Keys with a variants panel */
+  position: relative;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.MLK__rows > .row div:hover {
+  background: var(--_keycap-background-hover);
+}
+.MLK__rows > .row div .ML__mathlive {
+  pointer-events: none;
+  touch-action: none;
+}
+.MLK__rows > .row div svg.svg-glyph {
+  margin: 8px 0;
+  width: 20px;
+  height: 20px;
+  min-height: 20px;
+}
+.MLK__rows > .row div svg.svg-glyph-lg {
+  margin: 8px 0;
+  width: 24px;
+  height: 24px;
+  min-height: 24px;
+}
+.MLK__rows > .row div.MLK__tex-math {
+  font-size: 25px;
+}
+.MLK__rows > .row div.is-pressed {
+  background: var(--_keycap-background-pressed);
+  color: var(--_keycap-text-pressed);
+}
+.MLK__rows > .row div.MLK__keycap.is-active,
+.MLK__rows > .row div.action.is-active,
+.MLK__rows > .row div.MLK__keycap.is-pressed,
+.MLK__rows > .row div.action.is-pressed {
+  z-index: calc(var(--_keyboard-zindex) - 5);
+}
+.MLK__rows > .row div.MLK__keycap.is-active aside,
+.MLK__rows > .row div.action.is-active aside,
+.MLK__rows > .row div.MLK__keycap.is-pressed aside,
+.MLK__rows > .row div.action.is-pressed aside {
+  display: none;
+}
+.MLK__rows > .row div.MLK__keycap.is-active .MLK__shift,
+.MLK__rows > .row div.action.is-active .MLK__shift,
+.MLK__rows > .row div.MLK__keycap.is-pressed .MLK__shift,
+.MLK__rows > .row div.action.is-pressed .MLK__shift {
+  display: none;
+}
+.MLK__rows > .row div.shift.is-pressed,
+.MLK__rows > .row div.MLK__keycap.is-pressed,
+.MLK__rows > .row div.action.is-pressed {
+  background: var(--_keycap-background-pressed);
+  color: var(--_keycap-text-pressed);
+}
+.MLK__rows > .row div.shift.is-active,
+.MLK__rows > .row div.MLK__keycap.is-active,
+.MLK__rows > .row div.action.is-active {
+  background: var(--_keycap-background-active);
+  color: var(--_keycap-text-active);
+}
+.MLK__rows > .row div small {
+  color: var(--_keycap-secondary-text);
+}
+.MLK__rows > .row div aside {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  line-height: 10px;
+  color: var(--_keycap-secondary-text);
+}
+/* Add an attribute 'data-tooltip' to display a tooltip on hover.
+Note there are a different set of tooltip rules for the keyboard toggle
+(it's in a different CSS tree) */
+.MLK__tooltip {
+  position: relative;
+}
+.MLK__tooltip::after {
+  position: absolute;
+  display: inline-table;
+  content: attr(data-tooltip);
+  top: inherit;
+  bottom: 100%;
+  width: max-content;
+  max-width: 200px;
+  padding: 8px 8px;
+  background: #616161;
+  color: #fff;
+  text-align: center;
+  z-index: 2;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 1, 1) 1s;
+  opacity: 0;
+  transform: scale(0.5);
+}
+.MLK__tooltip:hover {
+  position: relative;
+}
+.MLK__tooltip:hover::after {
+  opacity: 1;
+  transform: scale(1);
+}
+.MLK__toolbar {
+  align-self: center;
+  display: flex;
+  flex-flow: row;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 996px;
+  min-height: 32px;
+  /* Icons for undo/redo, etc. */
+}
+.MLK__toolbar svg {
+  height: 20px;
+  width: 20px;
+}
+.MLK__toolbar > .left {
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+  flex-flow: row;
+}
+.MLK__toolbar > .right {
+  display: flex;
+  justify-content: flex-end;
+  flex-flow: row;
+}
+.MLK__toolbar > div > div {
+  /* "button" in the toolbar */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--_toolbar-text);
+  fill: currentColor;
+  background: var(--_toolbar-background);
+  font-size: 135%;
+  padding: 4px 15px;
+  cursor: pointer;
+  width: max-content;
+  min-width: 42px;
+  min-height: 22px;
+  border: none;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 8px;
+  padding-top: 8px;
+  margin-top: 7px;
+  margin-bottom: 8px;
+  margin-left: 4px;
+  margin-right: 4px;
+  border-radius: 8px;
+  box-shadow: none;
+  border-bottom: 2px solid transparent;
+}
+.MLK__toolbar > div > div:not(.disabled):not(.selected):hover {
+  background: var(--_toolbar-background-hover);
+}
+.MLK__toolbar > div > div.disabled svg,
+.MLK__toolbar > div > div.disabled:hover svg,
+.MLK__toolbar > div > div.disabled.is-pressed svg {
+  color: var(--_toolbar-text);
+  opacity: 0.2;
+}
+.MLK__toolbar > div > div:hover,
+.MLK__toolbar > div > div:active,
+.MLK__toolbar > div > div.is-pressed,
+.MLK__toolbar > div > div.is-active {
+  color: var(--_toolbar-text-active);
+}
+.MLK__toolbar > div > div.selected {
+  color: var(--_toolbar-text-active);
+  background: var(--_toolbar-background-selected);
+  border-radius: 0;
+  border-bottom-color: var(--_toolbar-text-active);
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+}
+/* This is the element that displays variants on press+hold */
+.MLK__variant-panel {
+  visibility: hidden;
+  position: fixed;
+  display: flex;
+  flex-flow: row wrap-reverse;
+  justify-content: center;
+  align-content: center;
+  margin: 0;
+  padding: 0;
+  bottom: auto;
+  top: 0;
+  box-sizing: content-box;
+  transform: none;
+  z-index: calc(var(--_keyboard-zindex) + 1);
+  touch-action: none;
+  max-width: 350px;
+  background: var(--_variant-panel-background);
+  text-align: center;
+  border-radius: 6px;
+  padding: 6px;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  transition: none;
+}
+.MLK__variant-panel.is-visible {
+  visibility: visible;
+}
+.MLK__variant-panel.compact {
+  --_variant-keycap-length: var(--variant-keycap-length, 50px);
+  --_variant-keycap-font-size: var(--variant-keycap-font-size, 24px);
+  --_variant-keycap-aside-font-size: var(--variant-keycap-aside-font-size, 10px);
+}
+.MLK__variant-panel .item {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--_variant-keycap-font-size);
+  height: var(--_variant-keycap-length);
+  width: var(--_variant-keycap-length);
+  margin: 0;
+  box-sizing: border-box;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  background: transparent;
+  pointer-events: all;
+  cursor: pointer;
+  color: var(--_variant-keycap-text);
+  fill: currentColor;
+}
+@media (max-height: 412px) {
+  .MLK__variant-panel .item {
+    --_variant-keycap-font-size: var(--variant-keycap-font-size, 24px);
+    --_variant-keycap-length: var(--variant-keycap-length, 50px);
+  }
+}
+.MLK__variant-panel .item .ML__mathlive {
+  pointer-events: none;
+}
+.MLK__variant-panel .item.is-active {
+  background: var(--_variant-keycap-background-active);
+  color: var(--_variant-keycap-text-active);
+}
+.MLK__variant-panel .item.is-pressed {
+  background: var(--_variant-keycap-background-pressed);
+  color: var(--_variant-keycap-text-pressed);
+}
+.MLK__variant-panel .item.small {
+  font-size: var(--_keycap-small-font-size);
+}
+.MLK__variant-panel .item.swatch-button {
+  box-sizing: border-box;
+  background: #fbfbfb;
+}
+.MLK__variant-panel .item.swatch-button > span {
+  display: inline-block;
+  margin: 6px;
+  width: calc(100% - 12px);
+  height: calc(100% - 12px);
+  border-radius: 50%;
+}
+.MLK__variant-panel .item.swatch-button:hover {
+  background: #f0f0f0;
+}
+.MLK__variant-panel .item.swatch-button:hover > span {
+  border-radius: 2px;
+}
+.MLK__variant-panel .item.box > div,
+.MLK__variant-panel .item.box > span {
+  border: 1px dashed rgba(0, 0, 0, 0.24);
+}
+.MLK__variant-panel .item .warning {
+  min-height: 60px;
+  min-width: 60px;
+  background: #cd0030;
+  color: white;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+}
+.MLK__variant-panel .item .warning.is-pressed,
+.MLK__variant-panel .item .warning.is-active {
+  background: red;
+}
+.MLK__variant-panel .item .warning svg.svg-glyph {
+  width: 50px;
+  height: 50px;
+}
+.MLK__variant-panel .item aside {
+  font-size: var(--_variant-keycap-aside-font-size);
+  line-height: 12px;
+  opacity: 0.78;
+  padding-top: 2px;
+}
+.MLK__keycap {
+  position: relative;
+}
+.MLK__shift {
+  display: block;
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  font-size: var(--_keycap-shift-font-size);
+  color: var(--_keycap-shift-color);
+}
+.hide-shift .MLK__shift {
+  display: none;
+}
+@media (max-width: 414px) {
+  .MLK__variant-panel {
+    max-width: 350px;
+    --_variant-keycap-font-size: var(--variant-keycap-font-size, 24px);
+    --_variant-keycap-length: var(--variant-keycap-length, 50px);
+  }
+}
+/* @xs breakpoint: iPhone 5 */
+@container (max-width: 414px) {
+  .MLK__rows {
+    --_keycap-gap: min(var(--_keycap-gap, 2px), 2px);
+    --_keycap-height: min(var(--_keycap-height, 42px), 42px);
+    --_keycap-max-width: min(var(--_keycap-max-width, 62px), 62px);
+  }
+  .MLK__toolbar > div > div {
+    font-size: 100%;
+    padding: 0;
+    margin-left: 2px;
+    margin-right: 2px;
+  }
+  .MLK__rows .shift,
+  .MLK__rows .action {
+    font-size: 65%;
+  }
+  .MLK__rows .warning svg.svg-glyph {
+    width: 14px;
+    height: 14px;
+    min-height: 14px;
+  }
+}
+@container (max-width: 744px) {
+  .MLK__rows {
+    --_keycap-gap: min(var(--keycap-gap, 2px), 2px);
+    --_keycap-height: min(var(--keycap-height, 52px), 52px);
+    --_keycap-max-width: min(var(--keycap-max-width, 62px), 62px);
+  }
+  .MLK__toolbar > div > div {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .MLK__tooltip::after {
+    padding: 8px 16px;
+    font-size: 16px;
+  }
+  .MLK__rows > .row > div.fnbutton {
+    font-size: 16px;
+  }
+  .MLK__rows > .row > div.bigfnbutton {
+    font-size: calc(var(--_keycap-extra-small-font-size) / 1.55);
+  }
+  .MLK__rows > .row > div.small {
+    font-size: 13px;
+  }
+  .MLK__rows > .row > div > aside {
+    display: none;
+  }
+  .MLK__shift {
+    display: none;
+  }
+}
+/* Medium breakpoint: larger phones */
+@container (max-width: 768px) {
+  .MLK__rows {
+    --_keycap-height: min(var(--keycap-height, 42px), 42px);
+  }
+  .MLK__rows > .row > div > small {
+    font-size: 14px;
+  }
+}
+@container (max-width: 1444px) {
+  .MLK__rows .if-wide {
+    display: none;
+  }
+}
+`;
 
 // src/virtual-keyboard/data.ts
 var LAYOUTS = {
@@ -24048,13 +23731,16 @@ function makeSyntheticKeycap(element) {
   }
 }
 function injectStylesheets() {
-  injectStylesheet("virtual-keyboard");
-  injectStylesheet("core");
+  injectStylesheet(
+    "mathlive-virtual-keyboard-stylesheet",
+    virtual_keyboard_default
+  );
+  injectStylesheet("mathlive-core-stylesheet", core_default);
   void loadFonts();
 }
 function releaseStylesheets() {
-  releaseStylesheet("core");
-  releaseStylesheet("virtual-keyboard");
+  releaseStylesheet("mathlive-core-stylesheet");
+  releaseStylesheet("mathlive-virtual-keyboard-stylesheet");
 }
 var SVG_ICONS = `<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
 
@@ -29679,6 +29365,9 @@ function smartMode(mathfield, keystroke, evt) {
   return false;
 }
 
+// css/keystroke-caption.less
+var keystroke_caption_default = "/* The element that displays the keys as the user type them */\n#mathlive-keystroke-caption-panel {\n  visibility: hidden;\n  /*min-width: 160px;*/\n  /*background-color: rgba(97, 97, 200, .95);*/\n  background: var(--secondary, hsl(var(--_hue), 19%, 26%));\n  border-color: var(--secondary-border, hsl(0, 0%, 91%));\n  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);\n  text-align: center;\n  border-radius: 6px;\n  padding: 16px;\n  position: absolute;\n  z-index: 1;\n  display: flex;\n  flex-direction: row-reverse;\n  justify-content: center;\n  --keystroke: white;\n  --on-keystroke: #555;\n  --keystroke-border: #f7f7f7;\n}\n@media (prefers-color-scheme: dark) {\n  body:not([theme='light']) #mathlive-keystroke-caption-panel {\n    --keystroke: hsl(var(--_hue), 50%, 30%);\n    --on-keystroke: hsl(0, 0%, 98%);\n    --keystroke-border: hsl(var(--_hue), 50%, 25%);\n  }\n}\nbody[theme='dark'] #mathlive-keystroke-caption-panel {\n  --keystroke: hsl(var(--_hue), 50%, 30%);\n  --on-keystroke: hsl(0, 0%, 98%);\n  --keystroke-border: hsl(var(--_hue), 50%, 25%);\n}\n#mathlive-keystroke-caption-panel > span {\n  min-width: 14px;\n  /*height: 8px;*/\n  margin: 0 8px 0 0;\n  padding: 4px;\n  background-color: var(--keystroke);\n  color: var(--on-keystroke);\n  fill: currentColor;\n  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;\n  font-size: 1em;\n  border-radius: 6px;\n  border: 2px solid var(--keystroke-border);\n  /*box-shadow: 0 7px 14px rgba(0,0,0,0.25), 0 5px 5px rgba(0,0,0,0.22);*/\n}\n";
+
 // src/editor-mathfield/keystroke-caption.ts
 function showKeystroke(mathfield, keystroke) {
   if (!mathfield.isSelectionEditable || !mathfield.keystrokeCaptionVisible)
@@ -29710,19 +29399,23 @@ function toggleKeystrokeCaption(mathfield) {
   return false;
 }
 function createKeystrokeCaption() {
-  const panel = document.getElementById("mathlive-keystroke-caption-panel");
+  let panel = document.getElementById("mathlive-keystroke-caption-panel");
   if (panel)
     return panel;
-  injectStylesheet("keystroke-caption");
-  injectStylesheet("core");
-  return getSharedElement("mathlive-keystroke-caption-panel");
+  panel = getSharedElement("mathlive-keystroke-caption-panel");
+  injectStylesheet(
+    "mathlive-keystroke-caption-stylesheet",
+    keystroke_caption_default
+  );
+  injectStylesheet("mathlive-core-stylesheet", core_default);
+  return panel;
 }
 function disposeKeystrokeCaption() {
   if (!document.getElementById("mathlive-keystroke-caption-panel"))
     return;
   releaseSharedElement("mathlive-keystroke-caption-panel");
-  releaseStylesheet("core");
-  releaseStylesheet("keystroke-caption");
+  releaseStylesheet("mathlive-core-stylesheet");
+  releaseStylesheet("mathlive-keystroke-caption-stylesheet");
 }
 
 // src/editor-mathfield/keyboard-input.ts
@@ -33691,6 +33384,9 @@ function convertStringToAtoms2(s, context) {
 }
 new TextModeEditor();
 
+// css/environment-popover.less
+var environment_popover_default = "#mathlive-environment-popover.is-visible {\n  visibility: visible;\n}\n#mathlive-environment-popover {\n  --_environment-panel-height: var(--environment-panel-height, 70px);\n  --_accent-color: var(--accent-color, #0c75d8);\n  --_background: var(--environment-panel-background, #0c75d8);\n  --_button-background: var(--environment-panel-button-background, white);\n  --_button-background-hover: var(--environment-panel-button-background-hover, #f5f5f7);\n  --_button-background-active: var(--environment-panel-button-background-active, #f5f5f7);\n  --_button-text: var(--environment-panel-button-text, #e3e4e8);\n  position: absolute;\n  width: calc(var(--_environment-panel-height) * 2);\n  height: var(--_environment-panel-height);\n  border-radius: 4px;\n  border: 1.5px solid var(--_accent-color);\n  background-color: var(--_background);\n  box-shadow: 0 0 30px 0 var(--environment-shadow, rgba(0, 0, 0, 0.4));\n  pointer-events: all;\n  visibility: hidden;\n}\n#mathlive-environment-popover .MLEP__array-buttons {\n  height: calc(var(--_environment-panel-height) * 5/4);\n  width: calc(var(--_environment-panel-height) * 5/4);\n  margin-left: calc(0px - var(--_environment-panel-height) * 0.16);\n  margin-top: calc(0px - var(--_environment-panel-height) * 0.19);\n}\n#mathlive-environment-popover .MLEP__array-buttons .font {\n  fill: white;\n}\n#mathlive-environment-popover .MLEP__array-buttons circle {\n  fill: #7f7f7f;\n  transition: fill 300ms;\n}\n#mathlive-environment-popover .MLEP__array-buttons .MLEP__array-insert-background {\n  fill-opacity: 1;\n  fill: var(--_background);\n  stroke: var(--_accent-color);\n  stroke-width: 3px;\n}\n#mathlive-environment-popover .MLEP__array-buttons line {\n  stroke: var(--_accent-color);\n  stroke-opacity: 0;\n  stroke-width: 40;\n  pointer-events: none;\n  transition: stroke-opacity 300ms;\n  stroke-linecap: round;\n}\n#mathlive-environment-popover .MLEP__array-buttons g[data-command]:hover circle {\n  fill: var(--_accent-color);\n}\n#mathlive-environment-popover .MLEP__array-buttons g[data-command]:hover line {\n  stroke-opacity: 1;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls {\n  height: 100%;\n  width: 50%;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options {\n  width: var(--_environment-panel-height);\n  height: var(--_environment-panel-height);\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: space-around;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg {\n  pointer-events: all;\n  margin-top: 2px;\n  width: calc(var(--_environment-panel-height) / 3 * 28 / 24);\n  height: calc(var(--_environment-panel-height) / 3 - 2px);\n  border-radius: calc(var(--_environment-panel-height) / 25);\n  background-color: var(--_button-background);\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg:hover {\n  background-color: var(--_button-background-hover);\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg path,\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg line {\n  stroke: var(--_button-text);\n  stroke-width: 2;\n  stroke-linecap: round;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg rect,\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg path {\n  fill-opacity: 0;\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg.active {\n  pointer-events: none;\n  background-color: var(--_button-background-active);\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg.active path,\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg.active line {\n  stroke: var(--_accent-color);\n}\n#mathlive-environment-popover .MLEP__environment-delimiter-controls .MLEP__array-delimiter-options svg.active circle {\n  fill: var(--_accent-color);\n}\n";
+
 // src/editor/environment-popover.ts
 var padding = 4;
 var radius = 20;
@@ -33862,8 +33558,11 @@ function showEnvironmentPopover(mf) {
   let panel = document.getElementById("mathlive-environment-popover");
   if (!panel) {
     panel = getSharedElement("mathlive-environment-popover");
-    injectStylesheet("environment-popover");
-    injectStylesheet("core");
+    injectStylesheet(
+      "mathlive-environment-popover-stylesheet",
+      environment_popover_default
+    );
+    injectStylesheet("mathlive-core-stylesheet", core_default);
     panel.setAttribute("aria-hidden", "true");
   }
   let flexbox;
@@ -33946,8 +33645,8 @@ function disposeEnvironmentPopover() {
   if (!document.getElementById("mathlive-environment-popover"))
     return;
   releaseSharedElement("mathlive-environment-popover");
-  releaseStylesheet("environment-popover");
-  releaseStylesheet("core");
+  releaseStylesheet("mathlive-environment-popover-stylesheet");
+  releaseStylesheet("mathlive-core-stylesheet");
 }
 function updateEnvironmentPopover(mf) {
   if (!mf.hasFocus())
@@ -35651,11 +35350,298 @@ function defaultReadAloudHook(element, text) {
   });
 }
 
+// css/mathfield.less
+var mathfield_default = `@keyframes ML__caret-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+.ML__container {
+  display: inline-flex;
+  flex-flow: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  min-height: 39px;
+  /* Need some room for the virtual keyboard toggle */
+  width: 100%;
+  /* Encourage browsers to consider allocating a hardware accelerated
+   layer for this element. */
+  isolation: isolate;
+  /* Prevent the browser from trying to interpret touch gestures in the field */
+  /* "Disabling double-tap to zoom removes the need for browsers to
+        delay the generation of click events when the user taps the screen." */
+  touch-action: none;
+  --_caret-color: var(--caret-color, hsl(var(--_hue), 40%, 49%));
+  --_selection-color: var(--selection-color, #000);
+  --_selection-background-color: var(--selection-background-color, hsl(var(--_hue), 70%, 85%));
+  --_text-highlight-background-color: var(--highlight-text, hsla(var(--_hue), 40%, 50%, 0.1));
+  --_contains-highlight-background-color: var(--contains-highlight-backround-color, hsl(var(--_hue), 40%, 95%));
+  --_smart-fence-color: var(--smart-fence-color, currentColor);
+  --_smart-fence-opacity: var(--smart-fence-opacity, 0.5);
+  --_latex-color: var(--latex-color, hsl(var(--_hue), 40%, 50%));
+  --_correct-color: var(--correct-color, #10a000);
+  --_incorrect-color: var(--incorrect-color, #a01b00);
+  --_composition-background-color: var(--composition-background-color, #fff1c2);
+  --_composition-text-color: var(--composition-text-color, black);
+  --_composition-underline-color: var(--composition-underline-color, transparent);
+}
+/* This is the actual field content (formula) */
+.ML__content {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  position: relative;
+  overflow: hidden;
+  padding: 2px 0 2px 1px;
+  width: 100%;
+}
+.ML__virtual-keyboard-toggle {
+  box-sizing: border-box;
+  display: flex;
+  align-self: center;
+  align-items: center;
+  flex-shrink: 0;
+  flex-direction: column;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  margin-right: 4px;
+  cursor: pointer;
+  /* Avoid some weird blinking with :hover */
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: background 0.2s cubic-bezier(0.64, 0.09, 0.08, 1);
+  color: hsl(var(--_hue), 40%, 50%);
+  fill: currentColor;
+  background: transparent;
+}
+.ML__virtual-keyboard-toggle:hover {
+  background: hsla(0, 0%, 70%, 0.3);
+  color: #333;
+  fill: currentColor;
+}
+.ML__virtual-keyboard-toggle > span {
+  display: flex;
+  align-self: center;
+  align-items: center;
+}
+/* The invisible element used to capture keyboard events. We're just trying
+ really hard to make sure it doesn't show. */
+.ML__keyboard-sink {
+  display: inline-block;
+  resize: none;
+  outline: none;
+  border: none;
+  /* Need these for Microsoft Edge */
+  position: fixed;
+  clip: rect(0 0 0 0);
+  /* Need this to prevent iOS Safari from auto-zooming */
+  font-size: 1em;
+  font-family: KaTeX_Main;
+}
+.ML__composition {
+  background: var(--_composition-background-color);
+  color: var(--_composition-text-color);
+  text-decoration: underline var(--_composition-underline-color);
+}
+.ML__caret:after {
+  content: '';
+  border: none;
+  border-radius: 2px;
+  border-right: 2px solid var(--_caret-color);
+  margin-right: -2px;
+  position: relative;
+  left: -1px;
+  animation: ML__caret-blink 1.05s step-end forwards infinite;
+}
+.ML__text-caret:after {
+  content: '';
+  border: none;
+  border-radius: 1px;
+  border-right: 1px solid var(--_caret-color);
+  margin-right: -1px;
+  position: relative;
+  left: 0;
+  animation: ML__caret-blink 1.05s step-end forwards infinite;
+}
+.ML__latex-caret:after {
+  content: '_';
+  border: none;
+  margin-right: 0;
+  margin-right: calc(-1ex - 2px);
+  position: relative;
+  color: var(--_caret-color);
+  animation: ML__caret-blink 1.05s step-end forwards infinite;
+}
+.ML__focused .ML__text {
+  background: var(--_text-highlight-background-color);
+}
+/* When using smartFence, the anticipated closing fence is displayed
+with this style */
+.ML__smart-fence__close {
+  opacity: var(--_smart-fence-opacity);
+  color: var(--_smart-fence-color);
+}
+.ML__selected,
+.ML__focused .ML__selected .ML__contains-caret,
+.ML__focused .ML__selected .ML__smart-fence__close,
+.ML__focused .ML__selected .ML__placeholder {
+  color: var(--_selection-color);
+  opacity: 1;
+}
+.ML__selection {
+  box-sizing: border-box;
+  background: var(--_selection-background-color) !important;
+}
+.ML__contains-caret.ML__close,
+.ML__contains-caret.ML__open,
+.ML__contains-caret > .ML__close,
+.ML__contains-caret > .ML__open,
+.ML__contains-caret .ML__sqrt-sign,
+.ML__contains-caret .ML__sqrt-line {
+  color: var(--_caret-color);
+}
+.ML__contains-highlight {
+  background: var(--_contains-highlight-background-color);
+  box-sizing: border-box;
+}
+.ML__latex {
+  font-family: 'Berkeley Mono', 'IBM Plex Mono', 'Source Code Pro', Consolas, 'Roboto Mono', Menlo, 'Bitstream Vera Sans Mono', 'DejaVu Sans Mono', Monaco, Courier, monospace;
+  font-weight: 400;
+  color: var(--_latex-color);
+}
+.ML__suggestion {
+  opacity: 0.5;
+}
+.ML__virtual-keyboard-toggle.is-visible.is-pressed:hover {
+  background: hsl(var(--_hue), 25%, 35%);
+  color: #fafafa;
+  fill: currentColor;
+}
+.ML__virtual-keyboard-toggle:focus {
+  outline: none;
+  border-radius: 8px;
+  border: 2px solid hsl(var(--_hue), 40%, 50%);
+}
+.ML__virtual-keyboard-toggle.is-pressed,
+.ML__virtual-keyboard-toggle.is-active:hover,
+.ML__virtual-keyboard-toggle.is-active {
+  background: hsl(var(--_hue), 25%, 35%);
+  color: #fafafa;
+  fill: currentColor;
+}
+/* Add an attribute 'data-ML__tooltip' to automatically show a
+   tooltip over a element on hover.
+   Use 'data-position="top"' to place the tooltip above the
+   element rather than below.
+   Use 'data-delay' to delay the triggering of the tooltip.
+*/
+[data-ML__tooltip] {
+  position: relative;
+}
+[data-ML__tooltip][data-placement='top']::after {
+  top: inherit;
+  bottom: 100%;
+}
+[data-ML__tooltip]::after {
+  content: attr(data-ML__tooltip);
+  position: absolute;
+  display: none;
+  z-index: 2;
+  right: 110%;
+  left: calc(100% + 8px);
+  width: max-content;
+  max-width: 200px;
+  padding: 8px 8px;
+  border-radius: 2px;
+  background: #616161;
+  color: #fff;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  /* Phone */
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.15s cubic-bezier(0.4, 0, 1, 1);
+}
+@media only screen and (max-width: 767px) {
+  [data-ML__tooltip]::after {
+    padding: 8px 16px;
+    font-size: 16px;
+  }
+}
+:not(.tracking) [data-ML__tooltip]:hover {
+  position: relative;
+}
+:not(.tracking) [data-ML__tooltip]:hover::after {
+  visibility: visible;
+  display: inline-table;
+  opacity: 1;
+  transform: scale(1);
+}
+[data-ML__tooltip][data-delay]::after {
+  transition-delay: 0s;
+}
+[data-ML__tooltip][data-delay]:hover::after {
+  transition-delay: 1s;
+  /* attr(data-delay); Should work. But doesn't. */
+}
+.ML__prompt {
+  border-radius: 2px;
+}
+.ML__editablePromptBox {
+  outline: 1px solid #acacac;
+  border-radius: 2px;
+  z-index: -1;
+}
+.ML__focusedPromptBox {
+  outline: highlight auto 1px;
+}
+.ML__lockedPromptBox {
+  background-color: rgba(142, 142, 141, 0.4);
+  z-index: -1;
+}
+.ML__correctPromptBox {
+  outline: 1px solid var(--_correct-color);
+  box-shadow: 0 0 5px var(--_correct-color);
+}
+.ML__incorrectPromptBox {
+  outline: 1px solid var(--_incorrect-color);
+  box-shadow: 0 0 5px var(--_incorrect-color);
+}
+`;
+
 // src/public/mathfield-element.ts
 if (!isBrowser()) {
   console.error(
     `MathLive 0.94.5: this version of the MathLive library is for use in the browser. A subset of the API is available on the server side in the "mathlive-ssr" library. If using server side rendering (with React for example) you may want to do a dynamic import of the MathLive library inside a \`useEffect()\` call.`
   );
+}
+var MATHFIELD_TEMPLATE = isBrowser() ? document.createElement("template") : null;
+if (MATHFIELD_TEMPLATE) {
+  MATHFIELD_TEMPLATE.innerHTML = `<style>
+  :host { display: inline-block; background-color: field; color: fieldtext; border-width: 1px; border-style: solid; border-color: #acacac; border-radius: 2px; padding:4px; pointer-events: none;}
+  :host([hidden]) { display: none; }
+  :host([disabled]), :host([disabled]:focus), :host([disabled]:focus-within) { outline: none; opacity:  .5; }
+  :host(:focus), :host(:focus-within) {
+    outline: Highlight auto 1px;    /* For Firefox */
+    outline: -webkit-focus-ring-color auto 1px;
+  }
+  :host([readonly]:focus), :host([readonly]:focus-within),
+  :host([read-only]:focus), :host([read-only]:focus-within) {
+    outline: none;
+  }
+  ${core_default}${mathfield_default}
+  </style>
+  <span style="pointer-events:auto"></span><slot style="display:none"></slot>`;
 }
 var gDeferredState = /* @__PURE__ */ new WeakMap();
 var AUDIO_FEEDBACK_VOLUME = 0.5;
@@ -35776,12 +35762,7 @@ var _MathfieldElement = class extends HTMLElement {
       this._internals.ariaMultiLine = "false";
     }
     this.attachShadow({ mode: "open", delegatesFocus: true });
-    this.shadowRoot.adoptedStyleSheets = [
-      getStylesheet("core"),
-      getStylesheet("mathfield"),
-      getStylesheet("mathfield-element")
-    ];
-    this.shadowRoot.innerHTML = `<span style="pointer-events:auto"></span><slot style="display:none"></slot>`;
+    this.shadowRoot.append(MATHFIELD_TEMPLATE.content.cloneNode(true));
     if (options)
       this._setOptions(options);
   }
@@ -37623,7 +37604,7 @@ function autoRenderMathInElement(element, options) {
       (_d2 = optionsPrivate.processMathJSONScriptType) != null ? _d2 : ""
     );
     void loadFonts();
-    injectStylesheet("core");
+    injectStylesheet("mathlive-core-stylesheet", core_default);
     scanElement(element, optionsPrivate);
   } catch (error) {
     if (error instanceof Error)
