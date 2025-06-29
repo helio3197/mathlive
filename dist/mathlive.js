@@ -1281,10 +1281,10 @@ var MathLive = (() => {
     return typeof navigator.vibrate === "function";
   }
   function osPlatform() {
-    var _a3, _b3;
+    var _a4, _b3;
     if (!isBrowser())
       return "other";
-    const platform2 = (_b3 = (_a3 = navigator["userAgentData"]) == null ? void 0 : _a3.platform) != null ? _b3 : navigator.platform;
+    const platform2 = (_b3 = (_a4 = navigator["userAgentData"]) == null ? void 0 : _a4.platform) != null ? _b3 : navigator.platform;
     if (/^mac/i.test(platform2)) {
       if (navigator.maxTouchPoints === 5)
         return "ios";
@@ -1536,7 +1536,7 @@ var MathLive = (() => {
     YellowOrange: "#FAA21A"
   };
   function defaultColorMap(s) {
-    var _a3, _b3, _c2, _d2, _e, _f;
+    var _a4, _b3, _c2, _d2, _e, _f;
     const colorSpec = s.split("!");
     let baseRed;
     let baseGreen;
@@ -1552,7 +1552,7 @@ var MathLive = (() => {
       baseRed = red;
       baseGreen = green;
       baseBlue = blue;
-      const colorName = (_a3 = colorSpec[i].trim().match(/^([A-Za-z\d]+)/)) == null ? void 0 : _a3[1];
+      const colorName = (_a4 = colorSpec[i].trim().match(/^([A-Za-z\d]+)/)) == null ? void 0 : _a4[1];
       const lcColorName = colorName == null ? void 0 : colorName.toLowerCase();
       const color = !colorName ? colorSpec[i].trim() : (_f = (_e = (_d2 = (_c2 = (_b3 = FOREGROUND_COLORS[lcColorName]) != null ? _b3 : FOREGROUND_COLORS[DVIPS_TO_CHROMATIC[colorName]]) != null ? _c2 : MATLAB_COLORS[colorName]) != null ? _d2 : DVIPS_COLORS[colorName]) != null ? _e : MATHEMATICA_COLORS[colorName]) != null ? _f : colorSpec[i].trim();
       let m = color.match(/^#([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i);
@@ -1601,9 +1601,9 @@ var MathLive = (() => {
     return "#" + ("00" + Math.round(red).toString(16)).slice(-2) + ("00" + Math.round(green).toString(16)).slice(-2) + ("00" + Math.round(blue).toString(16)).slice(-2);
   }
   function defaultBackgroundColorMap(s) {
-    var _a3, _b3;
+    var _a4, _b3;
     s = s.trim();
-    return (_b3 = (_a3 = BACKGROUND_COLORS[s.toLowerCase()]) != null ? _a3 : BACKGROUND_COLORS[DVIPS_TO_CHROMATIC[s]]) != null ? _b3 : defaultColorMap(s);
+    return (_b3 = (_a4 = BACKGROUND_COLORS[s.toLowerCase()]) != null ? _a4 : BACKGROUND_COLORS[DVIPS_TO_CHROMATIC[s]]) != null ? _b3 : defaultColorMap(s);
   }
   function parseHex(hex) {
     if (!hex)
@@ -1870,12 +1870,12 @@ var MathLive = (() => {
     return char;
   }
   function unicodeToMathVariant(codepoint) {
-    var _a3;
+    var _a4;
     if ((codepoint < 119808 || codepoint > 120831) && (codepoint < 8448 || codepoint > 8527))
       return { char: String.fromCodePoint(codepoint) };
     for (const c in MATH_LETTER_EXCEPTIONS) {
       if (MATH_LETTER_EXCEPTIONS[c] === codepoint) {
-        codepoint = (_a3 = c.codePointAt(0)) != null ? _a3 : 0;
+        codepoint = (_a4 = c.codePointAt(0)) != null ? _a4 : 0;
         break;
       }
     }
@@ -2326,17 +2326,17 @@ var MathLive = (() => {
       newSymbol(String.fromCodePoint(i), i);
   }
   function getEnvironmentDefinition(name) {
-    var _a3;
-    return (_a3 = ENVIRONMENTS[name]) != null ? _a3 : null;
+    var _a4;
+    return (_a4 = ENVIRONMENTS[name]) != null ? _a4 : null;
   }
   function suggest(mf, s) {
-    var _a3, _b3;
+    var _a4, _b3;
     if (s.length === 0 || s === "\\" || !s.startsWith("\\"))
       return [];
     const result = [];
     for (const p in LATEX_COMMANDS) {
       if (p.startsWith(s) && !LATEX_COMMANDS[p].infix)
-        result.push({ match: p, frequency: (_a3 = LATEX_COMMANDS[p].frequency) != null ? _a3 : 0 });
+        result.push({ match: p, frequency: (_a4 = LATEX_COMMANDS[p].frequency) != null ? _a4 : 0 });
     }
     for (const p in MATH_SYMBOLS) {
       if (p.startsWith(s))
@@ -2347,13 +2347,13 @@ var MathLive = (() => {
       if (p.startsWith(command))
         result.push({ match: "\\" + p, frequency: 0 });
     result.sort((a, b) => {
-      var _a4, _b4;
+      var _a5, _b4;
       if (a.frequency === b.frequency) {
         if (a.match.length === b.match.length)
           return a.match < b.match ? -1 : 1;
         return a.match.length - b.match.length;
       }
-      return ((_a4 = b.frequency) != null ? _a4 : 0) - ((_b4 = a.frequency) != null ? _b4 : 0);
+      return ((_a5 = b.frequency) != null ? _a5 : 0) - ((_b4 = a.frequency) != null ? _b4 : 0);
     });
     return result.map((x) => x.match);
   }
@@ -2426,7 +2426,7 @@ var MathLive = (() => {
       ENVIRONMENTS[name] = data;
   }
   function defineFunction(names, parameters, options) {
-    var _a3, _b3;
+    var _a4, _b3;
     if (!options)
       options = {};
     const data = {
@@ -2435,7 +2435,7 @@ var MathLive = (() => {
       // {optional, type}
       params: parseParameterTemplate(parameters),
       ifMode: options.ifMode,
-      isFunction: (_a3 = options.isFunction) != null ? _a3 : false,
+      isFunction: (_a4 = options.isFunction) != null ? _a4 : false,
       applyMode: options.applyMode,
       infix: (_b3 = options.infix) != null ? _b3 : false,
       createAtom: options.createAtom,
@@ -2451,14 +2451,14 @@ var MathLive = (() => {
   }
   var _DEFAULT_MACROS;
   function getMacros(otherMacros) {
+    var _a4, _b3;
     if (!_DEFAULT_MACROS)
       _DEFAULT_MACROS = normalizeMacroDictionary(DEFAULT_MACROS);
-    if (!otherMacros)
-      return _DEFAULT_MACROS;
+    otherMacros = __spreadValues(__spreadValues({}, otherMacros != null ? otherMacros : {}), (_b3 = (_a4 = window.mathfieldGlobalOptions) == null ? void 0 : _a4.macros) != null ? _b3 : {});
     return normalizeMacroDictionary(__spreadValues(__spreadValues({}, _DEFAULT_MACROS), otherMacros));
   }
   function normalizeMacroDefinition(def, options) {
-    var _a3, _b3, _c2, _d2;
+    var _a4, _b3, _c2, _d2;
     if (typeof def === "string") {
       let argCount = 0;
       const defString = def;
@@ -2481,7 +2481,7 @@ var MathLive = (() => {
       if (/(^|[^\\])#9/.test(defString))
         argCount = 9;
       return {
-        expand: (_a3 = options == null ? void 0 : options.expand) != null ? _a3 : true,
+        expand: (_a4 = options == null ? void 0 : options.expand) != null ? _a4 : true,
         captureSelection: (_b3 = options == null ? void 0 : options.captureSelection) != null ? _b3 : true,
         args: argCount,
         def: defString
@@ -2568,9 +2568,9 @@ var MathLive = (() => {
     return macros[command];
   }
   function unicodeCharToLatex(parseMode, char) {
-    var _a3;
+    var _a4;
     if (parseMode === "text")
-      return (_a3 = charToLatex(parseMode, char.codePointAt(0))) != null ? _a3 : char;
+      return (_a4 = charToLatex(parseMode, char.codePointAt(0))) != null ? _a4 : char;
     let result;
     result = charToLatex(parseMode, char.codePointAt(0));
     if (result)
@@ -7638,14 +7638,14 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   var emojiCombinator;
   var REGIONAL_INDICATOR = [127462, 127487];
   function isEmojiCombinator(code) {
-    var _a3;
+    var _a4;
     if (emojiCombinator === void 0) {
       emojiCombinator = {};
       for (const x of EMOJI_COMBINATOR)
         for (let i = x[0]; i <= x[0] + x[1] - 1; i++)
           emojiCombinator[i] = true;
     }
-    return (_a3 = emojiCombinator[code]) != null ? _a3 : false;
+    return (_a4 = emojiCombinator[code]) != null ? _a4 : false;
   }
   function isRegionalIndicator(code) {
     return code >= REGIONAL_INDICATOR[0] && code <= REGIONAL_INDICATOR[1];
@@ -7788,7 +7788,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     }
   };
   function expand(lex, args) {
-    var _a3, _b3, _c2, _d2;
+    var _a4, _b3, _c2, _d2;
     const result = [];
     let token = lex.next();
     if (token) {
@@ -7827,7 +7827,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
             if (/^#[\d?@]$/.test(lex.peek())) {
               const parameter = lex.get().slice(1);
               tokens = tokenize(
-                (_b3 = (_a3 = args == null ? void 0 : args(parameter)) != null ? _a3 : args == null ? void 0 : args("?")) != null ? _b3 : "\\placeholder{}",
+                (_b3 = (_a4 = args == null ? void 0 : args(parameter)) != null ? _a4 : args == null ? void 0 : args("?")) != null ? _b3 : "\\placeholder{}",
                 args
               );
               token = tokens[0];
@@ -7904,14 +7904,14 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return joinLatex(
       tokens.map(
         (token) => {
-          var _a3;
-          return (_a3 = {
+          var _a4;
+          return (_a4 = {
             "<space>": " ",
             "<$$>": "$$",
             "<$>": "$",
             "<{>": "{",
             "<}>": "}"
-          }[token]) != null ? _a3 : token;
+          }[token]) != null ? _a4 : token;
         }
       )
     );
@@ -7930,10 +7930,10 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       );
     }
     static serialize(atoms, options) {
-      var _a3;
+      var _a4;
       if (!atoms || atoms.length === 0)
         return "";
-      if ((_a3 = options.skipStyles) != null ? _a3 : false) {
+      if ((_a4 = options.skipStyles) != null ? _a4 : false) {
         const body = [];
         for (const run of getModeRuns(atoms)) {
           const mode = _Mode._registry[run[0].mode];
@@ -7996,7 +7996,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return result;
   }
   function emitColorRun(run, options) {
-    var _a3;
+    var _a4;
     const { parent } = run[0];
     const parentColor = parent == null ? void 0 : parent.computedStyle.color;
     const result = [];
@@ -8011,7 +8011,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
           result.push(
             latexCommand(
               "\\textcolor",
-              (_a3 = style.verbatimColor) != null ? _a3 : style.color,
+              (_a4 = style.verbatimColor) != null ? _a4 : style.color,
               joinLatex(body)
             )
           );
@@ -8025,13 +8025,13 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     const { parent } = run[0];
     const parentColor = parent == null ? void 0 : parent.computedStyle.backgroundColor;
     return getPropertyRuns(run, "backgroundColor").map((x) => {
-      var _a3;
+      var _a4;
       if (x.length > 0 || x[0].type !== "box") {
         const style = x[0].computedStyle;
         if (style.backgroundColor && style.backgroundColor !== "none" && (!parent || parentColor !== style.backgroundColor)) {
           return latexCommand(
             "\\colorbox",
-            (_a3 = style.verbatimBackgroundColor) != null ? _a3 : style.backgroundColor,
+            (_a4 = style.verbatimBackgroundColor) != null ? _a4 : style.backgroundColor,
             joinLatex(emitColorRun(x, __spreadProps(__spreadValues({}, options), { defaultMode: "text" })))
           );
         }
@@ -8118,7 +8118,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   }
   var Box = class {
     constructor(content, options) {
-      var _a3, _b3, _c2, _d2, _e, _f;
+      var _a4, _b3, _c2, _d2, _e, _f;
       if (typeof content === "number")
         this.value = String.fromCodePoint(content);
       else if (typeof content === "string")
@@ -8130,7 +8130,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       if (this.children)
         for (const child of this.children)
           child.parent = this;
-      this.type = (_a3 = options == null ? void 0 : options.type) != null ? _a3 : "ignore";
+      this.type = (_a4 = options == null ? void 0 : options.type) != null ? _a4 : "ignore";
       this.isSelected = (options == null ? void 0 : options.isSelected) === true;
       if (options == null ? void 0 : options.caret)
         this.caret = options.caret;
@@ -8257,8 +8257,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       }
     }
     get left() {
-      var _a3;
-      if ((_a3 = this.cssProperties) == null ? void 0 : _a3["margin-left"])
+      var _a4;
+      if ((_a4 = this.cssProperties) == null ? void 0 : _a4["margin-left"])
         return Number.parseFloat(this.cssProperties["margin-left"]);
       return 0;
     }
@@ -8328,8 +8328,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
      * Generate the HTML markup to represent this box.
      */
     toMarkup() {
-      var _a3, _b3, _c2, _d2;
-      let body = (_a3 = this.value) != null ? _a3 : "";
+      var _a4, _b3, _c2, _d2;
+      let body = (_a4 = this.value) != null ? _a4 : "";
       if (this.children)
         for (const box of this.children)
           body += box.toMarkup();
@@ -8594,7 +8594,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return [null, 0];
   }
   function makeRows(params) {
-    var _a3;
+    var _a4;
     const [children, depth] = getVListChildrenAndDepth(params);
     if (!children)
       return [[], 0, 0];
@@ -8617,7 +8617,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
         currPos += child;
       else {
         const box = child.box;
-        const classes = (_a3 = child.classes) != null ? _a3 : [];
+        const classes = (_a4 = child.classes) != null ? _a4 : [];
         const childWrap = new Box([pstrut, box], {
           classes: classes.join(" "),
           style: child.style
@@ -8658,10 +8658,10 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   }
   var VBox = class extends Box {
     constructor(content, options) {
-      var _a3;
+      var _a4;
       const [rows, height, depth] = makeRows(content);
       super(rows.length === 1 ? rows[0] : rows, {
-        classes: ((_a3 = options == null ? void 0 : options.classes) != null ? _a3 : "") + " vlist-t" + (rows.length === 2 ? " vlist-t2" : ""),
+        classes: ((_a4 = options == null ? void 0 : options.classes) != null ? _a4 : "") + " vlist-t" + (rows.length === 2 ? " vlist-t2" : ""),
         height,
         depth,
         type: options == null ? void 0 : options.type
@@ -8669,10 +8669,10 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     }
   };
   function makeLimitsStack(context, options) {
-    var _a3, _b3, _c2, _d2, _e;
+    var _a4, _b3, _c2, _d2, _e;
     const metrics = context.metrics;
     const base = new Box(options.base);
-    const baseShift = (_a3 = options.baseShift) != null ? _a3 : 0;
+    const baseShift = (_a4 = options.baseShift) != null ? _a4 : 0;
     const slant = (_b3 = options.slant) != null ? _b3 : 0;
     let aboveShift = 0;
     let belowShift = 0;
@@ -8835,7 +8835,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
 
   // src/core/registers-utils.ts
   function convertDimensionToPt(value, precision) {
-    var _a3;
+    var _a4;
     if (!value)
       return 0;
     const f = {
@@ -8850,7 +8850,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       pc: 12,
       in: 72.27,
       mu: 10 / 18
-    }[(_a3 = value.unit) != null ? _a3 : "pt"];
+    }[(_a4 = value.unit) != null ? _a4 : "pt"];
     if (Number.isFinite(precision)) {
       const factor = 10 ** precision;
       return Math.round(value.dimension / PT_PER_EM * f * factor) / factor;
@@ -8868,8 +8868,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return result;
   }
   function serializeDimension(value) {
-    var _a3;
-    return `${value.dimension}${(_a3 = value.unit) != null ? _a3 : "pt"}`;
+    var _a4;
+    return `${value.dimension}${(_a4 = value.unit) != null ? _a4 : "pt"}`;
   }
   function serializeGlue(value) {
     let result = serializeDimension(value.glue);
@@ -8880,12 +8880,12 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return result;
   }
   function serializeLatexValue(value) {
-    var _a3, _b3;
+    var _a4, _b3;
     if (value === null || value === void 0)
       return null;
     let result = "";
     if ("dimension" in value)
-      result = `${value.dimension}${(_a3 = value.unit) != null ? _a3 : "pt"}`;
+      result = `${value.dimension}${(_a4 = value.unit) != null ? _a4 : "pt"}`;
     if ("glue" in value)
       result = serializeGlue(value);
     if ("number" in value) {
@@ -9140,14 +9140,14 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   // src/core/context.ts
   var Context = class {
     constructor(options, style) {
-      var _a3, _b3, _c2, _d2, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o;
+      var _a4, _b3, _c2, _d2, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o;
       let template;
       if (options == null ? void 0 : options.parent) {
         this.parent = options.parent;
         template = options.parent;
         this.registers = {};
       } else {
-        template = __spreadValues(__spreadValues({}, getDefaultContext()), (_a3 = options == null ? void 0 : options.from) != null ? _a3 : {});
+        template = __spreadValues(__spreadValues({}, getDefaultContext()), (_a4 = options == null ? void 0 : options.from) != null ? _a4 : {});
         this.registers = template.registers;
       }
       if (template.atomIdsSettings)
@@ -9260,8 +9260,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       );
     }
     getRegister(name) {
-      var _a3;
-      if ((_a3 = this.registers) == null ? void 0 : _a3[name])
+      var _a4;
+      if ((_a4 = this.registers) == null ? void 0 : _a4[name])
         return this.registers[name];
       if (this.parent)
         return this.parent.getRegister(name);
@@ -9276,8 +9276,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return void 0;
     }
     getRegisterAsGlue(name) {
-      var _a3;
-      if ((_a3 = this.registers) == null ? void 0 : _a3[name]) {
+      var _a4;
+      if ((_a4 = this.registers) == null ? void 0 : _a4[name]) {
         const value = this.registers[name];
         if (typeof value === "object" && "glue" in value)
           return value;
@@ -9295,8 +9295,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return convertDimensionToEm(this.getRegisterAsDimension(name), precision);
     }
     getRegisterAsDimension(name) {
-      var _a3;
-      if ((_a3 = this.registers) == null ? void 0 : _a3[name]) {
+      var _a4;
+      if ((_a4 = this.registers) == null ? void 0 : _a4[name]) {
         const value = this.registers[name];
         if (typeof value === "object" && "glue" in value)
           return value.glue;
@@ -9389,25 +9389,25 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return null;
     }
     toColor(value) {
-      var _a3, _b3;
+      var _a4, _b3;
       if (value === null)
         return null;
       const val = this.evaluate(value);
       if (val === void 0)
         return null;
       if ("string" in val)
-        return (_b3 = (_a3 = this.colorMap) == null ? void 0 : _a3.call(this, val.string)) != null ? _b3 : val.string;
+        return (_b3 = (_a4 = this.colorMap) == null ? void 0 : _a4.call(this, val.string)) != null ? _b3 : val.string;
       return null;
     }
     toBackgroundColor(value) {
-      var _a3, _b3;
+      var _a4, _b3;
       if (value === null)
         return null;
       const val = this.evaluate(value);
       if (val === void 0)
         return null;
       if ("string" in val)
-        return (_b3 = (_a3 = this.backgroundColorMap) == null ? void 0 : _a3.call(this, val.string)) != null ? _b3 : val.string;
+        return (_b3 = (_a4 = this.backgroundColorMap) == null ? void 0 : _a4.call(this, val.string)) != null ? _b3 : val.string;
       return null;
     }
   };
@@ -9440,11 +9440,11 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       // `\displaylimits`.
       // Necessary so the proper LaTeX can be output.
       this.explicitSubsupPlacement = false;
-      var _a3, _b3, _c2, _d2, _e, _f, _g, _h, _i;
+      var _a4, _b3, _c2, _d2, _e, _f, _g, _h, _i;
       this.type = options.type;
       if (typeof options.value === "string")
         this.value = options.value;
-      this.command = (_b3 = (_a3 = options.command) != null ? _a3 : this.value) != null ? _b3 : "";
+      this.command = (_b3 = (_a4 = options.command) != null ? _a4 : this.value) != null ? _b3 : "";
       this.mode = (_c2 = options.mode) != null ? _c2 : "math";
       this.isFunction = (_d2 = options.isFunction) != null ? _d2 : false;
       this.subsupPlacement = options.limits;
@@ -9471,7 +9471,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
      * to render an expression
      */
     static createBox(context, atoms, options) {
-      var _a3;
+      var _a4;
       if (!atoms)
         return null;
       const runs = getStyleRuns(atoms);
@@ -9490,7 +9490,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       }
       if (boxes.length === 0)
         return null;
-      const classes = ((_a3 = options == null ? void 0 : options.classes) != null ? _a3 : "").trim();
+      const classes = ((_a4 = options == null ? void 0 : options.classes) != null ? _a4 : "").trim();
       if (boxes.length === 1 && !classes && !(options == null ? void 0 : options.type))
         return boxes[0].wrap(context);
       return new Box(boxes, { classes, type: options == null ? void 0 : options.type }).wrap(context);
@@ -9607,7 +9607,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
      * one or more atoms, use `Atom.serialize()`
      */
     _serialize(options) {
-      var _a3;
+      var _a4;
       if (!(options.expandMacro || options.skipStyles) && typeof this.verbatimLatex === "string")
         return this.verbatimLatex;
       const def = getDefinition(this.command, this.mode);
@@ -9627,12 +9627,12 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       }
       if (!this.value || this.value === "\u200B")
         return "";
-      return (_a3 = this.command) != null ? _a3 : unicodeCharToLatex(this.mode, this.value);
+      return (_a4 = this.command) != null ? _a4 : unicodeCharToLatex(this.mode, this.value);
     }
     bodyToLatex(options) {
-      var _a3;
+      var _a4;
       return Mode.serialize(this.body, __spreadProps(__spreadValues({}, options), {
-        defaultMode: (_a3 = options.defaultMode) != null ? _a3 : this.latexMode
+        defaultMode: (_a4 = options.defaultMode) != null ? _a4 : this.latexMode
       }));
     }
     aboveToLatex(options) {
@@ -9752,45 +9752,45 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return this.parentBranch[1];
     }
     get body() {
-      var _a3;
-      return (_a3 = this._branches) == null ? void 0 : _a3.body;
+      var _a4;
+      return (_a4 = this._branches) == null ? void 0 : _a4.body;
     }
     set body(atoms) {
       this.setChildren(atoms, "body");
     }
     get superscript() {
-      var _a3;
-      return (_a3 = this._branches) == null ? void 0 : _a3.superscript;
+      var _a4;
+      return (_a4 = this._branches) == null ? void 0 : _a4.superscript;
     }
     set superscript(atoms) {
       this.setChildren(atoms, "superscript");
     }
     get subscript() {
-      var _a3;
-      return (_a3 = this._branches) == null ? void 0 : _a3.subscript;
+      var _a4;
+      return (_a4 = this._branches) == null ? void 0 : _a4.subscript;
     }
     set subscript(atoms) {
       this.setChildren(atoms, "subscript");
     }
     get above() {
-      var _a3;
-      return (_a3 = this._branches) == null ? void 0 : _a3.above;
+      var _a4;
+      return (_a4 = this._branches) == null ? void 0 : _a4.above;
     }
     set above(atoms) {
       this.setChildren(atoms, "above");
     }
     get below() {
-      var _a3;
-      return (_a3 = this._branches) == null ? void 0 : _a3.below;
+      var _a4;
+      return (_a4 = this._branches) == null ? void 0 : _a4.below;
     }
     set below(atoms) {
       this.setChildren(atoms, "below");
     }
     get computedStyle() {
-      var _a3, _b3;
+      var _a4, _b3;
       const hadVerbatimColor = typeof this.style.verbatimColor === "string";
       const hadVerbatimBackgroundColor = typeof this.style.verbatimBackgroundColor === "string";
-      const result = __spreadValues(__spreadValues({}, (_b3 = (_a3 = this.parent) == null ? void 0 : _a3.computedStyle) != null ? _b3 : {}), this.style);
+      const result = __spreadValues(__spreadValues({}, (_b3 = (_a4 = this.parent) == null ? void 0 : _a4.computedStyle) != null ? _b3 : {}), this.style);
       delete result.variant;
       delete result.variantStyle;
       if (!hadVerbatimBackgroundColor)
@@ -9822,10 +9822,10 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
         child.applyStyle(style);
     }
     getInitialBaseElement() {
-      var _a3, _b3, _c2;
+      var _a4, _b3, _c2;
       if (this.hasEmptyBranch("body"))
         return this;
-      console.assert(((_a3 = this.body) == null ? void 0 : _a3[0].type) === "first");
+      console.assert(((_a4 = this.body) == null ? void 0 : _a4[0].type) === "first");
       return (_c2 = (_b3 = this.body[1]) == null ? void 0 : _b3.getInitialBaseElement()) != null ? _c2 : this;
     }
     getFinalBaseElement() {
@@ -9853,13 +9853,13 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
      * the `first` atom will be added if necessary
      */
     setChildren(children, branch) {
-      var _a3;
+      var _a4;
       if (!children)
         return;
       console.assert(isNamedBranch(branch));
       if (!isNamedBranch(branch))
         return;
-      console.assert(((_a3 = children[0]) == null ? void 0 : _a3.type) !== "first");
+      console.assert(((_a4 = children[0]) == null ? void 0 : _a4.type) !== "first");
       const newBranch = [this.makeFirstAtom(branch), ...children];
       if (this._branches)
         this._branches[branch] = newBranch;
@@ -10042,7 +10042,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return result.wrap(context);
     }
     attachSupsub(parentContext, options) {
-      var _a3;
+      var _a4;
       const base = options.base;
       const superscript = this.superscript;
       const subscript = this.subscript;
@@ -10050,7 +10050,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
         return base;
       let supBox = null;
       let subBox = null;
-      const isCharacterBox = (_a3 = options.isCharacterBox) != null ? _a3 : this.isCharacterBox();
+      const isCharacterBox = (_a4 = options.isCharacterBox) != null ? _a4 : this.isCharacterBox();
       let supShift = 0;
       if (superscript) {
         const context = new Context({
@@ -10174,8 +10174,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
      * Create a box with the specified body.
      */
     createBox(context, options) {
-      var _a3, _b3, _c2, _d2;
-      const value = (_a3 = this.value) != null ? _a3 : this.body;
+      var _a4, _b3, _c2, _d2;
+      const value = (_a4 = this.value) != null ? _a4 : this.body;
       const type = (_b3 = options == null ? void 0 : options.boxType) != null ? _b3 : boxType(this.type);
       let classes = (_c2 = options == null ? void 0 : options.classes) != null ? _c2 : "";
       if (this.mode === "text")
@@ -10210,18 +10210,18 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     }
     /** Return true if a digit, or a decimal point, or a french decimal `{,}` */
     isDigit() {
-      var _a3;
+      var _a4;
       if (this.type === "mord" && this.value)
         return /^[\d,\.]$/.test(this.value);
-      if (this.type === "group" && ((_a3 = this.body) == null ? void 0 : _a3.length) === 2)
+      if (this.type === "group" && ((_a4 = this.body) == null ? void 0 : _a4.length) === 2)
         return this.body[0].type === "first" && this.body[1].value === ",";
       return false;
     }
     asDigit() {
-      var _a3;
+      var _a4;
       if (this.type === "mord" && this.value && /^[\d,\.]$/.test(this.value))
         return this.value;
-      if (this.type === "group" && ((_a3 = this.body) == null ? void 0 : _a3.length) === 2) {
+      if (this.type === "group" && ((_a4 = this.body) == null ? void 0 : _a4.length) === 2) {
         if (this.body[0].type === "first" && this.body[1].value === ",")
           return ".";
       }
@@ -10252,11 +10252,11 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return runs;
   }
   function renderStyleRun(parentContext, atoms, options) {
-    var _a3, _b3, _c2, _d2, _e;
+    var _a4, _b3, _c2, _d2, _e;
     if (!atoms || atoms.length === 0)
       return null;
     const context = new Context({ parent: parentContext }, options.style);
-    const displaySelection = !((_a3 = context.atomIdsSettings) == null ? void 0 : _a3.groupNumbers);
+    const displaySelection = !((_a4 = context.atomIdsSettings) == null ? void 0 : _a4.groupNumbers);
     let boxes = [];
     if (atoms.length === 1) {
       const atom = atoms[0];
@@ -10341,8 +10341,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return result;
     }
     _serialize(_options) {
-      var _a3;
-      return (_a3 = this.verbatimLatex) != null ? _a3 : charToLatex("text", this.value.codePointAt(0));
+      var _a4;
+      return (_a4 = this.verbatimLatex) != null ? _a4 : charToLatex("text", this.value.codePointAt(0));
     }
   };
 
@@ -10809,8 +10809,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
 
   // src/editor/parse-math-string.ts
   function parseMathString(s, options) {
-    var _a3;
-    let format = (_a3 = options == null ? void 0 : options.format) != null ? _a3 : "auto";
+    var _a4;
+    let format = (_a4 = options == null ? void 0 : options.format) != null ? _a4 : "auto";
     if (format === "auto")
       [format, s] = inferFormat(s);
     if (format === "ascii-math") {
@@ -10828,12 +10828,12 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return ["latex", s];
   }
   function parseMathExpression(s, options) {
-    var _a3, _b3, _c2;
+    var _a4, _b3, _c2;
     if (!s)
       return "";
     let done = false;
     let m;
-    const inlineShortcuts = (_a3 = options.inlineShortcuts) != null ? _a3 : INLINE_SHORTCUTS;
+    const inlineShortcuts = (_a4 = options.inlineShortcuts) != null ? _a4 : INLINE_SHORTCUTS;
     if (!done && (s.startsWith("^") || s.startsWith("_"))) {
       m = parseMathArgument(s.slice(1), { inlineShortcuts, noWrap: true });
       s = s[0] + "{" + m.match + "}";
@@ -11055,7 +11055,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       _ModeEditor._modes[name] = this;
     }
     static onPaste(mode, mathfield, data) {
-      var _a3;
+      var _a4;
       if (!mathfield.contentEditable && mathfield.userSelect === "none") {
         mathfield.model.announce("plonk");
         return false;
@@ -11069,12 +11069,12 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
         clipboardData: data,
         cancelable: true
       });
-      if (!((_a3 = mathfield.host) == null ? void 0 : _a3.dispatchEvent(redispatchedEvent)))
+      if (!((_a4 = mathfield.host) == null ? void 0 : _a4.dispatchEvent(redispatchedEvent)))
         return false;
       return _ModeEditor._modes[mode].onPaste(mathfield, data);
     }
     static onCopy(mathfield, ev) {
-      var _a3;
+      var _a4;
       if (!ev.clipboardData)
         return;
       if (!mathfield.contentEditable && mathfield.userSelect === "none") {
@@ -11093,8 +11093,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
         ev.clipboardData.setData(
           "text/plain",
           model.getAtoms(exportRange, { includeChildren: true }).map((x) => {
-            var _a4;
-            return (_a4 = x.value) != null ? _a4 : "";
+            var _a5;
+            return (_a5 = x.value) != null ? _a5 : "";
           }).join("")
         );
       } else {
@@ -11120,7 +11120,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
           );
         } catch (e) {
         }
-        if ((_a3 = window[Symbol.for("io.cortexjs.compute-engine")]) == null ? void 0 : _a3.ComputeEngine) {
+        if ((_a4 = window[Symbol.for("io.cortexjs.compute-engine")]) == null ? void 0 : _a4.ComputeEngine) {
           const ce = window.MathfieldElement.computeEngine;
           if (ce) {
             try {
@@ -11139,8 +11139,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       ev.preventDefault();
     }
     static insert(model, text, options = {}) {
-      var _a3;
-      const mode = options.mode === "auto" ? model.mode : (_a3 = options.mode) != null ? _a3 : model.mode;
+      var _a4;
+      const mode = options.mode === "auto" ? model.mode : (_a4 = options.mode) != null ? _a4 : model.mode;
       return _ModeEditor._modes[mode].insert(model, text, options);
     }
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -11605,12 +11605,12 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     }
   }
   function isValidMathfield(mf) {
-    var _a3;
-    return ((_a3 = mf.element) == null ? void 0 : _a3.mathfield) === mf;
+    var _a4;
+    return ((_a4 = mf.element) == null ? void 0 : _a4.mathfield) === mf;
   }
   function findElementWithCaret(element) {
-    var _a3, _b3;
-    return (_b3 = (_a3 = element.querySelector(".ML__caret")) != null ? _a3 : element.querySelector(".ML__text-caret")) != null ? _b3 : element.querySelector(".ML__latex-caret");
+    var _a4, _b3;
+    return (_b3 = (_a4 = element.querySelector(".ML__caret")) != null ? _a4 : element.querySelector(".ML__text-caret")) != null ? _b3 : element.querySelector(".ML__latex-caret");
   }
   function getCaretPoint(element) {
     const caret = findElementWithCaret(element);
@@ -11624,10 +11624,10 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     };
   }
   function branchId(atom) {
-    var _a3;
+    var _a4;
     if (!atom.parent)
       return "root";
-    let result = (_a3 = atom.parent.id) != null ? _a3 : "";
+    let result = (_a4 = atom.parent.id) != null ? _a4 : "";
     result += typeof atom.parentBranch === "string" ? "-" + atom.parentBranch : `-${atom.parentBranch[0]}/${atom.parentBranch[0]}`;
     return result;
   }
@@ -11666,10 +11666,10 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return result;
   }
   function getAtomBounds(mathfield, atom) {
-    var _a3, _b3;
+    var _a4, _b3;
     if (!atom.id)
       return null;
-    let result = (_b3 = (_a3 = mathfield.atomBoundsCache) == null ? void 0 : _a3.get(atom.id)) != null ? _b3 : null;
+    let result = (_b3 = (_a4 = mathfield.atomBoundsCache) == null ? void 0 : _a4.get(atom.id)) != null ? _b3 : null;
     if (result !== null)
       return result;
     const node = mathfield.fieldContent.querySelector(
@@ -11747,12 +11747,12 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
 
   // src/common/stylesheet.ts
   function injectStylesheet(id, css) {
-    var _a3;
+    var _a4;
     if (!css)
       return;
     const element_ = document.getElementById(id);
     if (element_) {
-      const refCount = Number.parseInt((_a3 = element_.dataset.refcount) != null ? _a3 : "0");
+      const refCount = Number.parseInt((_a4 = element_.dataset.refcount) != null ? _a4 : "0");
       element_.dataset.refcount = Number(refCount + 1).toString();
     } else {
       const styleNode = document.createElement("style");
@@ -11763,11 +11763,11 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     }
   }
   function releaseStylesheet(id) {
-    var _a3;
+    var _a4;
     const element_ = document.getElementById(id);
     if (!element_)
       return;
-    const refCount = Number.parseInt((_a3 = element_.dataset.refcount) != null ? _a3 : "0");
+    const refCount = Number.parseInt((_a4 = element_.dataset.refcount) != null ? _a4 : "0");
     if (refCount <= 1)
       element_.remove();
     else
@@ -11777,8 +11777,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   // src/core-atoms/accent.ts
   var AccentAtom = class extends Atom {
     constructor(options) {
-      var _a3;
-      super(__spreadProps(__spreadValues({}, options), { type: "accent", body: (_a3 = options.body) != null ? _a3 : void 0 }));
+      var _a4;
+      super(__spreadProps(__spreadValues({}, options), { type: "accent", body: (_a4 = options.body) != null ? _a4 : void 0 }));
       if (options.accentChar)
         this.accent = options.accentChar;
       else
@@ -11796,12 +11796,12 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       });
     }
     render(parentContext) {
-      var _a3;
+      var _a4;
       const context = new Context(
         { parent: parentContext, mathstyle: "cramp" },
         this.style
       );
-      const base = (_a3 = Atom.createBox(context, this.body)) != null ? _a3 : new Box("\u25A2", { style: this.style });
+      const base = (_a4 = Atom.createBox(context, this.body)) != null ? _a4 : new Box("\u25A2", { style: this.style });
       let skew = 0;
       if (!this.hasEmptyBranch("body") && this.body.length === 2 && this.body[1].isCharacterBox())
         skew = base.skew;
@@ -11867,8 +11867,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     ])
   );
   function getSymbolValue(symbol) {
-    var _a3;
-    return (_a3 = {
+    var _a4;
+    return (_a4 = {
       "[": 91,
       // '[',
       "]": 93,
@@ -11925,14 +11925,14 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       "\\lmoustache": 9136,
       "\\rmoustache": 9137,
       "\\surd": 8730
-    }[symbol]) != null ? _a3 : symbol.codePointAt(0);
+    }[symbol]) != null ? _a4 : symbol.codePointAt(0);
   }
   function makeSmallDelim(delim, context, center, options) {
-    var _a3;
+    var _a4;
     const text = new Box(getSymbolValue(delim), {
       fontFamily: "Main-Regular",
       isSelected: options.isSelected,
-      classes: "ML__small-delim " + ((_a3 = options.classes) != null ? _a3 : "")
+      classes: "ML__small-delim " + ((_a4 = options.classes) != null ? _a4 : "")
     });
     const box = text.wrap(context);
     if (center)
@@ -11940,7 +11940,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return box;
   }
   function makeLargeDelim(delim, size, center, parentContext, options) {
-    var _a3, _b3;
+    var _a4, _b3;
     const context = new Context(
       { parent: parentContext, mathstyle: "textstyle" },
       options == null ? void 0 : options.style
@@ -11948,7 +11948,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     const result = new Box(getSymbolValue(delim), {
       fontFamily: `Size${size}-Regular`,
       isSelected: options.isSelected,
-      classes: ((_a3 = options.classes) != null ? _a3 : "") + ` ML__delim-size${size}`,
+      classes: ((_a4 = options.classes) != null ? _a4 : "") + ` ML__delim-size${size}`,
       type: (_b3 = options.type) != null ? _b3 : "ignore"
     }).wrap(context);
     if (center)
@@ -11956,7 +11956,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return result;
   }
   function makeStackedDelim(delim, heightTotal, center, context, options) {
-    var _a3;
+    var _a4;
     let top;
     let middle;
     let repeat;
@@ -12125,7 +12125,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       { classes: sizeClass }
     );
     const result = new Box(inner, __spreadProps(__spreadValues({}, options != null ? options : {}), {
-      classes: ((_a3 = options == null ? void 0 : options.classes) != null ? _a3 : "") + " ML__delim-mult"
+      classes: ((_a4 = options == null ? void 0 : options.classes) != null ? _a4 : "") + " ML__delim-mult"
     }));
     return result;
   }
@@ -12331,11 +12331,11 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   // src/core-atoms/placeholder.ts
   var PlaceholderAtom = class extends Atom {
     constructor(options) {
-      var _a3;
+      var _a4;
       super({
         type: "placeholder",
         command: "\\placeholder",
-        mode: (_a3 = options == null ? void 0 : options.mode) != null ? _a3 : "math",
+        mode: (_a4 = options == null ? void 0 : options.mode) != null ? _a4 : "math",
         style: options == null ? void 0 : options.style
       });
       this.captureSelection = true;
@@ -12454,7 +12454,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   }
   var ArrayAtom = class extends Atom {
     constructor(envName, array, rowGaps, options = {}) {
-      var _a3;
+      var _a4;
       super({ type: "array" });
       this.environmentName = envName;
       this.rowGaps = rowGaps;
@@ -12490,7 +12490,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       this.colSeparationType = options.colSeparationType;
       if (options.arraystretch !== void 0)
         this.arraystretch = options.arraystretch;
-      this.minColumns = (_a3 = options.minColumns) != null ? _a3 : 1;
+      this.minColumns = (_a4 = options.minColumns) != null ? _a4 : 1;
     }
     static fromJson(json) {
       return new ArrayAtom(
@@ -12521,17 +12521,17 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return result;
     }
     branch(cell) {
-      var _a3;
+      var _a4;
       if (!isCellBranch(cell))
         return void 0;
-      return (_a3 = this.array[cell[0]][cell[1]]) != null ? _a3 : void 0;
+      return (_a4 = this.array[cell[0]][cell[1]]) != null ? _a4 : void 0;
     }
     createBranch(cell) {
-      var _a3;
+      var _a4;
       if (!isCellBranch(cell))
         return [];
       this.isDirty = true;
-      return (_a3 = this.branch(cell)) != null ? _a3 : [];
+      return (_a4 = this.branch(cell)) != null ? _a4 : [];
     }
     get rowCount() {
       return this.array.length;
@@ -12574,7 +12574,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return [...result, ...super.children];
     }
     render(context) {
-      var _a3, _b3, _c2, _d2, _e, _f;
+      var _a4, _b3, _c2, _d2, _e, _f;
       const innerContext = new Context(
         { parent: context, mathstyle: this.mathstyleName },
         this.style
@@ -12582,7 +12582,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       const arrayRuleWidth = innerContext.getRegisterAsEm("arrayrulewidth");
       const arrayColSep = innerContext.getRegisterAsEm("arraycolsep");
       const doubleRuleSep = innerContext.getRegisterAsEm("doublerulesep");
-      const arraystretch = (_b3 = (_a3 = this.arraystretch) != null ? _a3 : innerContext.getRegisterAsNumber("arraystretch")) != null ? _b3 : 1;
+      const arraystretch = (_b3 = (_a4 = this.arraystretch) != null ? _a4 : innerContext.getRegisterAsNumber("arraystretch")) != null ? _b3 : 1;
       let arraycolsep = typeof this.arraycolsep === "number" ? this.arraycolsep : arrayColSep;
       if (this.colSeparationType === "small") {
         const localMultiplier = new Context({
@@ -12752,7 +12752,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return this.attachSupsub(context, { base: result });
     }
     _serialize(options) {
-      var _a3;
+      var _a4;
       const result = [`\\begin{${this.environmentName}}`];
       if (this.environmentName === "array") {
         result.push("{");
@@ -12777,7 +12777,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
         if (row < this.array.length - 1) {
           const gap = this.rowGaps[row];
           if (gap == null ? void 0 : gap.dimension)
-            result.push(`\\\\[${gap.dimension} ${(_a3 = gap.unit) != null ? _a3 : "pt"}] `);
+            result.push(`\\\\[${gap.dimension} ${(_a4 = gap.unit) != null ? _a4 : "pt"}] `);
           else
             result.push("\\\\ ");
         }
@@ -12983,11 +12983,11 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       });
     }
     render(parentContext) {
-      var _a3, _b3, _c2, _d2;
+      var _a4, _b3, _c2, _d2;
       const base = Atom.createBox(parentContext, this.body, { type: "lift" });
       if (!base)
         return null;
-      const offset = parentContext.toEm((_a3 = this.offset) != null ? _a3 : { dimension: 0 });
+      const offset = parentContext.toEm((_a4 = this.offset) != null ? _a4 : { dimension: 0 });
       base.depth += offset;
       const context = new Context({ parent: parentContext }, this.style);
       const padding2 = context.toEm((_b3 = this.padding) != null ? _b3 : { register: "fboxsep" });
@@ -13052,8 +13052,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   // src/core-atoms/composition.ts
   var CompositionAtom = class extends Atom {
     constructor(value, options) {
-      var _a3;
-      super({ type: "composition", mode: (_a3 = options == null ? void 0 : options.mode) != null ? _a3 : "math", value });
+      var _a4;
+      super({ type: "composition", mode: (_a4 = options == null ? void 0 : options.mode) != null ? _a4 : "math", value });
     }
     static fromJson(json) {
       return new CompositionAtom(json.value, json);
@@ -13145,8 +13145,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       this.rightDelim = options.rightDelim;
     }
     static fromJson(json) {
-      var _a3;
-      return new LeftRightAtom((_a3 = json.variant) != null ? _a3 : "", json.body, json);
+      var _a4;
+      return new LeftRightAtom((_a4 = json.variant) != null ? _a4 : "", json.body, json);
     }
     toJson() {
       const result = super.toJson();
@@ -13159,12 +13159,12 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return result;
     }
     _serialize(options) {
-      var _a3, _b3;
+      var _a4, _b3;
       const rightDelim = this.matchingRightDelim();
       if (this.variant === "left...right") {
         return joinLatex([
           "\\left",
-          (_a3 = this.leftDelim) != null ? _a3 : ".",
+          (_a4 = this.leftDelim) != null ? _a4 : ".",
           this.bodyToLatex(options),
           "\\right",
           rightDelim
@@ -13186,21 +13186,21 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       ]);
     }
     matchingRightDelim() {
-      var _a3, _b3;
+      var _a4, _b3;
       if (this.rightDelim && this.rightDelim !== "?")
         return this.rightDelim;
-      const leftDelim = (_a3 = this.leftDelim) != null ? _a3 : ".";
+      const leftDelim = (_a4 = this.leftDelim) != null ? _a4 : ".";
       return (_b3 = RIGHT_DELIM[leftDelim]) != null ? _b3 : leftDelim;
     }
     render(parentContext) {
-      var _a3, _b3, _c2, _d2, _e;
+      var _a4, _b3, _c2, _d2, _e;
       const context = new Context({ parent: parentContext }, this.style);
       console.assert(this.body !== void 0);
       const delimContext = new Context(
         { parent: parentContext, mathstyle: "textstyle" },
         this.style
       );
-      const inner = (_a3 = Atom.createBox(context, this.body, { type: "inner" })) != null ? _a3 : new Box(null, { type: "inner" });
+      const inner = (_a4 = Atom.createBox(context, this.body, { type: "inner" })) != null ? _a4 : new Box(null, { type: "inner" });
       const innerHeight = inner.height / delimContext.scalingFactor;
       const innerDepth = inner.depth / delimContext.scalingFactor;
       const boxes = [];
@@ -13295,7 +13295,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   // src/core-atoms/macro.ts
   var MacroAtom = class extends Atom {
     constructor(macro, options) {
-      var _a3;
+      var _a4;
       super({ type: "macro", command: macro, style: options.style });
       this.body = options.body;
       if (options.captureSelection === void 0) {
@@ -13306,7 +13306,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       } else
         this.captureSelection = options.captureSelection;
       this.macroArgs = options.args;
-      this.expand = (_a3 = options.expand) != null ? _a3 : false;
+      this.expand = (_a4 = options.expand) != null ? _a4 : false;
     }
     static fromJson(json) {
       return new MacroAtom(json.command, json);
@@ -13322,8 +13322,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return options;
     }
     _serialize(options) {
-      var _a3;
-      return options.expandMacro && this.expand ? this.bodyToLatex(options) : this.command + ((_a3 = this.macroArgs) != null ? _a3 : "");
+      var _a4;
+      return options.expandMacro && this.expand ? this.bodyToLatex(options) : this.command + ((_a4 = this.macroArgs) != null ? _a4 : "");
     }
     render(context) {
       const result = Atom.createBox(context, this.body);
@@ -13356,10 +13356,10 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   // src/core-atoms/prompt.ts
   var PromptAtom = class extends Atom {
     constructor(placeholderId, correctness, locked = false, body, options) {
-      var _a3;
+      var _a4;
       super({
         type: "prompt",
-        mode: (_a3 = options == null ? void 0 : options.mode) != null ? _a3 : "math",
+        mode: (_a4 = options == null ? void 0 : options.mode) != null ? _a4 : "math",
         style: options == null ? void 0 : options.style,
         command: "\\placeholder"
       });
@@ -13474,8 +13474,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       );
     }
     _serialize(options) {
-      var _a3;
-      const value = (_a3 = this.bodyToLatex(options)) != null ? _a3 : "";
+      var _a4;
+      const value = (_a4 = this.bodyToLatex(options)) != null ? _a4 : "";
       let command = "\\placeholder";
       if (this.placeholderId)
         command += `[${this.placeholderId}]`;
@@ -13503,10 +13503,10 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return result;
     }
     render(context) {
-      var _a3;
+      var _a4;
       const phantomCtx = new Context({ parent: context, isPhantom: true });
       const leftSibling = this.leftSibling;
-      const base = (_a3 = leftSibling.render(phantomCtx)) != null ? _a3 : new Box(null);
+      const base = (_a4 = leftSibling.render(phantomCtx)) != null ? _a4 : new Box(null);
       const phantom = new Box(null, { height: base.height, depth: base.depth });
       return this.attachSupsub(context, {
         base: phantom,
@@ -13543,14 +13543,14 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       // Counter to prevent deadlock. If `end()` is called too many
       // times (1,000) in a row for the same token, bail.
       this.endCount = 0;
-      var _a3, _b3, _c2, _d2;
+      var _a4, _b3, _c2, _d2;
       options != null ? options : options = {};
       this.tokens = tokens;
       this.context = context instanceof Context && !(options == null ? void 0 : options.parseMode) && !options.mathstyle ? context : new Context(
         { from: context, mathstyle: options.mathstyle },
         options.style
       );
-      this.args = (_a3 = options.args) != null ? _a3 : void 0;
+      this.args = (_a4 = options.args) != null ? _a4 : void 0;
       this.smartFence = this.context.smartFence;
       this.parsingContext = {
         parent: void 0,
@@ -13562,13 +13562,13 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       };
     }
     beginContext(options) {
-      var _a3, _b3, _c2;
+      var _a4, _b3, _c2;
       const current = this.parsingContext;
       const newContext = {
         parent: current,
         mathlist: [],
         style: __spreadValues({}, current.style),
-        parseMode: (_a3 = options == null ? void 0 : options.mode) != null ? _a3 : current.parseMode,
+        parseMode: (_a4 = options == null ? void 0 : options.mode) != null ? _a4 : current.parseMode,
         mathstyle: (_b3 = options == null ? void 0 : options.mathstyle) != null ? _b3 : current.mathstyle,
         tabular: (_c2 = options == null ? void 0 : options.tabular) != null ? _c2 : false
       };
@@ -13664,7 +13664,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return pattern.test(this.tokens[this.index]);
     }
     hasInfixCommand() {
-      var _a3;
+      var _a4;
       const { index } = this;
       if (index < this.tokens.length && this.tokens[index].startsWith("\\")) {
         const info = getDefinition(this.tokens[index], this.parseMode);
@@ -13672,7 +13672,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
           return false;
         if (info.ifMode && !info.ifMode.includes(this.parseMode))
           return false;
-        return (_a3 = info.infix) != null ? _a3 : false;
+        return (_a4 = info.infix) != null ? _a4 : false;
       }
       return false;
     }
@@ -13699,8 +13699,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
      * one, or if a value was provided for #? via args, that value.
      */
     placeholder() {
-      var _a3;
-      const placeHolderArg = (_a3 = this.args) == null ? void 0 : _a3.call(this, "?");
+      var _a4;
+      const placeHolderArg = (_a4 = this.args) == null ? void 0 : _a4.call(this, "?");
       if (!placeHolderArg)
         return [new PlaceholderAtom({ mode: this.parseMode, style: this.style })];
       return parseLatex(placeHolderArg, {
@@ -13818,7 +13818,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
      * Used when handling macros
      */
     scanLiteralGroup() {
-      var _a3;
+      var _a4;
       if (!this.match("<{>"))
         return "";
       let result = "";
@@ -13835,11 +13835,11 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
         } else {
           if (/\\[a-zA-Z]+$/.test(result) && /^[a-zA-Z]/.test(token))
             result += " ";
-          result += (_a3 = {
+          result += (_a4 = {
             "<space>": " ",
             "<$$>": "$$",
             "<$>": "$"
-          }[token]) != null ? _a3 : token;
+          }[token]) != null ? _a4 : token;
         }
       }
       return result;
@@ -13856,7 +13856,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
      * > an internal variable.
      */
     scanNumber(isInteger = true) {
-      var _a3, _b3;
+      var _a4, _b3;
       let negative = false;
       let token = this.peek();
       while (token === "<space>" || token === "+" || token === "-") {
@@ -13885,7 +13885,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
         if (token) {
           if (token.length === 2 && token.startsWith("\\")) {
             return {
-              number: (negative ? -1 : 1) * ((_a3 = token.codePointAt(1)) != null ? _a3 : 0),
+              number: (negative ? -1 : 1) * ((_a4 = token.codePointAt(1)) != null ? _a4 : 0),
               base: "alpha"
             };
           }
@@ -13913,7 +13913,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       };
     }
     scanRegister() {
-      var _a3;
+      var _a4;
       const index = this.index;
       const number = this.scanNumber(false);
       this.skipWhitespace();
@@ -13962,7 +13962,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       if (!negative || number !== null) {
         return {
           register: register3,
-          factor: (negative ? -1 : 1) * ((_a3 = number == null ? void 0 : number.number) != null ? _a3 : 1)
+          factor: (negative ? -1 : 1) * ((_a4 = number == null ? void 0 : number.number) != null ? _a4 : 1)
         };
       }
       return { register: register3 };
@@ -14357,7 +14357,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
      * Return either an atom of type `"leftright"` or null
      */
     scanLeftRight() {
-      var _a3;
+      var _a4;
       if (this.match("\\right")) {
         this.onError({ code: "unbalanced-braces" });
         return new ErrorAtom("\\right");
@@ -14382,7 +14382,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
         this.parseExpression();
       const body = this.mathlist;
       this.endContext();
-      const rightDelim = (_a3 = this.scanDelim()) != null ? _a3 : ".";
+      const rightDelim = (_a4 = this.scanDelim()) != null ? _a4 : ".";
       return new LeftRightAtom(
         close === "\\right" ? "left...right" : "mleft...mright",
         body,
@@ -14542,7 +14542,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return result ? [result] : null;
     }
     scanArgument(type) {
-      var _a3;
+      var _a4;
       this.skipFiller();
       const mode = this.parseMode;
       if (type === "auto")
@@ -14553,7 +14553,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
         if (type === "value")
           return this.scanValue();
         if (type === "delim")
-          return (_a3 = this.scanDelim()) != null ? _a3 : ".";
+          return (_a4 = this.scanDelim()) != null ? _a4 : ".";
         if (type === "expression")
           return this.scanExpression();
         if (type === "math") {
@@ -14658,7 +14658,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     }
     /** Parse a symbol or a command and its arguments */
     scanSymbolOrCommand(command) {
-      var _a3, _b3;
+      var _a4, _b3;
       if (command === "\\placeholder") {
         const id = this.scanOptionalArgument("string");
         const defaultValue = this.scanOptionalArgument("math");
@@ -14773,7 +14773,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
         } else {
           result = new Atom({
             type: "mord",
-            command: (_a3 = info.command) != null ? _a3 : command,
+            command: (_a4 = info.command) != null ? _a4 : command,
             style: __spreadValues({}, this.style),
             value: command,
             mode: (_b3 = info.applyMode) != null ? _b3 : this.parseMode
@@ -14836,13 +14836,13 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
      * Scan the macro name and its arguments and return a macro atom
      */
     scanMacro(macro) {
-      var _a3;
+      var _a4;
       const def = this.context.getMacro(macro);
       if (!def)
         return null;
       const initialIndex = this.index;
       const argCount = def.args;
-      const args = { "?": (_a3 = this.args) == null ? void 0 : _a3.call(this, "?") };
+      const args = { "?": (_a4 = this.args) == null ? void 0 : _a4.call(this, "?") };
       for (let i = 1; i <= argCount; i++)
         args[i] = this.scanLiteralGroup();
       return new MacroAtom(macro, {
@@ -14866,8 +14866,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
      * arguments.
      */
     parseExpression() {
-      var _a3, _b3, _c2, _d2;
-      let result = (_d2 = (_c2 = (_b3 = (_a3 = this.scanEnvironment()) != null ? _a3 : this.scanModeShift()) != null ? _b3 : this.scanModeSet()) != null ? _c2 : this.scanGroup()) != null ? _d2 : this.scanLeftRight();
+      var _a4, _b3, _c2, _d2;
+      let result = (_d2 = (_c2 = (_b3 = (_a4 = this.scanEnvironment()) != null ? _a4 : this.scanModeShift()) != null ? _b3 : this.scanModeSet()) != null ? _c2 : this.scanGroup()) != null ? _d2 : this.scanLeftRight();
       if (result === null) {
         if (this.parseSupSub())
           return true;
@@ -14885,8 +14885,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     }
   };
   function parseLatex(s, options) {
-    var _a3, _b3, _c2, _d2;
-    const args = (_a3 = options == null ? void 0 : options.args) != null ? _a3 : void 0;
+    var _a4, _b3, _c2, _d2;
+    const args = (_a4 = options == null ? void 0 : options.args) != null ? _a4 : void 0;
     const parser = new Parser(tokenize(s, args), options == null ? void 0 : options.context, {
       args,
       mathstyle: (_b3 = options == null ? void 0 : options.mathstyle) != null ? _b3 : "displaystyle",
@@ -14899,10 +14899,10 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return atoms;
   }
   function validateLatex(s, options) {
-    var _a3;
+    var _a4;
     const parser = new Parser(tokenize(s, null), options == null ? void 0 : options.context, {
       mathstyle: "displaystyle",
-      parseMode: (_a3 = options == null ? void 0 : options.parseMode) != null ? _a3 : "math"
+      parseMode: (_a4 = options == null ? void 0 : options.parseMode) != null ? _a4 : "math"
     });
     while (!parser.end())
       parser.scan();
@@ -14940,8 +14940,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   };
   defineFunction(["ce", "pu"], "{chemformula:balanced-string}", {
     createAtom: (options) => {
-      var _a3;
-      return new ChemAtom(options.command, (_a3 = options.args[0]) != null ? _a3 : "");
+      var _a4;
+      return new ChemAtom(options.command, (_a4 = options.args[0]) != null ? _a4 : "");
     }
   });
   var mhchemParser = {
@@ -17318,13 +17318,13 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       });
     }
     _serialize(options) {
-      var _a3;
+      var _a4;
       if (!(options.expandMacro || options.skipStyles) && typeof this.verbatimLatex === "string")
         return this.verbatimLatex;
       const def = getDefinition(this.command, this.mode);
       if (def == null ? void 0 : def.serialize)
         return def.serialize(this, options);
-      let command = (_a3 = this.command) != null ? _a3 : "";
+      let command = (_a4 = this.command) != null ? _a4 : "";
       if (this.command === "\\enclose") {
         command += "{" + Object.keys(this.notation).join(" ") + "}";
         let style = "";
@@ -17350,7 +17350,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return latexCommand(command, this.bodyToLatex(options));
     }
     render(parentContext) {
-      var _a3;
+      var _a4;
       const context = new Context({ parent: parentContext }, this.style);
       const base = Atom.createBox(context, this.body);
       if (!base)
@@ -17375,7 +17375,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       if (this.backgroundcolor) {
         notation.setStyle(
           "background-color",
-          (_a3 = this.backgroundcolor) != null ? _a3 : "transparent"
+          (_a4 = this.backgroundcolor) != null ? _a4 : "transparent"
         );
       }
       if (this.notation.box)
@@ -17468,14 +17468,14 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   // src/core-atoms/genfrac.ts
   var GenfracAtom = class extends Atom {
     constructor(above, below, options) {
-      var _a3, _b3;
+      var _a4, _b3;
       super(__spreadProps(__spreadValues({}, options), {
         type: "genfrac",
         displayContainsHighlight: true
       }));
       this.above = above;
       this.below = below;
-      this.hasBarLine = (_a3 = options == null ? void 0 : options.hasBarLine) != null ? _a3 : true;
+      this.hasBarLine = (_a4 = options == null ? void 0 : options.hasBarLine) != null ? _a4 : true;
       this.continuousFraction = (_b3 = options == null ? void 0 : options.continuousFraction) != null ? _b3 : false;
       this.numerPrefix = options == null ? void 0 : options.numerPrefix;
       this.denomPrefix = options == null ? void 0 : options.denomPrefix;
@@ -17540,7 +17540,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return result;
     }
     render(context) {
-      var _a3, _b3;
+      var _a4, _b3;
       const fracContext = new Context(
         { parent: context, mathstyle: this.mathstyleName },
         this.style
@@ -17556,7 +17556,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       const numerBox = this.numerPrefix ? new Box(
         [new Box(this.numerPrefix), Atom.createBox(numContext, this.above)],
         { isTight: numContext.isTight, type: "ignore" }
-      ) : (_a3 = Atom.createBox(numContext, this.above, { type: "ignore" })) != null ? _a3 : new Box(null, { type: "ignore" });
+      ) : (_a4 = Atom.createBox(numContext, this.above, { type: "ignore" })) != null ? _a4 : new Box(null, { type: "ignore" });
       const denomContext = new Context(
         {
           parent: fracContext,
@@ -17692,9 +17692,9 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   var LatexAtom = class extends Atom {
     // Display errors with wavy red line
     constructor(value, options) {
-      var _a3;
+      var _a4;
       super({ type: "latex", value, mode: "latex" });
-      this.isSuggestion = (_a3 = options == null ? void 0 : options.isSuggestion) != null ? _a3 : false;
+      this.isSuggestion = (_a4 = options == null ? void 0 : options.isSuggestion) != null ? _a4 : false;
       this.isError = false;
     }
     static fromJson(json) {
@@ -17752,17 +17752,17 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return this.bind(context, box);
     }
     _serialize(_options) {
-      var _a3, _b3;
-      return (_b3 = (_a3 = this.body) == null ? void 0 : _a3.map((x) => x.value).join("")) != null ? _b3 : "";
+      var _a4, _b3;
+      return (_b3 = (_a4 = this.body) == null ? void 0 : _a4.map((x) => x.value).join("")) != null ? _b3 : "";
     }
   };
 
   // src/core-atoms/operator.ts
   var OperatorAtom = class extends Atom {
     constructor(symbol, options) {
-      var _a3, _b3, _c2;
+      var _a4, _b3, _c2;
       super(__spreadProps(__spreadValues({}, options), {
-        type: (_a3 = options.type) != null ? _a3 : "mop",
+        type: (_a4 = options.type) != null ? _a4 : "mop",
         isFunction: options == null ? void 0 : options.isFunction
       }));
       this.value = symbol;
@@ -17792,7 +17792,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return result;
     }
     render(context) {
-      var _a3;
+      var _a4;
       let base;
       let baseShift = 0;
       let slant = 0;
@@ -17827,7 +17827,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       }
       let result = base;
       if (this.superscript || this.subscript) {
-        const limits = (_a3 = this.subsupPlacement) != null ? _a3 : "auto";
+        const limits = (_a4 = this.subsupPlacement) != null ? _a4 : "auto";
         result = limits === "over-under" || limits === "auto" && context.isDisplayStyle ? this.attachLimits(context, { base, baseShift, slant }) : this.attachSupsub(context, { base });
       }
       return new Box(this.bind(context, result), {
@@ -17906,14 +17906,14 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   // src/core-atoms/overunder.ts
   var OverunderAtom = class extends Atom {
     constructor(options) {
-      var _a3, _b3, _c2, _d2;
+      var _a4, _b3, _c2, _d2;
       super({
         type: "overunder",
         command: options.command,
         style: options.style,
         mode: options.mode,
         body: options.body,
-        skipBoundary: (_a3 = options.skipBoundary) != null ? _a3 : true
+        skipBoundary: (_a4 = options.skipBoundary) != null ? _a4 : true
       });
       this.subsupPlacement = options.supsubPlacement;
       this.svgAbove = options.svgAbove;
@@ -18058,10 +18058,10 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   // src/core-atoms/phantom.ts
   var PhantomAtom = class extends Atom {
     constructor(options) {
-      var _a3, _b3, _c2, _d2;
+      var _a4, _b3, _c2, _d2;
       super(__spreadProps(__spreadValues({}, options), { type: "phantom" }));
       this.captureSelection = true;
-      this.isInvisible = (_a3 = options.isInvisible) != null ? _a3 : false;
+      this.isInvisible = (_a4 = options.isInvisible) != null ? _a4 : false;
       this.smashDepth = (_b3 = options.smashDepth) != null ? _b3 : false;
       this.smashHeight = (_c2 = options.smashHeight) != null ? _c2 : false;
       this.smashWidth = (_d2 = options.smashWidth) != null ? _d2 : false;
@@ -18121,10 +18121,10 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   // src/core-atoms/spacing.ts
   var SpacingAtom = class extends Atom {
     constructor(options) {
-      var _a3;
+      var _a4;
       super(__spreadValues({ type: "spacing" }, options));
       this.width = options == null ? void 0 : options.width;
-      this._braced = (_a3 = options == null ? void 0 : options.braced) != null ? _a3 : false;
+      this._braced = (_a4 = options == null ? void 0 : options.braced) != null ? _a4 : false;
     }
     static fromJson(json) {
       return new SpacingAtom(json);
@@ -18138,7 +18138,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return json;
     }
     render(context) {
-      var _a3;
+      var _a4;
       if (this.command === "space")
         return new Box(this.mode === "math" ? null : " ");
       let result;
@@ -18146,7 +18146,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
         result = new Box(null, { classes: "mspace" });
         result.left = context.toEm(this.width);
       } else {
-        const spacingCls = (_a3 = {
+        const spacingCls = (_a4 = {
           "\\qquad": "qquad",
           "\\quad": "quad",
           "\\enspace": "enspace",
@@ -18154,7 +18154,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
           "\\:": "mediumspace",
           "\\,": "thinspace",
           "\\!": "negativethinspace"
-        }[this.command]) != null ? _a3 : "mediumspace";
+        }[this.command]) != null ? _a4 : "mediumspace";
         result = new Box(null, { classes: spacingCls });
       }
       result = this.bind(context, result);
@@ -18163,13 +18163,13 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return result;
     }
     _serialize(options) {
-      var _a3;
+      var _a4;
       if (!options.expandMacro && typeof this.verbatimLatex === "string")
         return this.verbatimLatex;
       const def = getDefinition(this.command, this.mode);
       if (def == null ? void 0 : def.serialize)
         return def.serialize(this, options);
-      const command = (_a3 = this.command) != null ? _a3 : "";
+      const command = (_a4 = this.command) != null ? _a4 : "";
       if (this.width === void 0)
         return command;
       if (this._braced && !("register" in this.width))
@@ -18181,10 +18181,10 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   // src/core-atoms/surd.ts
   var SurdAtom = class extends Atom {
     constructor(options) {
-      var _a3;
+      var _a4;
       super(__spreadProps(__spreadValues({}, options), {
         type: "surd",
-        mode: (_a3 = options.mode) != null ? _a3 : "math",
+        mode: (_a4 = options.mode) != null ? _a4 : "math",
         style: options.style,
         displayContainsHighlight: true,
         body: options.body
@@ -18211,12 +18211,12 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return latexCommand(command, body);
     }
     render(context) {
-      var _a3;
+      var _a4;
       const innerContext = new Context(
         { parent: context, mathstyle: "cramp" },
         this.style
       );
-      const innerBox = (_a3 = Atom.createBox(innerContext, this.body, { type: "inner" })) != null ? _a3 : new Box(null);
+      const innerBox = (_a4 = Atom.createBox(innerContext, this.body, { type: "inner" })) != null ? _a4 : new Box(null);
       const factor = innerContext.scalingFactor;
       const ruleWidth = innerContext.metrics.defaultRuleThickness / factor;
       const phi = context.isDisplayStyle ? X_HEIGHT : ruleWidth;
@@ -18376,11 +18376,11 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     const med = context.getRegisterAsEm("medmuskip");
     const thick = context.getRegisterAsEm("thickmuskip");
     traverseBoxes(boxes, (prev, cur) => {
-      var _a3, _b3, _c2;
+      var _a4, _b3, _c2;
       if (!prev)
         return;
       const prevType = prev.type;
-      const table = cur.isTight ? (_a3 = INTER_BOX_TIGHT_SPACING[prevType]) != null ? _a3 : null : (_b3 = INTER_BOX_SPACING[prevType]) != null ? _b3 : null;
+      const table = cur.isTight ? (_a4 = INTER_BOX_TIGHT_SPACING[prevType]) != null ? _a4 : null : (_b3 = INTER_BOX_SPACING[prevType]) != null ? _b3 : null;
       const hskip = (_c2 = table == null ? void 0 : table[cur.type]) != null ? _c2 : null;
       if (hskip === 3)
         addSkipBefore(cur, thin);
@@ -18435,8 +18435,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       }));
     }
     toJson() {
-      var _a3;
-      const tooltip = (_a3 = this.tooltip.body) == null ? void 0 : _a3.filter((x) => x.type !== "first").map((x) => x.toJson());
+      var _a4;
+      const tooltip = (_a4 = this.tooltip.body) == null ? void 0 : _a4.filter((x) => x.type !== "first").map((x) => x.toJson());
       return __spreadProps(__spreadValues({}, super.toJson()), { tooltip });
     }
     render(context) {
@@ -18660,7 +18660,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       super("math");
     }
     createAtom(command, info, style) {
-      var _a3, _b3, _c2, _d2, _e;
+      var _a4, _b3, _c2, _d2, _e;
       if (info === null) {
         return new Atom({
           type: "mord",
@@ -18672,7 +18672,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       }
       if (info.definitionType === "symbol") {
         const result2 = new Atom({
-          type: (_a3 = info.type) != null ? _a3 : "mord",
+          type: (_a4 = info.type) != null ? _a4 : "mord",
           mode: "math",
           command: (_b3 = info.command) != null ? _b3 : command,
           value: String.fromCodePoint(info.codepoint),
@@ -18713,8 +18713,8 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       }
       if (variant === "normal" && !variantStyle && box.value.length === 1) {
         LETTER_SHAPE_RANGES.forEach((x, i) => {
-          var _a3;
-          if (x.test(box.value) && LETTER_SHAPE_MODIFIER[(_a3 = style.letterShapeStyle) != null ? _a3 : "tex"][i] === "it")
+          var _a4;
+          if (x.test(box.value) && LETTER_SHAPE_MODIFIER[(_a4 = style.letterShapeStyle) != null ? _a4 : "tex"][i] === "it")
             variantStyle = "italic";
         });
       }
@@ -18825,7 +18825,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   }
   function emitSizeTextRun(run, options) {
     return getPropertyRuns(run, "fontSize").map((x) => {
-      var _a3, _b3;
+      var _a4, _b3;
       const s = emitFontSeriesTextRun(x, options);
       const command = (_b3 = [
         "",
@@ -18839,19 +18839,19 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
         "\\LARGE",
         "\\huge",
         "\\Huge"
-      ][(_a3 = x[0].style.fontSize) != null ? _a3 : ""]) != null ? _b3 : "";
+      ][(_a4 = x[0].style.fontSize) != null ? _a4 : ""]) != null ? _b3 : "";
       return command ? `${command} ${joinLatex(s)}` : joinLatex(s);
     });
   }
   function emitFontFamilyTextRun(run, options) {
     return getPropertyRuns(run, "fontFamily").map((x) => {
-      var _a3, _b3;
+      var _a4, _b3;
       const s = emitSizeTextRun(x, options);
       const command = (_b3 = {
         "roman": "textrm",
         "monospace": "texttt",
         "sans-serif": "textsf"
-      }[(_a3 = x[0].style.fontFamily) != null ? _a3 : ""]) != null ? _b3 : "";
+      }[(_a4 = x[0].style.fontFamily) != null ? _a4 : ""]) != null ? _b3 : "";
       if (command)
         return `\\${command}{${joinLatex(s)}}`;
       if (x[0].style.fontFamily)
@@ -18892,7 +18892,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
      * Return the font-family name
      */
     getFont(box, style) {
-      var _a3, _b3, _c2, _d2, _e;
+      var _a4, _b3, _c2, _d2, _e;
       const { fontFamily } = style;
       if (TEXT_FONT_CLASS[fontFamily])
         box.classes += " " + TEXT_FONT_CLASS[fontFamily];
@@ -18901,7 +18901,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       }
       if (style.fontShape) {
         box.classes += " ";
-        box.classes += (_a3 = {
+        box.classes += (_a4 = {
           it: "ML__it",
           sl: "ML__shape_sl",
           // Slanted
@@ -18909,7 +18909,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
           // Small caps
           ol: "ML__shape_ol"
           // Outline
-        }[style.fontShape]) != null ? _a3 : "";
+        }[style.fontShape]) != null ? _a4 : "";
       }
       if (style.fontSeries) {
         const m = style.fontSeries.match(/(.?[lbm])?(.?[cx])?/);
@@ -19292,7 +19292,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       gKeyboardLayouts.push(layout);
   }
   function getCodeForKey(k, layout) {
-    var _a3;
+    var _a4;
     const result = {
       shift: false,
       alt: false,
@@ -19326,7 +19326,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
         return result;
       }
     }
-    result.key = (_a3 = BASE_LAYOUT_MAPPING[k]) != null ? _a3 : "";
+    result.key = (_a4 = BASE_LAYOUT_MAPPING[k]) != null ? _a4 : "";
     return result;
   }
   function normalizeKeyboardEvent(evt) {
@@ -19356,7 +19356,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return new KeyboardEvent(evt.type, __spreadProps(__spreadValues({}, evt), { altKey, shiftKey, code }));
   }
   function validateKeyboardLayout(evt) {
-    var _a3, _b3;
+    var _a4, _b3;
     if (!evt)
       return;
     if (evt.key === "Unidentified")
@@ -19365,7 +19365,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       return;
     const index = evt.shiftKey && evt.altKey ? 3 : evt.altKey ? 2 : evt.shiftKey ? 1 : 0;
     for (const layout of gKeyboardLayouts) {
-      if (((_a3 = layout.mapping[evt.code]) == null ? void 0 : _a3[index]) === evt.key) {
+      if (((_a4 = layout.mapping[evt.code]) == null ? void 0 : _a4[index]) === evt.key) {
         layout.score += 1;
       } else if ((_b3 = layout.mapping[evt.code]) == null ? void 0 : _b3[index]) {
         layout.score = 0;
@@ -20056,7 +20056,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return result.map(getKeybindingMarkup);
   }
   function getKeybindingMarkup(keystroke) {
-    var _a3;
+    var _a4;
     const useSymbol = /macos|ios|/.test(osPlatform());
     const segments = keystroke.split("+");
     let result = "";
@@ -20072,7 +20072,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       else if (segment.startsWith("Digit"))
         result += segment.slice(5, 6);
       else {
-        result += (_a3 = {
+        result += (_a4 = {
           "cmd": "\u2318",
           "meta": useSymbol ? "\u2318" : "command",
           "shift": useSymbol ? "\u21E7" : "shift",
@@ -20136,7 +20136,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
           "[digit7]": "7",
           "[digit8]": "8",
           "[digit9]": "9"
-        }[segment.toLowerCase()]) != null ? _a3 : segment.toUpperCase();
+        }[segment.toLowerCase()]) != null ? _a4 : segment.toUpperCase();
       }
     }
     return result;
@@ -20392,7 +20392,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return result;
   }
   function contentDidChange(model, options) {
-    var _a3;
+    var _a4;
     if (window.mathVirtualKeyboard.visible)
       window.mathVirtualKeyboard.update(makeProxy(model.mathfield));
     if (model.silenceNotifications || !model.mathfield.host)
@@ -20401,7 +20401,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     model.mathfield.host.dispatchEvent(
       new InputEvent("input", __spreadProps(__spreadValues({}, options), {
         // To work around a bug in WebKit/Safari (the inputType property gets stripped), include the inputType as the 'data' property. (see #1843)
-        data: options.data ? options.data : (_a3 = options.inputType) != null ? _a3 : "",
+        data: options.data ? options.data : (_a4 = options.inputType) != null ? _a4 : "",
         bubbles: true,
         composed: true
       }))
@@ -20489,17 +20489,17 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return model.atoms.find((x) => x.type === "latexgroup");
   }
   function getLatexGroupBody(model) {
-    var _a3, _b3;
+    var _a4, _b3;
     const atom = model.atoms.find((x) => x.type === "latexgroup");
     if (!atom)
       return [];
-    return (_b3 = (_a3 = atom.body) == null ? void 0 : _a3.filter((x) => x.type === "latex")) != null ? _b3 : [];
+    return (_b3 = (_a4 = atom.body) == null ? void 0 : _a4.filter((x) => x.type === "latex")) != null ? _b3 : [];
   }
   function getCommandSuggestionRange(model, options) {
-    var _a3;
+    var _a4;
     let start = 0;
     let found = false;
-    const last = Number.isFinite(options == null ? void 0 : options.before) ? (_a3 = options == null ? void 0 : options.before) != null ? _a3 : 0 : model.lastOffset;
+    const last = Number.isFinite(options == null ? void 0 : options.before) ? (_a4 = options == null ? void 0 : options.before) != null ? _a4 : 0 : model.lastOffset;
     while (start <= last && !found) {
       const atom = model.at(start);
       found = atom instanceof LatexAtom && atom.isSuggestion;
@@ -20532,7 +20532,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       atom.parent.removeChild(atom);
   }
   function updateAutocomplete(mathfield, options) {
-    var _a3;
+    var _a4;
     const { model } = mathfield;
     removeSuggestion(mathfield);
     for (const atom2 of getLatexGroupBody(model))
@@ -20562,7 +20562,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       hideSuggestionPopover(mathfield);
       return;
     }
-    const index = (_a3 = options == null ? void 0 : options.atIndex) != null ? _a3 : 0;
+    const index = (_a4 = options == null ? void 0 : options.atIndex) != null ? _a4 : 0;
     mathfield.suggestionIndex = index < 0 ? suggestions.length - 1 : index % suggestions.length;
     const suggestion = suggestions[mathfield.suggestionIndex];
     if (suggestion !== command) {
@@ -20593,7 +20593,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return result;
   }
   function complete(mathfield, completion = "accept", options) {
-    var _a3, _b3;
+    var _a4, _b3;
     hideSuggestionPopover(mathfield);
     const latexGroup = getLatexGroup(mathfield.model);
     if (!latexGroup)
@@ -20618,7 +20618,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     const newPos = latexGroup.leftSibling;
     latexGroup.parent.removeChild(latexGroup);
     mathfield.model.position = mathfield.model.offsetOf(newPos);
-    mathfield.model.mode = (_a3 = options == null ? void 0 : options.mode) != null ? _a3 : "math";
+    mathfield.model.mode = (_a4 = options == null ? void 0 : options.mode) != null ? _a4 : "math";
     if (completion === "reject")
       return true;
     ModeEditor.insert(mathfield.model, latex, {
@@ -20633,11 +20633,11 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
 
   // src/editor/shared-element.ts
   function getSharedElement(id) {
-    var _a3;
+    var _a4;
     let result = document.getElementById(id);
     if (result) {
       result.dataset.refcount = Number(
-        Number.parseInt((_a3 = result.dataset.refcount) != null ? _a3 : "0") + 1
+        Number.parseInt((_a4 = result.dataset.refcount) != null ? _a4 : "0") + 1
       ).toString();
     } else {
       result = document.createElement("div");
@@ -20649,12 +20649,12 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return result;
   }
   function releaseSharedElement(id) {
-    var _a3;
+    var _a4;
     const element = document.getElementById(id);
     if (!element)
       return;
     const refcount = Number.parseInt(
-      (_a3 = element.getAttribute("data-refcount")) != null ? _a3 : "0"
+      (_a4 = element.getAttribute("data-refcount")) != null ? _a4 : "0"
     );
     if (refcount <= 1)
       element.remove();
@@ -20679,7 +20679,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return makeStruts(box, { classes: "ML__mathlive" }).toMarkup();
   }
   function showSuggestionPopover(mf, suggestions) {
-    var _a3;
+    var _a4;
     if (suggestions.length === 0) {
       hideSuggestionPopover(mf);
       return;
@@ -20698,14 +20698,14 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     }
     const panel = createSuggestionPopover(mf, `<ul>${template}</ul>`);
     if (isSuggestionPopoverVisible()) {
-      (_a3 = panel.querySelector(".ML__popover__current")) == null ? void 0 : _a3.scrollIntoView({ block: "nearest", inline: "nearest" });
+      (_a4 = panel.querySelector(".ML__popover__current")) == null ? void 0 : _a4.scrollIntoView({ block: "nearest", inline: "nearest" });
     }
     setTimeout(() => {
-      var _a4;
+      var _a5;
       if (panel && !isSuggestionPopoverVisible()) {
         panel.classList.add("is-visible");
         updateSuggestionPopoverPosition(mf);
-        (_a4 = panel.querySelector(".ML__popover__current")) == null ? void 0 : _a4.scrollIntoView({ block: "nearest", inline: "nearest" });
+        (_a5 = panel.querySelector(".ML__popover__current")) == null ? void 0 : _a5.scrollIntoView({ block: "nearest", inline: "nearest" });
       }
     }, 32);
   }
@@ -20716,12 +20716,12 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return panel.classList.contains("is-visible");
   }
   function updateSuggestionPopoverPosition(mf, options) {
-    var _a3;
+    var _a4;
     if (!mf.element || mf.element.mathfield !== mf)
       return;
     if (!isSuggestionPopoverVisible())
       return;
-    if (((_a3 = mf.model.at(mf.model.position)) == null ? void 0 : _a3.type) !== "latex") {
+    if (((_a4 = mf.model.at(mf.model.position)) == null ? void 0 : _a4.type) !== "latex") {
       hideSuggestionPopover(mf);
       return;
     }
@@ -20864,13 +20864,13 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return loadFonts();
   }
   async function loadFonts() {
-    var _a3;
+    var _a4;
     if (gFontsState !== "not-loaded")
       return;
     gFontsState = "loading";
-    const useStaticFonts = (_a3 = getComputedStyle(document.documentElement).getPropertyValue(
+    const useStaticFonts = (_a4 = getComputedStyle(document.documentElement).getPropertyValue(
       "--ML__static-fonts"
-    )) != null ? _a3 : false;
+    )) != null ? _a4 : false;
     if (useStaticFonts) {
       gFontsState = "ready";
       return;
@@ -20982,7 +20982,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     });
   }
   function makeBox(mathfield, renderOptions) {
-    var _a3;
+    var _a4;
     renderOptions = renderOptions != null ? renderOptions : {};
     const context = new Context({
       from: __spreadProps(__spreadValues({}, mathfield.context), {
@@ -20998,7 +20998,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
           // The `groupNumbers` flag indicates that extra boxes should be generated
           // to represent group of atoms, for example, a box to group
           // consecutive digits to represent a number.
-          groupNumbers: (_a3 = renderOptions.forHighlighting) != null ? _a3 : false
+          groupNumbers: (_a4 = renderOptions.forHighlighting) != null ? _a4 : false
         },
         letterShapeStyle: mathfield.options.letterShapeStyle
       }),
@@ -21048,11 +21048,11 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return box.toMarkup();
   }
   function render(mathfield, renderOptions) {
-    var _a3;
+    var _a4;
     if (!isValidMathfield(mathfield))
       return;
     renderOptions != null ? renderOptions : renderOptions = {};
-    const toggle = (_a3 = mathfield.element) == null ? void 0 : _a3.querySelector(
+    const toggle = (_a4 = mathfield.element) == null ? void 0 : _a4.querySelector(
       "[part=virtual-keyboard-toggle]"
     );
     if (toggle)
@@ -21203,11 +21203,11 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return COMMANDS[selector];
   }
   function getCommandTarget(command) {
-    var _a3;
-    return (_a3 = getCommandInfo(command)) == null ? void 0 : _a3.target;
+    var _a4;
+    return (_a4 = getCommandInfo(command)) == null ? void 0 : _a4.target;
   }
   function perform(mathfield, command) {
-    var _a3;
+    var _a4;
     if (!command)
       return false;
     let selector;
@@ -21242,7 +21242,7 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
       dirty = true;
       handled = true;
     } else if (commandTarget === "virtual-keyboard") {
-      dirty = (_a3 = window.mathVirtualKeyboard.executeCommand(command)) != null ? _a3 : false;
+      dirty = (_a4 = window.mathVirtualKeyboard.executeCommand(command)) != null ? _a4 : false;
       handled = true;
     } else if (COMMANDS[selector]) {
       if (!mathfield.isSelectionEditable && (info == null ? void 0 : info.changeContent)) {
@@ -21268,12 +21268,12 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
     return handled;
   }
   function performWithFeedback(mathfield, selector) {
-    var _a3;
+    var _a4;
     mathfield.focus();
     if (mathfield_element_default.keypressVibration && canVibrate())
       navigator.vibrate(HAPTIC_FEEDBACK_DURATION);
     const info = getCommandInfo(selector);
-    window.MathfieldElement.playSound((_a3 = info == null ? void 0 : info.audioFeedback) != null ? _a3 : "keypress");
+    window.MathfieldElement.playSound((_a4 = info == null ? void 0 : info.audioFeedback) != null ? _a4 : "keypress");
     const result = mathfield.executeCommand(selector);
     mathfield.scrollIntoView();
     return result;
@@ -21311,11 +21311,11 @@ M500 241 v40 H399408 v-40z M500 435 v40 H400000 v-40z`
   // src/virtual-keyboard/proxy.ts
   var VIRTUAL_KEYBOARD_MESSAGE = "mathlive#virtual-keyboard-message";
   function isVirtualKeyboardMessage(evt) {
-    var _a3;
+    var _a4;
     if (evt.type !== "message")
       return false;
     const msg = evt;
-    return ((_a3 = msg.data) == null ? void 0 : _a3.type) === VIRTUAL_KEYBOARD_MESSAGE;
+    return ((_a4 = msg.data) == null ? void 0 : _a4.type) === VIRTUAL_KEYBOARD_MESSAGE;
   }
   var VirtualKeyboardProxy = class {
     constructor() {
@@ -23002,8 +23002,8 @@ Note there are a different set of tooltip rules for the keyboard toggle
      * -
      */
     constructor(options) {
-      var _a3, _b3;
-      this.preventOverlayClose = (_a3 = options == null ? void 0 : options.preventOverlayClose) != null ? _a3 : false;
+      var _a4, _b3;
+      this.preventOverlayClose = (_a4 = options == null ? void 0 : options.preventOverlayClose) != null ? _a4 : false;
       this.translucent = (_b3 = options == null ? void 0 : options.translucent) != null ? _b3 : false;
       this.state = "closed";
     }
@@ -23029,13 +23029,13 @@ Note there are a different set of tooltip rules for the keyboard toggle
       return element;
     }
     open(options) {
-      var _a3;
+      var _a4;
       if (this.state !== "closed")
         return;
       this.state = "opening";
       this.savedActiveElement = deepActiveElement();
       const { element } = this;
-      ((_a3 = options == null ? void 0 : options.root) != null ? _a3 : document.body).appendChild(element);
+      ((_a4 = options == null ? void 0 : options.root) != null ? _a4 : document.body).appendChild(element);
       element.addEventListener("click", this);
       document.addEventListener("touchmove", this, false);
       document.addEventListener("scroll", this, false);
@@ -23052,7 +23052,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
       this.state = "open";
     }
     close() {
-      var _a3, _b3, _c2, _d2;
+      var _a4, _b3, _c2, _d2;
       if (this.state !== "open")
         return;
       this.state = "closing";
@@ -23063,7 +23063,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
       document.removeEventListener("touchmove", this, false);
       document.removeEventListener("scroll", this, false);
       element.remove();
-      document.body.style.overflow = (_a3 = this.savedOverflow) != null ? _a3 : "";
+      document.body.style.overflow = (_a4 = this.savedOverflow) != null ? _a4 : "";
       document.body.style.marginRight = (_b3 = this.savedMarginRight) != null ? _b3 : "";
       if (deepActiveElement() !== this.savedActiveElement)
         (_d2 = (_c2 = this.savedActiveElement) == null ? void 0 : _c2.focus) == null ? void 0 : _d2.call(_c2);
@@ -23085,9 +23085,9 @@ Note there are a different set of tooltip rules for the keyboard toggle
     }
   };
   function deepActiveElement() {
-    var _a3;
+    var _a4;
     let a = document.activeElement;
-    while ((_a3 = a == null ? void 0 : a.shadowRoot) == null ? void 0 : _a3.activeElement)
+    while ((_a4 = a == null ? void 0 : a.shadowRoot) == null ? void 0 : _a4.activeElement)
       a = a.shadowRoot.activeElement;
     return a;
   }
@@ -23307,12 +23307,12 @@ Note there are a different set of tooltip rules for the keyboard toggle
   };
   var variantPanelController;
   function showVariantsPanel(element, onClose) {
-    var _a3, _b3, _c2;
+    var _a4, _b3, _c2;
     const keyboard = VirtualKeyboard.singleton;
     if (!keyboard)
       return;
     const keycap = parentKeycap(element);
-    const variantDef = (_b3 = (_a3 = keyboard.getKeycap(keycap == null ? void 0 : keycap.id)) == null ? void 0 : _a3.variants) != null ? _b3 : "";
+    const variantDef = (_b3 = (_a4 = keyboard.getKeycap(keycap == null ? void 0 : keycap.id)) == null ? void 0 : _a4.variants) != null ? _b3 : "";
     if (typeof variantDef === "string" && !hasVariants(variantDef) || Array.isArray(variantDef) && variantDef.length === 0) {
       onClose == null ? void 0 : onClose();
       return;
@@ -23426,9 +23426,9 @@ Note there are a different set of tooltip rules for the keyboard toggle
     return;
   }
   function hideVariantsPanel() {
-    var _a3;
+    var _a4;
     variantPanelController == null ? void 0 : variantPanelController.abort();
-    (_a3 = Scrim.scrim) == null ? void 0 : _a3.close();
+    (_a4 = Scrim.scrim) == null ? void 0 : _a4.close();
   }
   function makeVariants(id) {
     if (id === "foreground-color") {
@@ -23459,11 +23459,11 @@ Note there are a different set of tooltip rules for the keyboard toggle
     return VARIANTS2[id] !== void 0;
   }
   function getVariants(id) {
-    var _a3;
+    var _a4;
     if (typeof id !== "string")
       return id;
     if (!VARIANTS2[id])
-      VARIANTS2[id] = (_a3 = makeVariants(id)) != null ? _a3 : [];
+      VARIANTS2[id] = (_a4 = makeVariants(id)) != null ? _a4 : [];
     return VARIANTS2[id];
   }
 
@@ -23499,17 +23499,17 @@ Note there are a different set of tooltip rules for the keyboard toggle
     return makeStruts(box, { classes: "ML__mathlive" }).toMarkup();
   }
   function normalizeLayer(layer) {
-    var _a3;
+    var _a4;
     if (Array.isArray(layer))
       return layer.map((x) => normalizeLayer(x)).flat();
     const result = typeof layer === "string" ? { markup: layer } : layer;
     if ("rows" in result && Array.isArray(result.rows))
       result.rows = result.rows.map((row) => row.map((x) => normalizeKeycap(x)));
-    (_a3 = result.id) != null ? _a3 : result.id = "ML__layer_" + Date.now().toString(36).slice(-2) + Math.floor(Math.random() * 1e5).toString(36);
+    (_a4 = result.id) != null ? _a4 : result.id = "ML__layer_" + Date.now().toString(36).slice(-2) + Math.floor(Math.random() * 1e5).toString(36);
     return [result];
   }
   function alphabeticLayout() {
-    var _a3, _b3;
+    var _a4, _b3;
     const keyboard = window.mathVirtualKeyboard;
     let layoutName = keyboard.alphabeticLayout;
     if (layoutName === "auto") {
@@ -23517,7 +23517,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
       if (activeLayout)
         layoutName = activeLayout.virtualLayout;
       if (!layoutName || layoutName === "auto") {
-        layoutName = (_a3 = {
+        layoutName = (_a4 = {
           fr: "azerty",
           be: "azerty",
           al: "qwertz",
@@ -23527,7 +23527,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
           hu: "qwertz",
           sk: "qwertz",
           ch: "qwertz"
-        }[l10n.locale.slice(0, 2)]) != null ? _a3 : "qwerty";
+        }[l10n.locale.slice(0, 2)]) != null ? _a4 : "qwerty";
       }
     }
     const ALPHABETIC_TEMPLATE = {
@@ -23613,7 +23613,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
         !("layers" in layout || "markup" in layout),
         `MathLive 0.94.5: when providing a "rows" property, "layers" and "markup" are ignored`
       );
-      const _a3 = layout, { rows } = _a3, partialLayout = __objRest(_a3, ["rows"]);
+      const _a4 = layout, { rows } = _a4, partialLayout = __objRest(_a4, ["rows"]);
       result = __spreadProps(__spreadValues({}, partialLayout), {
         layers: normalizeLayer({ rows: layout.rows })
       });
@@ -23652,7 +23652,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     return result;
   }
   function makeLayoutsToolbar(keyboard, index) {
-    var _a3, _b3;
+    var _a4, _b3;
     let markup = `<div class="left">`;
     if (keyboard.normalizedLayouts.length > 1) {
       for (const [i, l] of keyboard.normalizedLayouts.entries()) {
@@ -23664,7 +23664,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
           classes.push(...layout.labelClass.split(" "));
         markup += `<div class="${classes.join(" ")}"`;
         if (layout.tooltip) {
-          markup += " data-tooltip='" + ((_a3 = localize(layout.tooltip)) != null ? _a3 : layout.tooltip) + "' ";
+          markup += " data-tooltip='" + ((_a4 = localize(layout.tooltip)) != null ? _a4 : layout.tooltip) + "' ";
         }
         if (i !== index)
           markup += `data-layer="${layout.layers[0].id}"`;
@@ -23843,11 +23843,11 @@ Note there are a different set of tooltip rules for the keyboard toggle
     if (toolbars) {
       for (const toolbar of toolbars) {
         toolbar.addEventListener("click", (ev) => {
-          var _a3, _b3;
+          var _a4, _b3;
           let target = ev.target;
           let command = "";
           while (target && !command) {
-            command = (_a3 = target == null ? void 0 : target.getAttribute("data-command")) != null ? _a3 : "";
+            command = (_a4 = target == null ? void 0 : target.getAttribute("data-command")) != null ? _a4 : "";
             target = (_b3 = target == null ? void 0 : target.parentElement) != null ? _b3 : null;
           }
           if (command)
@@ -23926,9 +23926,9 @@ Note there are a different set of tooltip rules for the keyboard toggle
     return layerMarkup;
   }
   function renderKeycap(keycap, options = { shifted: false }) {
-    var _a3, _b3, _c2, _d2, _e, _f, _g;
+    var _a4, _b3, _c2, _d2, _e, _f, _g;
     let markup = "";
-    let cls = (_a3 = keycap.class) != null ? _a3 : "";
+    let cls = (_a4 = keycap.class) != null ? _a4 : "";
     if (options.shifted && isShiftKey(keycap))
       cls += " is-active";
     if (options.shifted && "shift" in keycap) {
@@ -24207,7 +24207,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     }
   };
   function normalizeKeycap(keycap) {
-    var _a3;
+    var _a4;
     if (typeof keycap === "string") {
       if (!KEYCAP_SHORTCUTS[keycap])
         return { latex: keycap };
@@ -24226,7 +24226,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     }
     if (shortcut) {
       if (shortcut.command === "insertDecimalSeparator")
-        shortcut.label = (_a3 = window.MathfieldElement.decimalSeparator) != null ? _a3 : ".";
+        shortcut.label = (_a4 = window.MathfieldElement.decimalSeparator) != null ? _a4 : ".";
       if (keycap.label === "[action]") {
         shortcut = __spreadValues(__spreadValues({}, shortcut), window.mathVirtualKeyboard.actionKeycap);
       }
@@ -24245,7 +24245,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
   }
   var pressAndHoldTimer;
   function handlePointerDown(ev) {
-    var _a3;
+    var _a4;
     if (ev.button !== 0)
       return;
     const keyboard = VirtualKeyboard.singleton;
@@ -24255,7 +24255,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     while (layerButton && !layerButton.getAttribute("data-layer"))
       layerButton = layerButton.parentElement;
     if (layerButton) {
-      keyboard.currentLayer = (_a3 = layerButton.getAttribute("data-layer")) != null ? _a3 : "";
+      keyboard.currentLayer = (_a4 = layerButton.getAttribute("data-layer")) != null ? _a4 : "";
       ev.preventDefault();
       return;
     }
@@ -24384,7 +24384,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     };
   }
   function executeKeycapCommand(keycap) {
-    var _a3;
+    var _a4;
     let command = keycap.command;
     if (!command && keycap.insert) {
       command = [
@@ -24428,7 +24428,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
         { focus: true, feedback: true, simulateKeystroke: true }
       ];
     }
-    (_a3 = VirtualKeyboard.singleton) == null ? void 0 : _a3.executeCommand(command);
+    (_a4 = VirtualKeyboard.singleton) == null ? void 0 : _a4.executeCommand(command);
   }
   function isKeycapElement(el) {
     if (el.nodeType !== 1)
@@ -24462,13 +24462,13 @@ Note there are a different set of tooltip rules for the keyboard toggle
        */
       this._shiftPressCount = 0;
       this._isShifted = false;
-      var _a3, _b3, _c2;
+      var _a4, _b3, _c2;
       this.targetOrigin = window.origin;
       this.originValidator = "none";
       this._alphabeticLayout = "auto";
       this._layouts = Object.freeze(["default"]);
       this._editToolbar = "default";
-      this._container = (_b3 = (_a3 = window.document) == null ? void 0 : _a3.body) != null ? _b3 : null;
+      this._container = (_b3 = (_a4 = window.document) == null ? void 0 : _a4.body) != null ? _b3 : null;
       this.overrideAutoClose = false;
       this.renderKeycap = renderKeycap;
       this._visible = false;
@@ -24481,9 +24481,9 @@ Note there are a different set of tooltip rules for the keyboard toggle
       this.listeners = {};
       (_c2 = window.top) == null ? void 0 : _c2.addEventListener("message", this);
       document.body.addEventListener("focusin", (event) => {
-        var _a4;
+        var _a5;
         const target = event.target;
-        if ((target == null ? void 0 : target.isConnected) && ((_a4 = target.tagName) == null ? void 0 : _a4.toLowerCase()) === "math-field" && isTouchCapable()) {
+        if ((target == null ? void 0 : target.isConnected) && ((_a5 = target.tagName) == null ? void 0 : _a5.toLowerCase()) === "math-field" && isTouchCapable()) {
           const mf = target;
           if (mf.mathVirtualKeyboardPolicy === "auto" && !mf.readOnly)
             this.show({ animate: true });
@@ -24495,11 +24495,11 @@ Note there are a different set of tooltip rules for the keyboard toggle
         const target = evt.target;
         if (target.mathVirtualKeyboardPolicy !== "manual") {
           setTimeout(() => {
-            var _a4, _b4, _c3;
+            var _a5, _b4, _c3;
             let target2 = document.activeElement;
             let focusedMathfield = false;
             while (target2) {
-              if (((_a4 = target2.tagName) == null ? void 0 : _a4.toLowerCase()) === "math-field") {
+              if (((_a5 = target2.tagName) == null ? void 0 : _a5.toLowerCase()) === "math-field") {
                 focusedMathfield = true;
                 break;
               }
@@ -24512,11 +24512,11 @@ Note there are a different set of tooltip rules for the keyboard toggle
       });
     }
     get currentLayer() {
-      var _a3, _b3, _c2;
-      return (_c2 = (_b3 = (_a3 = this._element) == null ? void 0 : _a3.querySelector(".MLK__layer.is-visible")) == null ? void 0 : _b3.id) != null ? _c2 : "";
+      var _a4, _b3, _c2;
+      return (_c2 = (_b3 = (_a4 = this._element) == null ? void 0 : _a4.querySelector(".MLK__layer.is-visible")) == null ? void 0 : _b3.id) != null ? _c2 : "";
     }
     set currentLayer(id) {
-      var _a3;
+      var _a4;
       if (!this._element) {
         this.latentLayer = id;
         return;
@@ -24525,7 +24525,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
       if (!newActive)
         newActive = this._element.querySelector(".MLK__layer");
       if (newActive) {
-        (_a3 = this._element.querySelector(".MLK__layer.is-visible")) == null ? void 0 : _a3.classList.remove("is-visible");
+        (_a4 = this._element.querySelector(".MLK__layer.is-visible")) == null ? void 0 : _a4.classList.remove("is-visible");
         newActive.classList.add("is-visible");
       }
       if (this.isShifted)
@@ -24535,8 +24535,8 @@ Note there are a different set of tooltip rules for the keyboard toggle
       return this._isCapslock;
     }
     set isCapslock(val) {
-      var _a3;
-      (_a3 = this._element) == null ? void 0 : _a3.classList.toggle("is-caps-lock", this.shiftPressCount === 2);
+      var _a4;
+      (_a4 = this._element) == null ? void 0 : _a4.classList.toggle("is-caps-lock", this.shiftPressCount === 2);
       if (val === this._isCapslock)
         return;
       this._isCapslock = val;
@@ -24704,10 +24704,10 @@ Note there are a different set of tooltip rules for the keyboard toggle
       return this._element;
     }
     set element(val) {
-      var _a3;
+      var _a4;
       if (this._element === val)
         return;
-      (_a3 = this._element) == null ? void 0 : _a3.remove();
+      (_a4 = this._element) == null ? void 0 : _a4.remove();
       this._element = val;
     }
     get visible() {
@@ -24720,19 +24720,19 @@ Note there are a different set of tooltip rules for the keyboard toggle
         this.hide();
     }
     get boundingRect() {
-      var _a3;
+      var _a4;
       if (!this._visible)
         return new DOMRect();
-      const plate = (_a3 = this._element) == null ? void 0 : _a3.getElementsByClassName("MLK__plate")[0];
+      const plate = (_a4 = this._element) == null ? void 0 : _a4.getElementsByClassName("MLK__plate")[0];
       if (plate)
         return plate.getBoundingClientRect();
       return new DOMRect();
     }
     adjustBoundingRect() {
-      var _a3, _b3;
+      var _a4, _b3;
       const h = this.boundingRect.height;
       if (this.container === document.body) {
-        (_a3 = this._element) == null ? void 0 : _a3.style.setProperty(
+        (_a4 = this._element) == null ? void 0 : _a4.style.setProperty(
           "--_keyboard-height",
           `calc(${h}px + env(safe-area-inset-bottom, 0))`
         );
@@ -24785,7 +24785,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
       }
     }
     show(options) {
-      var _a3;
+      var _a4;
       if (this._visible)
         return;
       const container = this.container;
@@ -24817,7 +24817,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
         window.addEventListener("keyup", this, { capture: true });
         this.currentLayer = this.latentLayer;
         this.render();
-        (_a3 = this._element) == null ? void 0 : _a3.classList.toggle(
+        (_a4 = this._element) == null ? void 0 : _a4.classList.toggle(
           "is-caps-lock",
           this.shiftPressCount === 2
         );
@@ -24830,8 +24830,8 @@ Note there are a different set of tooltip rules for the keyboard toggle
             this._element.addEventListener(
               "transitionend",
               () => {
-                var _a4;
-                return (_a4 = this._element) == null ? void 0 : _a4.classList.remove("animate");
+                var _a5;
+                return (_a5 = this._element) == null ? void 0 : _a5.classList.remove("animate");
               },
               { once: true }
             );
@@ -24845,7 +24845,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
       }
     }
     hide(_options) {
-      var _a3;
+      var _a4;
       const container = this.container;
       if (!container)
         return;
@@ -24866,7 +24866,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
         window.removeEventListener("contextmenu", this, { capture: true });
         hideVariantsPanel();
         releaseStylesheets();
-        (_a3 = this._element) == null ? void 0 : _a3.remove();
+        (_a4 = this._element) == null ? void 0 : _a4.remove();
         this._element = void 0;
         if (this.originalContainerBottomPadding !== null)
           container.style.paddingBottom = this.originalContainerBottomPadding;
@@ -24874,11 +24874,11 @@ Note there are a different set of tooltip rules for the keyboard toggle
       this.stateChanged();
     }
     get height() {
-      var _a3, _b3;
-      return (_b3 = (_a3 = this.element) == null ? void 0 : _a3.offsetHeight) != null ? _b3 : 0;
+      var _a4, _b3;
+      return (_b3 = (_a4 = this.element) == null ? void 0 : _a4.offsetHeight) != null ? _b3 : 0;
     }
     buildAndAttachElement() {
-      var _a3;
+      var _a4;
       console.assert(!this.element);
       this.element = makeKeyboardElement(this);
       window.addEventListener("contextmenu", this, { capture: true });
@@ -24894,7 +24894,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
         },
         { capture: true }
       );
-      (_a3 = this.container) == null ? void 0 : _a3.appendChild(this.element);
+      (_a4 = this.container) == null ? void 0 : _a4.appendChild(this.element);
     }
     handleEvent(evt) {
       if (isVirtualKeyboardMessage(evt)) {
@@ -25124,8 +25124,9 @@ Note there are a different set of tooltip rules for the keyboard toggle
   };
 
   // src/virtual-keyboard/global.ts
+  var _a2;
   if (isBrowser() && !("mathVirtualKeyboard" in window)) {
-    if (window === window["top"]) {
+    if (window === window["top"] || ((_a2 = window["mathfieldGlobalOptions"]) == null ? void 0 : _a2["avoidVirtualKeyboardProxy"])) {
       const kbd = VirtualKeyboard.singleton;
       Object.defineProperty(window, "mathVirtualKeyboard", {
         get: () => kbd
@@ -25280,13 +25281,13 @@ Note there are a different set of tooltip rules for the keyboard toggle
     return ` extid="${id}"`;
   }
   function scanIdentifier(stream, final, options) {
-    var _a3, _b3, _c2, _d2, _e, _f, _g, _h, _i;
+    var _a4, _b3, _c2, _d2, _e, _f, _g, _h, _i;
     let result = false;
     final = final != null ? final : stream.atoms.length;
     let mathML = "";
     let body = "";
     let atom = stream.atoms[stream.index];
-    const variant = (_b3 = (_a3 = atom.style) == null ? void 0 : _a3.variant) != null ? _b3 : "";
+    const variant = (_b3 = (_a4 = atom.style) == null ? void 0 : _a4.variant) != null ? _b3 : "";
     const variantStyle = (_d2 = (_c2 = atom.style) == null ? void 0 : _c2.variantStyle) != null ? _d2 : "";
     let variantProp = "";
     if (variant || variantStyle) {
@@ -25392,12 +25393,12 @@ Note there are a different set of tooltip rules for the keyboard toggle
     return result;
   }
   function parseSubsup(base, stream, options) {
-    var _a3;
+    var _a4;
     let atom = stream.atoms[stream.index - 1];
     if (!atom)
       return false;
     if (!atom.superscript && !atom.subscript) {
-      if (((_a3 = stream.atoms[stream.index]) == null ? void 0 : _a3.type) === "subsup") {
+      if (((_a4 = stream.atoms[stream.index]) == null ? void 0 : _a4.type) === "subsup") {
         atom = stream.atoms[stream.index];
         stream.index += 1;
       } else
@@ -25658,7 +25659,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     return xmlEscape(result);
   }
   function atomToMathML(atom, options) {
-    var _a3, _b3, _c2, _d2, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v;
+    var _a4, _b3, _c2, _d2, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v;
     if (atom.mode === "text")
       return `<mi${makeID(atom.id, options)}>${atom.value}</mi>`;
     const SVG_CODE_POINTS = {
@@ -25842,7 +25843,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
       case "leftright":
         result = "<mrow>";
         if (atom.leftDelim && atom.leftDelim !== ".") {
-          result += `<mo${makeID(atom.id, options)}${(_a3 = SPECIAL_DELIMS[atom.leftDelim]) != null ? _a3 : atom.leftDelim}</mo>`;
+          result += `<mo${makeID(atom.id, options)}${(_a4 = SPECIAL_DELIMS[atom.leftDelim]) != null ? _a4 : atom.leftDelim}</mo>`;
         }
         if (atom.body)
           result += toMathML(atom.body, options);
@@ -26090,7 +26091,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     // '\\hat': '&#x005e;'
   };
   function atomToAsciiMath(atom) {
-    var _a3, _b3, _c2, _d2, _e, _f, _g, _h, _i, _j, _k, _l, _m;
+    var _a4, _b3, _c2, _d2, _e, _f, _g, _h, _i, _j, _k, _l, _m;
     if (!atom)
       return "";
     if (isArray(atom)) {
@@ -26107,7 +26108,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
       else if (atom[0].mode === "text") {
         let i = 0;
         result2 = '"';
-        while (((_a3 = atom[i]) == null ? void 0 : _a3.mode) === "text") {
+        while (((_a4 = atom[i]) == null ? void 0 : _a4.mode) === "text") {
           result2 += atom[i].body ? atomToAsciiMath(atom[i].body) : atom[i].value;
           i++;
         }
@@ -26394,7 +26395,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     return atoms.map((atom) => atom.value).join("");
   }
   function atomToSpeakableFragment(mode, atom) {
-    var _a3, _b3, _c2, _d2, _e;
+    var _a4, _b3, _c2, _d2, _e;
     function letter(c) {
       if (!window.MathfieldElement.textToSpeechMarkup) {
         if (/[a-z]/.test(c))
@@ -26429,7 +26430,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
           i += 2;
         } else if (atom[i].mode === "text") {
           if (isInTextRun)
-            result += (_a3 = atom[i].value) != null ? _a3 : " ";
+            result += (_a4 = atom[i].value) != null ? _a4 : " ";
           else {
             isInTextRun = true;
             result += atomToSpeakableFragment("text", atom[i]);
@@ -26752,12 +26753,12 @@ Note there are a different set of tooltip rules for the keyboard toggle
     return result;
   }
   function atomToSpeakableText(atoms) {
-    var _a3, _b3;
+    var _a4, _b3;
     if (window.MathfieldElement.textToSpeechRules === "sre" && ("sre" in window || "SRE" in window)) {
       const mathML = toMathML(atoms);
       if (mathML) {
         if (window.MathfieldElement.textToSpeechMarkup) {
-          window.MathfieldElement.textToSpeechRulesOptions = (_a3 = window.MathfieldElement.textToSpeechRulesOptions) != null ? _a3 : {};
+          window.MathfieldElement.textToSpeechRulesOptions = (_a4 = window.MathfieldElement.textToSpeechRulesOptions) != null ? _a4 : {};
           window.MathfieldElement.textToSpeechRulesOptions.markup = window.MathfieldElement.textToSpeechMarkup;
           if (window.MathfieldElement.textToSpeechRulesOptions.markup === "ssml")
             window.MathfieldElement.textToSpeechRulesOptions.markup = "ssml_step";
@@ -26807,7 +26808,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     { target: "mathfield" }
   );
   function speak(mathfield, scope, speakOptions) {
-    var _a3, _b3;
+    var _a4, _b3;
     speakOptions = speakOptions != null ? speakOptions : { withHighlighting: false };
     const { model } = mathfield;
     function getAtoms(scope2) {
@@ -26878,7 +26879,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     }
     const atoms = getAtoms(scope);
     if (atoms === null) {
-      (_b3 = (_a3 = window.MathfieldElement).speakHook) == null ? void 0 : _b3.call(_a3, getFailedSpeech(scope));
+      (_b3 = (_a4 = window.MathfieldElement).speakHook) == null ? void 0 : _b3.call(_a4, getFailedSpeech(scope));
       return false;
     }
     if (speakOptions.withHighlighting || window.MathfieldElement.speechEngine === "amazon") {
@@ -26895,7 +26896,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     return false;
   }
   function defaultSpeakHook(text) {
-    var _a3, _b3;
+    var _a4, _b3;
     if (!isBrowser()) {
       console.log("Speak:", text);
       return;
@@ -26912,7 +26913,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
         const polly = new window.AWS.Polly({ apiVersion: "2016-06-10" });
         const parameters = {
           OutputFormat: "mp3",
-          VoiceId: (_a3 = window.MathfieldElement.speechEngineVoice) != null ? _a3 : "Joanna",
+          VoiceId: (_a4 = window.MathfieldElement.speechEngineVoice) != null ? _a4 : "Joanna",
           Engine: [
             "Amy",
             "Emma",
@@ -26955,13 +26956,13 @@ Note there are a different set of tooltip rules for the keyboard toggle
 
   // src/editor/a11y.ts
   function relationName(atom) {
-    var _a3;
+    var _a4;
     let result = void 0;
     if (atom.parent.type === "prompt") {
       if (atom.parentBranch === "body")
         result = "prompt";
     } else if (atom.parentBranch === "body") {
-      result = !atom.type ? "parent" : (_a3 = {
+      result = !atom.type ? "parent" : (_a4 = {
         enclose: "cross out",
         leftright: "delimiter",
         surd: "square root",
@@ -26969,7 +26970,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
         mop: "operator",
         // E.g. `\operatorname`, a `mop` with a body
         first: "first"
-      }[atom.type]) != null ? _a3 : "parent";
+      }[atom.type]) != null ? _a4 : "parent";
     } else if (atom.parent.type === "genfrac") {
       if (atom.parentBranch === "above")
         return "numerator";
@@ -27070,9 +27071,9 @@ Note there are a different set of tooltip rules for the keyboard toggle
       };
     }
     setState(state, options) {
-      var _a3;
+      var _a4;
       const wasSuppressing = this.silenceNotifications;
-      this.silenceNotifications = (_a3 = options == null ? void 0 : options.silenceNotifications) != null ? _a3 : true;
+      this.silenceNotifications = (_a4 = options == null ? void 0 : options.silenceNotifications) != null ? _a4 : true;
       let changeOption = {};
       if ((options == null ? void 0 : options.type) === "undo")
         changeOption = { inputType: "historyUndo" };
@@ -27105,13 +27106,13 @@ Note there are a different set of tooltip rules for the keyboard toggle
       if (!this.mathfield.contentEditable && this.mathfield.userSelect === "none")
         return false;
       return this.deferNotifications({ selection: true }, () => {
-        var _a3, _b3, _c2;
+        var _a4, _b3, _c2;
         const value = this.normalizeSelection(arg1, arg2);
         if (value === void 0)
           throw new TypeError("Invalid selection");
         if (value.ranges.length === 1 && value.ranges[0][0] === value.ranges[0][1]) {
           const pos = value.ranges[0][0];
-          if (!this.mathfield.dirty && !((_a3 = this.at(pos)) == null ? void 0 : _a3.parentPrompt) && this.mathfield.hasEditablePrompts) {
+          if (!this.mathfield.dirty && !((_a4 = this.at(pos)) == null ? void 0 : _a4.parentPrompt) && this.mathfield.hasEditablePrompts) {
             if ((_b3 = this.at(pos - 1)) == null ? void 0 : _b3.parentPrompt) {
               this._anchor = this.normalizeOffset(pos - 1);
               this._position = this._anchor;
@@ -27151,11 +27152,11 @@ Note there are a different set of tooltip rules for the keyboard toggle
       });
     }
     setPositionHandlingPlaceholder(pos) {
-      var _a3;
+      var _a4;
       const atom = this.at(pos);
       if ((atom == null ? void 0 : atom.type) === "placeholder") {
         this.setSelection(pos - 1, pos);
-      } else if (((_a3 = atom == null ? void 0 : atom.rightSibling) == null ? void 0 : _a3.type) === "placeholder") {
+      } else if (((_a4 = atom == null ? void 0 : atom.rightSibling) == null ? void 0 : _a4.type) === "placeholder") {
         this.setSelection(pos, pos + 1);
       } else
         this.position = pos;
@@ -27472,8 +27473,8 @@ Note there are a different set of tooltip rules for the keyboard toggle
      * action, such as the functions in `commands.ts`
      */
     announce(command, previousPosition, atoms = []) {
-      var _a3, _b3;
-      const result = (_b3 = (_a3 = this.mathfield.host) == null ? void 0 : _a3.dispatchEvent(
+      var _a4, _b3;
+      const result = (_b3 = (_a4 = this.mathfield.host) == null ? void 0 : _a4.dispatchEvent(
         new CustomEvent("announce", {
           detail: { command, previousPosition, atoms },
           cancelable: true,
@@ -27523,7 +27524,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
       return start < end ? [start, end] : [end, start];
     }
     normalizeSelection(value, value2) {
-      var _a3;
+      var _a4;
       let result = void 0;
       if (isOffset(value)) {
         const offset = this.normalizeOffset(value);
@@ -27542,7 +27543,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
       } else if (isSelection(value)) {
         result = {
           ranges: value.ranges.map((x) => this.normalizeRange(x)),
-          direction: (_a3 = value.direction) != null ? _a3 : "none"
+          direction: (_a4 = value.direction) != null ? _a4 : "none"
         };
       }
       console.assert(result !== void 0);
@@ -28125,7 +28126,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
 
   // src/editor-model/delete.ts
   function onDelete(model, direction, atom, branch) {
-    var _a3, _b3, _c2, _d2, _e, _f;
+    var _a4, _b3, _c2, _d2, _e, _f;
     const parent = atom.parent;
     if (parent && atom instanceof LeftRightAtom) {
       const atStart = !branch && direction === "forward" || branch === "body" && direction === "backward";
@@ -28220,7 +28221,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
         return false;
       if (!branch) {
         if (atom.subscript || atom.superscript) {
-          const pos = direction === "forward" ? (_c2 = (_a3 = atom.superscript) == null ? void 0 : _a3[0]) != null ? _c2 : (_b3 = atom.subscript) == null ? void 0 : _b3[0] : (_f = (_d2 = atom.subscript) == null ? void 0 : _d2[0].lastSibling) != null ? _f : (_e = atom.superscript) == null ? void 0 : _e[0].lastSibling;
+          const pos = direction === "forward" ? (_c2 = (_a4 = atom.superscript) == null ? void 0 : _a4[0]) != null ? _c2 : (_b3 = atom.subscript) == null ? void 0 : _b3[0] : (_f = (_d2 = atom.subscript) == null ? void 0 : _d2[0].lastSibling) != null ? _f : (_e = atom.superscript) == null ? void 0 : _e[0].lastSibling;
           if (pos)
             model.position = model.offsetOf(pos);
           return true;
@@ -28309,7 +28310,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     return model.deferNotifications(
       { content: true, selection: true, type: "deleteContentForward" },
       () => {
-        var _a3, _b3;
+        var _a4, _b3;
         let target = model.at(model.position).rightSibling;
         if (target && onDelete(model, "forward", target))
           return;
@@ -28325,7 +28326,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
           return;
         }
         target.parent.removeChild(target);
-        let sibling = (_a3 = model.at(model.position)) == null ? void 0 : _a3.rightSibling;
+        let sibling = (_a4 = model.at(model.position)) == null ? void 0 : _a4.rightSibling;
         while ((sibling == null ? void 0 : sibling.type) === "subsup") {
           sibling.parent.removeChild(sibling);
           sibling = (_b3 = model.at(model.position)) == null ? void 0 : _b3.rightSibling;
@@ -28357,11 +28358,11 @@ Note there are a different set of tooltip rules for the keyboard toggle
         return model.deferNotifications(
           { content: true, selection: true, type },
           () => {
-            var _a3, _b3;
+            var _a4, _b3;
             const numer = genfrac.removeBranch(branch);
             if (!(numer.length === 1 && numer[0].type === "placeholder")) {
               const lastAtom = genfrac.parent.addChildrenAfter(numer, genfrac);
-              (_a3 = genfrac.parent) == null ? void 0 : _a3.removeChild(genfrac);
+              (_a4 = genfrac.parent) == null ? void 0 : _a4.removeChild(genfrac);
               model.position = model.offsetOf(lastAtom);
             } else {
               (_b3 = genfrac.parent) == null ? void 0 : _b3.removeChild(genfrac);
@@ -28653,7 +28654,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     keyboardSink.addEventListener(
       "input",
       (ev) => {
-        var _a3;
+        var _a4;
         if (compositionInProgress)
           return;
         keyboardSink.textContent = "";
@@ -28664,7 +28665,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
           ev.stopPropagation();
           return;
         }
-        delegate.onInput((_a3 = ev.data) != null ? _a3 : "");
+        delegate.onInput((_a4 = ev.data) != null ? _a4 : "");
         ev.preventDefault();
         ev.stopPropagation();
       },
@@ -28692,8 +28693,8 @@ Note there are a different set of tooltip rules for the keyboard toggle
     keyboardSink.addEventListener(
       "blur",
       (event) => {
-        var _a3, _b3, _c2;
-        if (((_b3 = (_a3 = event["relatedTarget"]) == null ? void 0 : _a3["_mathfield"]) == null ? void 0 : _b3["element"]) === element) {
+        var _a4, _b3, _c2;
+        if (((_b3 = (_a4 = event["relatedTarget"]) == null ? void 0 : _a4["_mathfield"]) == null ? void 0 : _b3["element"]) === element) {
           keyboardSink.focus({ preventScroll: true });
           event.preventDefault();
           event.stopPropagation();
@@ -28752,10 +28753,10 @@ Note there are a different set of tooltip rules for the keyboard toggle
       },
       setAriaLabel: (value) => keyboardSink.setAttribute("aria-label", value),
       setValue: (value) => {
-        var _a3;
+        var _a4;
         keyboardSink.textContent = value;
         keyboardSink.style.left = `-1000px`;
-        (_a3 = window.getSelection()) == null ? void 0 : _a3.selectAllChildren(keyboardSink);
+        (_a4 = window.getSelection()) == null ? void 0 : _a4.selectAllChildren(keyboardSink);
       },
       moveTo: (x, y) => {
         keyboardSink.style.top = `${y}px`;
@@ -28764,14 +28765,14 @@ Note there are a different set of tooltip rules for the keyboard toggle
     };
   }
   function deepActiveElement2() {
-    var _a3;
+    var _a4;
     let a = document.activeElement;
-    while ((_a3 = a == null ? void 0 : a.shadowRoot) == null ? void 0 : _a3.activeElement)
+    while ((_a4 = a == null ? void 0 : a.shadowRoot) == null ? void 0 : _a4.activeElement)
       a = a.shadowRoot.activeElement;
     return a;
   }
   function keyboardEventToChar(evt) {
-    var _a3;
+    var _a4;
     if (!evt || !mightProducePrintableCharacter(evt))
       return "";
     let result;
@@ -28779,7 +28780,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
       if (evt.target)
         result = evt.target.value;
     }
-    result = (_a3 = result != null ? result : evt.key) != null ? _a3 : evt.code;
+    result = (_a4 = result != null ? result : evt.key) != null ? _a4 : evt.code;
     if (/^(Dead|Return|Enter|Tab|Escape|Delete|PageUp|PageDown|Home|End|Help|ArrowLeft|ArrowRight|ArrowUp|ArrowDown)$/.test(
       result
     ))
@@ -28917,7 +28918,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     return wasSubscript ? result : 0;
   }
   function moveToSuperscript(model) {
-    var _a3;
+    var _a4;
     model.collapseSelection();
     if (superscriptDepth(model) >= model.mathfield.options.scriptDepth[1]) {
       model.announce("plonk");
@@ -28925,7 +28926,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     }
     let target = model.at(model.position);
     if (target.subsupPlacement === void 0) {
-      if (((_a3 = target.rightSibling) == null ? void 0 : _a3.type) !== "subsup") {
+      if (((_a4 = target.rightSibling) == null ? void 0 : _a4.type) !== "subsup") {
         target.parent.addChildAfter(
           new SubsupAtom({ style: target.computedStyle }),
           target
@@ -28940,7 +28941,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     return true;
   }
   function moveToSubscript(model) {
-    var _a3;
+    var _a4;
     model.collapseSelection();
     if (subscriptDepth(model) >= model.mathfield.options.scriptDepth[0]) {
       model.announce("plonk");
@@ -28948,7 +28949,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     }
     let target = model.at(model.position);
     if (target.subsupPlacement === void 0) {
-      if (((_a3 = model.at(model.position + 1)) == null ? void 0 : _a3.type) !== "subsup") {
+      if (((_a4 = model.at(model.position + 1)) == null ? void 0 : _a4.type) !== "subsup") {
         target.parent.addChildAfter(
           new SubsupAtom({ style: model.at(model.position).computedStyle }),
           target
@@ -28998,9 +28999,9 @@ Note there are a different set of tooltip rules for the keyboard toggle
       return true;
     }
     function getTabindex(node) {
-      var _a3;
+      var _a4;
       const tabindexAttr = Number.parseInt(
-        (_a3 = node.getAttribute("tabindex")) != null ? _a3 : "NaN",
+        (_a4 = node.getAttribute("tabindex")) != null ? _a4 : "NaN",
         10
       );
       if (!Number.isNaN(tabindexAttr))
@@ -29021,10 +29022,10 @@ Note there are a different set of tooltip rules for the keyboard toggle
       return null;
     }
     function isTabbableRadio(node) {
-      var _a3;
+      var _a4;
       if (!node.name)
         return true;
-      const radioScope = (_a3 = node.form) != null ? _a3 : node.ownerDocument;
+      const radioScope = (_a4 = node.form) != null ? _a4 : node.ownerDocument;
       const radioSet = radioScope.querySelectorAll(
         'input[type="radio"][name="' + node.name + '"]'
       );
@@ -29051,7 +29052,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     return tabbable(document.body);
   }
   function leap(model, dir, callHooks = true) {
-    var _a3, _b3;
+    var _a4, _b3;
     const dist = dir === "forward" ? 1 : -1;
     if (model.at(model.anchor).type === "placeholder")
       move(model, dir);
@@ -29070,7 +29071,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
       dir
     );
     if (!target || dir === "forward" && model.offsetOf(target) < origin || dir === "backward" && model.offsetOf(target) > origin) {
-      const handled = !callHooks || !((_b3 = (_a3 = model.mathfield.host) == null ? void 0 : _a3.dispatchEvent(
+      const handled = !callHooks || !((_b3 = (_a4 = model.mathfield.host) == null ? void 0 : _a4.dispatchEvent(
         new CustomEvent("move-out", {
           detail: { direction: dir },
           cancelable: true,
@@ -29263,9 +29264,9 @@ Note there are a different set of tooltip rules for the keyboard toggle
     contentDidChange(model, { data: joinLatex(data), inputType: "insertText" });
   }
   function removeIsolatedSpace(model) {
-    var _a3;
+    var _a4;
     let i = model.position - 1;
-    while (i >= 0 && ((_a3 = model.at(i)) == null ? void 0 : _a3.mode) === "math")
+    while (i >= 0 && ((_a4 = model.at(i)) == null ? void 0 : _a4.mode) === "math")
       i -= 1;
     if (i < 0)
       return;
@@ -29456,7 +29457,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
 
   // src/editor-mathfield/keyboard-input.ts
   function onKeystroke(mathfield, keystroke, evt) {
-    var _a3, _b3, _c2, _d2;
+    var _a4, _b3, _c2, _d2;
     const { model } = mathfield;
     if (evt.isTrusted) {
       validateKeyboardLayout(evt);
@@ -29538,7 +29539,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
         } else {
           const c = keyboardEventToChar(evt);
           const keystrokes = [
-            ...(_b3 = (_a3 = buffer[buffer.length - 1]) == null ? void 0 : _a3.keystrokes) != null ? _b3 : [],
+            ...(_b3 = (_a4 = buffer[buffer.length - 1]) == null ? void 0 : _a4.keystrokes) != null ? _b3 : [],
             c
           ];
           buffer.push({
@@ -29760,7 +29761,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     return result;
   }
   function insertMathModeChar(mathfield, c, style, atom) {
-    var _a3;
+    var _a4;
     const model = mathfield.model;
     let selector = {
       "^": "moveToSuperscript",
@@ -29773,7 +29774,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
       mathfield.executeCommand(selector);
       return;
     }
-    if (/\d/.test(c) && mathfield.options.smartSuperscript && atom.parentBranch === "superscript" && ((_a3 = atom.parent) == null ? void 0 : _a3.type) !== "mop" && atom.hasNoSiblings) {
+    if (/\d/.test(c) && mathfield.options.smartSuperscript && atom.parentBranch === "superscript" && ((_a4 = atom.parent) == null ? void 0 : _a4.type) !== "mop" && atom.hasNoSiblings) {
       clearSelection(model);
       ModeEditor.insert(model, c, { style });
       mathfield.snapshot();
@@ -30095,12 +30096,12 @@ Note there are a different set of tooltip rules for the keyboard toggle
   });
   defineFunction("^", "{:string}", {
     createAtom: (options) => {
-      var _a3;
+      var _a4;
       return new Atom(__spreadProps(__spreadValues({}, options), {
         type: "mord",
         isFunction: false,
         limits: "adjacent",
-        value: options.args[0] ? (_a3 = {
+        value: options.args[0] ? (_a4 = {
           a: "\xE2",
           e: "\xEA",
           i: "\xEE",
@@ -30111,18 +30112,18 @@ Note there are a different set of tooltip rules for the keyboard toggle
           I: "\xCE",
           O: "\xD4",
           U: "\xDB"
-        }[options.args[0]]) != null ? _a3 : "^" : "^"
+        }[options.args[0]]) != null ? _a4 : "^" : "^"
       }));
     }
   });
   defineFunction("`", "{:string}", {
     createAtom: (options) => {
-      var _a3;
+      var _a4;
       return new Atom(__spreadProps(__spreadValues({}, options), {
         type: "mord",
         isFunction: false,
         limits: "adjacent",
-        value: options.args[0] ? (_a3 = {
+        value: options.args[0] ? (_a4 = {
           a: "\xE0",
           e: "\xE8",
           i: "\xEC",
@@ -30133,18 +30134,18 @@ Note there are a different set of tooltip rules for the keyboard toggle
           I: "\xCC",
           O: "\xD2",
           U: "\xD9"
-        }[options.args[0]]) != null ? _a3 : "`" : "`"
+        }[options.args[0]]) != null ? _a4 : "`" : "`"
       }));
     }
   });
   defineFunction("'", "{:string}", {
     createAtom: (options) => {
-      var _a3;
+      var _a4;
       return new Atom(__spreadProps(__spreadValues({}, options), {
         type: "mord",
         isFunction: false,
         limits: "adjacent",
-        value: options.args[0] ? (_a3 = {
+        value: options.args[0] ? (_a4 = {
           a: "\xE1",
           e: "\xE9",
           i: "\xED",
@@ -30155,30 +30156,30 @@ Note there are a different set of tooltip rules for the keyboard toggle
           I: "\xCD",
           O: "\xD3",
           U: "\xDA"
-        }[options.args[0]]) != null ? _a3 : "^" : "^"
+        }[options.args[0]]) != null ? _a4 : "^" : "^"
       }));
     }
   });
   defineFunction("~", "{:string}", {
     createAtom: (options) => {
-      var _a3;
+      var _a4;
       return new Atom(__spreadProps(__spreadValues({
         type: "mord"
       }, options), {
         isFunction: false,
         limits: "adjacent",
-        value: options.args[0] ? (_a3 = { n: "\xF1", N: "\xD1", a: "\xE3", o: "\xF5", A: "\xC3", O: "\xD5" }[options.args[0]]) != null ? _a3 : "\xB4" : "\xB4"
+        value: options.args[0] ? (_a4 = { n: "\xF1", N: "\xD1", a: "\xE3", o: "\xF5", A: "\xC3", O: "\xD5" }[options.args[0]]) != null ? _a4 : "\xB4" : "\xB4"
       }));
     }
   });
   defineFunction("c", "{:string}", {
     createAtom: (options) => {
-      var _a3;
+      var _a4;
       return new Atom(__spreadProps(__spreadValues({}, options), {
         type: "mord",
         isFunction: false,
         limits: "adjacent",
-        value: options.args[0] ? (_a3 = { c: "\xE7", C: "\xC7" }[options.args[0]]) != null ? _a3 : "" : ""
+        value: options.args[0] ? (_a4 = { c: "\xE7", C: "\xC7" }[options.args[0]]) != null ? _a4 : "" : ""
       }));
     }
   });
@@ -30186,7 +30187,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
   // src/core-definitions/enclose.ts
   defineFunction("enclose", "{notation:string}[style:string]{body:auto}", {
     createAtom: (atomOptions) => {
-      var _a3, _b3;
+      var _a4, _b3;
       const args = atomOptions.args;
       const options = {
         strokeColor: "currentColor",
@@ -30197,7 +30198,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
         shadow: "auto",
         svgStrokeStyle: void 0,
         borderStyle: void 0,
-        style: (_a3 = atomOptions.style) != null ? _a3 : {}
+        style: (_a4 = atomOptions.style) != null ? _a4 : {}
       };
       if (args[1]) {
         const styles = args[1].split(/,(?![^(]*\)(?:(?:[^(]*\)){2})*[^"]*$)/);
@@ -30241,7 +30242,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
   });
   defineFunction("cancel", "{body:auto}", {
     createAtom: (options) => {
-      var _a3;
+      var _a4;
       return new EncloseAtom(
         options.command,
         argAtoms(options.args[0]),
@@ -30254,14 +30255,14 @@ Note there are a different set of tooltip rules for the keyboard toggle
           backgroundcolor: "transparent",
           padding: "auto",
           shadow: "auto",
-          style: (_a3 = options.style) != null ? _a3 : {}
+          style: (_a4 = options.style) != null ? _a4 : {}
         }
       );
     }
   });
   defineFunction("bcancel", "{body:auto}", {
     createAtom: (options) => {
-      var _a3;
+      var _a4;
       return new EncloseAtom(
         options.command,
         argAtoms(options.args[0]),
@@ -30274,14 +30275,14 @@ Note there are a different set of tooltip rules for the keyboard toggle
           backgroundcolor: "transparent",
           padding: "auto",
           shadow: "auto",
-          style: (_a3 = options.style) != null ? _a3 : {}
+          style: (_a4 = options.style) != null ? _a4 : {}
         }
       );
     }
   });
   defineFunction("xcancel", "{body:auto}", {
     createAtom: (options) => {
-      var _a3;
+      var _a4;
       return new EncloseAtom(
         options.command,
         argAtoms(options.args[0]),
@@ -30294,7 +30295,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
           backgroundcolor: "transparent",
           padding: "auto",
           shadow: "auto",
-          style: (_a3 = options.style) != null ? _a3 : {}
+          style: (_a4 = options.style) != null ? _a4 : {}
         }
       );
     }
@@ -30315,9 +30316,9 @@ Note there are a different set of tooltip rules for the keyboard toggle
     "{:auto}",
     {
       createAtom: (options) => {
-        var _a3;
+        var _a4;
         return new OverunderAtom(__spreadProps(__spreadValues({}, options), {
-          body: argAtoms((_a3 = options.args) == null ? void 0 : _a3[0]),
+          body: argAtoms((_a4 = options.args) == null ? void 0 : _a4[0]),
           skipBoundary: false,
           supsubPlacement: "over-under",
           paddedBody: true,
@@ -30416,13 +30417,13 @@ Note there are a different set of tooltip rules for the keyboard toggle
     "[:auto]{:auto}",
     {
       createAtom: (options) => {
-        var _a3, _b3, _c2, _d2, _e;
+        var _a4, _b3, _c2, _d2, _e;
         return new OverunderAtom(__spreadProps(__spreadValues({}, options), {
           // Set the "svgBody" to the name of a SVG object (which is the same
           // as the command name)
           svgBody: options.command.slice(1),
           // The overscript is optional, i.e. `\xtofrom` is valid
-          above: ((_b3 = argAtoms((_a3 = options.args) == null ? void 0 : _a3[1])) == null ? void 0 : _b3.length) === 0 ? void 0 : argAtoms((_c2 = options.args) == null ? void 0 : _c2[1]),
+          above: ((_b3 = argAtoms((_a4 = options.args) == null ? void 0 : _a4[1])) == null ? void 0 : _b3.length) === 0 ? void 0 : argAtoms((_c2 = options.args) == null ? void 0 : _c2[1]),
           below: (_e = argAtoms((_d2 = options.args) == null ? void 0 : _d2[0])) != null ? _e : null,
           skipBoundary: false,
           supsubPlacement: "over-under",
@@ -30652,10 +30653,10 @@ Note there are a different set of tooltip rules for the keyboard toggle
     {
       infix: true,
       createAtom: (options) => {
-        var _a3, _b3;
+        var _a4, _b3;
         const args = options.args;
         return new GenfracAtom(argAtoms(args[0]), argAtoms(args[1]), __spreadProps(__spreadValues({}, options), {
-          leftDelim: (_a3 = args[2]) != null ? _a3 : ".",
+          leftDelim: (_a4 = args[2]) != null ? _a4 : ".",
           rightDelim: (_b3 = args[3]) != null ? _b3 : ".",
           hasBarLine: false
         }));
@@ -30770,9 +30771,9 @@ Note there are a different set of tooltip rules for the keyboard toggle
   defineFunction("middle", "{:delim}", {
     ifMode: "math",
     createAtom: (options) => {
-      var _a3;
+      var _a4;
       return new MiddleDelimAtom(__spreadProps(__spreadValues({}, options), {
-        delim: (_a3 = options.args[0]) != null ? _a3 : "|",
+        delim: (_a4 = options.args[0]) != null ? _a4 : "|",
         size: 1
       }));
     }
@@ -30784,14 +30785,14 @@ Note there are a different set of tooltip rules for the keyboard toggle
       // disable verbatim LaTeX
     })),
     render: (atom, parent) => {
-      var _a3;
+      var _a4;
       const ctx = new Context({ parent }, atom.style);
       let classes = "";
       if (atom.isSelected)
         classes += " ML__selected";
       const arg = ctx.evaluate(atom.args[0]);
       return new Box(
-        ((_a3 = serializeLatexValue(arg)) != null ? _a3 : "").split("").map(
+        ((_a4 = serializeLatexValue(arg)) != null ? _a4 : "").split("").map(
           (x) => new Box(x, {
             type: "ord",
             classes,
@@ -30810,8 +30811,8 @@ Note there are a different set of tooltip rules for the keyboard toggle
       ).wrap(ctx);
     },
     serialize: (atom) => {
-      var _a3;
-      return `\\the${(_a3 = serializeLatexValue(atom.args[0])) != null ? _a3 : "\\relax"}`;
+      var _a4;
+      return `\\the${(_a4 = serializeLatexValue(atom.args[0])) != null ? _a4 : "\\relax"}`;
     }
   });
 
@@ -30853,18 +30854,18 @@ Note there are a different set of tooltip rules for the keyboard toggle
   });
   defineFunction("color", "{:value}", {
     applyStyle: (_name, args, context) => {
-      var _a3, _b3;
+      var _a4, _b3;
       return {
-        verbatimColor: (_a3 = serializeLatexValue(args[0])) != null ? _a3 : void 0,
+        verbatimColor: (_a4 = serializeLatexValue(args[0])) != null ? _a4 : void 0,
         color: context.toColor((_b3 = args[0]) != null ? _b3 : { string: "red" })
       };
     }
   });
   defineFunction("textcolor", "{:value}{content:auto*}", {
     applyStyle: (_name, args, context) => {
-      var _a3, _b3;
+      var _a4, _b3;
       return {
-        verbatimColor: (_a3 = serializeLatexValue(args[0])) != null ? _a3 : void 0,
+        verbatimColor: (_a4 = serializeLatexValue(args[0])) != null ? _a4 : void 0,
         color: context.toColor((_b3 = args[0]) != null ? _b3 : { string: "red" })
       };
     }
@@ -30877,9 +30878,9 @@ Note there are a different set of tooltip rules for the keyboard toggle
   });
   defineFunction("colorbox", "{:value}{:text*}", {
     applyStyle: (_name, args, context) => {
-      var _a3, _b3;
+      var _a4, _b3;
       return {
-        verbatimBackgroundColor: (_a3 = serializeLatexValue(args[0])) != null ? _a3 : void 0,
+        verbatimBackgroundColor: (_a4 = serializeLatexValue(args[0])) != null ? _a4 : void 0,
         backgroundColor: context.toBackgroundColor(
           (_b3 = args[0]) != null ? _b3 : { string: "yellow" }
         )
@@ -30892,18 +30893,18 @@ Note there are a different set of tooltip rules for the keyboard toggle
     {
       applyMode: "text",
       createAtom: (options) => {
-        var _a3, _b3;
+        var _a4, _b3;
         return new BoxAtom(__spreadProps(__spreadValues({}, options), {
           body: argAtoms(options.args[2]),
-          framecolor: (_a3 = options.args[0]) != null ? _a3 : { string: "blue" },
+          framecolor: (_a4 = options.args[0]) != null ? _a4 : { string: "blue" },
           backgroundcolor: (_b3 = options.args[1]) != null ? _b3 : { string: "yellow" }
         }));
       },
       serialize: (atom, options) => {
-        var _a3, _b3;
+        var _a4, _b3;
         return options.skipStyles ? atom.bodyToLatex(__spreadProps(__spreadValues({}, options), { defaultMode: "text" })) : latexCommand(
           atom.command,
-          (_a3 = serializeLatexValue(atom.framecolor)) != null ? _a3 : "",
+          (_a4 = serializeLatexValue(atom.framecolor)) != null ? _a4 : "",
           (_b3 = serializeLatexValue(atom.backgroundcolor)) != null ? _b3 : "",
           atom.bodyToLatex(__spreadProps(__spreadValues({}, options), { defaultMode: "text" }))
         );
@@ -30912,7 +30913,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
   );
   defineFunction("bbox", "[:bbox]{body:auto}", {
     createAtom: (options) => {
-      var _a3;
+      var _a4;
       const arg = options.args[0];
       const body = argAtoms(options.args[1]);
       if (!arg)
@@ -30921,18 +30922,18 @@ Note there are a different set of tooltip rules for the keyboard toggle
         body,
         padding: arg.padding,
         border: arg.border,
-        backgroundcolor: (_a3 = arg.backgroundcolor) != null ? _a3 : void 0
+        backgroundcolor: (_a4 = arg.backgroundcolor) != null ? _a4 : void 0
       }));
     },
     serialize: (atom, options) => {
-      var _a3, _b3;
+      var _a4, _b3;
       if (options.skipStyles)
         return atom.bodyToLatex(options);
       let result = atom.command;
       if (Number.isFinite(atom.padding) || atom.border !== void 0 || atom.backgroundcolor !== void 0) {
         const bboxParameters = [];
         if (atom.padding)
-          bboxParameters.push((_a3 = serializeLatexValue(atom.padding)) != null ? _a3 : "");
+          bboxParameters.push((_a4 = serializeLatexValue(atom.padding)) != null ? _a4 : "");
         if (atom.border)
           bboxParameters.push(`border: ${atom.border}`);
         if (atom.backgroundcolor)
@@ -31000,22 +31001,22 @@ Note there are a different set of tooltip rules for the keyboard toggle
   defineFunction("fontseries", "{:string}", {
     ifMode: "text",
     applyStyle: (_name, args) => {
-      var _a3;
-      return { fontSeries: (_a3 = args[0]) != null ? _a3 : "auto" };
+      var _a4;
+      return { fontSeries: (_a4 = args[0]) != null ? _a4 : "auto" };
     }
   });
   defineFunction("fontshape", "{:string}", {
     ifMode: "text",
     applyStyle: (_name, args) => {
-      var _a3;
-      return { fontShape: (_a3 = args[0]) != null ? _a3 : "auto" };
+      var _a4;
+      return { fontShape: (_a4 = args[0]) != null ? _a4 : "auto" };
     }
   });
   defineFunction("fontfamily", "{:string}", {
     ifMode: "text",
     applyStyle: (_name, args) => {
-      var _a3;
-      return { fontFamily: (_a3 = args[0]) != null ? _a3 : "roman" };
+      var _a4;
+      return { fontFamily: (_a4 = args[0]) != null ? _a4 : "roman" };
     }
   });
   defineFunction("selectfont", "", {
@@ -31179,58 +31180,58 @@ Note there are a different set of tooltip rules for the keyboard toggle
       )}}`;
     },
     render: (atom, context) => {
-      var _a3;
-      return atom.createBox(context, { classes: (_a3 = atom.args[0]) != null ? _a3 : "" });
+      var _a4;
+      return atom.createBox(context, { classes: (_a4 = atom.args[0]) != null ? _a4 : "" });
     }
   });
   defineFunction(["cssId", "htmlId"], "{id:string}{content:auto}", {
     createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), { body: argAtoms(options.args[1]) })),
     serialize: (atom, options) => {
-      var _a3;
-      if (!((_a3 = atom.args) == null ? void 0 : _a3[0]) || options.skipStyles)
+      var _a4;
+      if (!((_a4 = atom.args) == null ? void 0 : _a4[0]) || options.skipStyles)
         return atom.bodyToLatex(options);
       return `${atom.command}{${atom.args[0]}}{${atom.bodyToLatex(
         options
       )}}`;
     },
     render: (atom, context) => {
-      var _a3;
+      var _a4;
       const box = atom.createBox(context);
-      box.cssId = (_a3 = atom.args[0]) != null ? _a3 : "";
+      box.cssId = (_a4 = atom.args[0]) != null ? _a4 : "";
       return box;
     }
   });
   defineFunction("htmlData", "{data:string}{content:auto}", {
     createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), { body: argAtoms(options.args[1]) })),
     serialize: (atom, options) => {
-      var _a3;
-      if (!((_a3 = atom.args) == null ? void 0 : _a3[0]) || options.skipStyles)
+      var _a4;
+      if (!((_a4 = atom.args) == null ? void 0 : _a4[0]) || options.skipStyles)
         return atom.bodyToLatex(options);
       return `\\htmlData{${atom.args[0]}}{${atom.bodyToLatex(
         options
       )}}`;
     },
     render: (atom, context) => {
-      var _a3;
+      var _a4;
       const box = atom.createBox(context);
-      box.htmlData = (_a3 = atom.args[0]) != null ? _a3 : "";
+      box.htmlData = (_a4 = atom.args[0]) != null ? _a4 : "";
       return box;
     }
   });
   defineFunction(["style", "htmlStyle"], "{data:string}{content:auto}", {
     createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), { body: argAtoms(options.args[1]) })),
     serialize: (atom, options) => {
-      var _a3;
-      if (!((_a3 = atom.args) == null ? void 0 : _a3[0]) || options.skipStyles)
+      var _a4;
+      if (!((_a4 = atom.args) == null ? void 0 : _a4[0]) || options.skipStyles)
         return atom.bodyToLatex(options);
       return `${atom.command}{${atom.args[0]}}{${atom.bodyToLatex(
         options
       )}}`;
     },
     render: (atom, context) => {
-      var _a3;
+      var _a4;
       const box = atom.createBox(context);
-      box.htmlStyle = (_a3 = atom.args[0]) != null ? _a3 : "";
+      box.htmlStyle = (_a4 = atom.args[0]) != null ? _a4 : "";
       return box;
     }
   });
@@ -31284,9 +31285,9 @@ Note there are a different set of tooltip rules for the keyboard toggle
     "{:delim}",
     {
       createAtom: (options) => {
-        var _a3;
+        var _a4;
         return new SizedDelimAtom(__spreadProps(__spreadValues({}, options), {
-          delim: (_a3 = options.args[0]) != null ? _a3 : ".",
+          delim: (_a4 = options.args[0]) != null ? _a4 : ".",
           size: DELIMITER_SIZES[options.command].size,
           delimType: DELIMITER_SIZES[options.command].mclass
         }));
@@ -31303,18 +31304,18 @@ Note there are a different set of tooltip rules for the keyboard toggle
     "{width:value}",
     {
       createAtom: (options) => {
-        var _a3;
+        var _a4;
         return new SpacingAtom(__spreadProps(__spreadValues({}, options), {
-          width: (_a3 = options.args[0]) != null ? _a3 : { dimension: 0 }
+          width: (_a4 = options.args[0]) != null ? _a4 : { dimension: 0 }
         }));
       }
     }
   );
   defineFunction(["mkern", "kern", "mskip", "hskip", "mspace"], "{width:value}", {
     createAtom: (options) => {
-      var _a3;
+      var _a4;
       return new SpacingAtom(__spreadProps(__spreadValues({}, options), {
-        width: (_a3 = options.args[0]) != null ? _a3 : { dimension: 0 }
+        width: (_a4 = options.args[0]) != null ? _a4 : { dimension: 0 }
       }));
     }
   });
@@ -31350,10 +31351,10 @@ Note there are a different set of tooltip rules for the keyboard toggle
       captureSelection: true
     })),
     render: (atom, context) => {
-      var _a3;
+      var _a4;
       let base = Atom.createBox(context, atom.body);
       if (atom.superscript || atom.subscript) {
-        const limits = (_a3 = atom.subsupPlacement) != null ? _a3 : "auto";
+        const limits = (_a4 = atom.subsupPlacement) != null ? _a4 : "auto";
         base = limits === "over-under" || limits === "auto" && context.isDisplayStyle ? atom.attachLimits(context, { base }) : atom.attachSupsub(context, { base });
       }
       return new Box(atom.bind(context, base), {
@@ -31406,10 +31407,10 @@ Note there are a different set of tooltip rules for the keyboard toggle
   defineFunction(["operatorname", "operatorname*"], "{operator:math}", {
     createAtom: (options) => {
       const body = argAtoms(options.args[0]).map((x) => {
-        var _a3;
+        var _a4;
         if (x.type !== "first") {
           x.type = "mord";
-          x.value = (_a3 = { "\u2217": "*", "\u2212": "-" }[x.value]) != null ? _a3 : x.value;
+          x.value = (_a4 = { "\u2217": "*", "\u2212": "-" }[x.value]) != null ? _a4 : x.value;
           x.isFunction = false;
           if (!x.style.variant && !x.style.variantStyle) {
             x.style.variant = "main";
@@ -31426,10 +31427,10 @@ Note there are a different set of tooltip rules for the keyboard toggle
       }));
     },
     render: (atom, context) => {
-      var _a3;
+      var _a4;
       let base = Atom.createBox(context, atom.body);
       if (atom.superscript || atom.subscript) {
-        const limits = (_a3 = atom.subsupPlacement) != null ? _a3 : "auto";
+        const limits = (_a4 = atom.subsupPlacement) != null ? _a4 : "auto";
         base = limits === "over-under" || limits === "auto" && context.isDisplayStyle ? atom.attachLimits(context, { base }) : atom.attachSupsub(context, { base });
       }
       return new Box(atom.bind(context, base), {
@@ -31455,9 +31456,9 @@ Note there are a different set of tooltip rules for the keyboard toggle
   defineFunction(["char", "unicode"], "{charcode:value}", {
     createAtom: (options) => new Atom(__spreadProps(__spreadValues({}, options), { type: options.mode === "text" ? "text" : "mord" })),
     serialize: (atom) => {
-      var _a3;
+      var _a4;
       return `${atom.command}${serializeLatexValue(
-        (_a3 = atom.args[0]) != null ? _a3 : { number: 10067, base: "hexadecimal" }
+        (_a4 = atom.args[0]) != null ? _a4 : { number: 10067, base: "hexadecimal" }
       )}`;
     },
     render: (atom, context) => {
@@ -31471,12 +31472,12 @@ Note there are a different set of tooltip rules for the keyboard toggle
   defineFunction("rule", "[raise:value]{width:value}{thickness:value}", {
     createAtom: (options) => new Atom(options),
     render: (atom, context) => {
-      var _a3, _b3, _c2;
+      var _a4, _b3, _c2;
       const ctx = new Context(
         { parent: context, mathstyle: "textstyle" },
         atom.style
       );
-      const shift = ctx.toEm((_a3 = atom.args[0]) != null ? _a3 : { dimension: 0 });
+      const shift = ctx.toEm((_a4 = atom.args[0]) != null ? _a4 : { dimension: 0 });
       const width = ctx.toEm((_b3 = atom.args[1]) != null ? _b3 : { dimension: 10 });
       const height = ctx.toEm((_c2 = atom.args[2]) != null ? _c2 : { dimension: 10 });
       const result = new Box(null, {
@@ -31602,10 +31603,10 @@ Note there are a different set of tooltip rules for the keyboard toggle
   );
   defineFunction("smash", "[:string]{:auto}", {
     createAtom: (options) => {
-      var _a3, _b3, _c2, _d2;
+      var _a4, _b3, _c2, _d2;
       return new PhantomAtom(__spreadProps(__spreadValues({}, options), {
         body: argAtoms(options.args[1]),
-        smashHeight: (_b3 = (_a3 = options.args[0]) == null ? void 0 : _a3.includes("t")) != null ? _b3 : true,
+        smashHeight: (_b3 = (_a4 = options.args[0]) == null ? void 0 : _a4.includes("t")) != null ? _b3 : true,
         smashDepth: (_d2 = (_c2 = options.args[0]) == null ? void 0 : _c2.includes("b")) != null ? _d2 : true
       }));
     }
@@ -31704,55 +31705,55 @@ Note there are a different set of tooltip rules for the keyboard toggle
   });
   defineFunction("raisebox", "{:value}{:text}", {
     createAtom: (options) => {
-      var _a3;
+      var _a4;
       return new BoxAtom(__spreadProps(__spreadValues({}, options), {
         body: argAtoms(options.args[1]),
         padding: { dimension: 0 },
-        offset: (_a3 = options.args[0]) != null ? _a3 : { dimension: 0 }
+        offset: (_a4 = options.args[0]) != null ? _a4 : { dimension: 0 }
       }));
     },
     serialize: (atom, options) => {
-      var _a3;
+      var _a4;
       return latexCommand(
         "\\raisebox",
-        (_a3 = serializeLatexValue(atom.offset)) != null ? _a3 : "0pt",
+        (_a4 = serializeLatexValue(atom.offset)) != null ? _a4 : "0pt",
         atom.bodyToLatex(options)
       );
     }
   });
   defineFunction("raise", "{:value}{:auto}", {
     createAtom: (options) => {
-      var _a3;
+      var _a4;
       return new BoxAtom(__spreadProps(__spreadValues({}, options), {
         body: argAtoms(options.args[1]),
         padding: { dimension: 0 },
-        offset: (_a3 = options.args[0]) != null ? _a3 : { dimension: 0 }
+        offset: (_a4 = options.args[0]) != null ? _a4 : { dimension: 0 }
       }));
     },
     serialize: (atom, options) => {
-      var _a3;
+      var _a4;
       return latexCommand(
         "\\raise",
-        (_a3 = serializeLatexValue(atom.offset)) != null ? _a3 : "0pt",
+        (_a4 = serializeLatexValue(atom.offset)) != null ? _a4 : "0pt",
         atom.bodyToLatex(options)
       );
     }
   });
   defineFunction("lower", "{:value}{:auto}", {
     createAtom: (options) => {
-      var _a3;
+      var _a4;
       return new BoxAtom(__spreadProps(__spreadValues({}, options), {
         body: argAtoms(options.args[1]),
         padding: { dimension: 0 },
-        offset: (_a3 = multiplyLatexValue(options.args[0], -1)) != null ? _a3 : { dimension: 0 }
+        offset: (_a4 = multiplyLatexValue(options.args[0], -1)) != null ? _a4 : { dimension: 0 }
       }));
     },
     serialize: (atom, options) => {
-      var _a3, _b3;
+      var _a4, _b3;
       return latexCommand(
         "\\lower",
         (_b3 = serializeLatexValue(
-          multiplyLatexValue((_a3 = atom.offset) != null ? _a3 : { dimension: 0 }, -1)
+          multiplyLatexValue((_a4 = atom.offset) != null ? _a4 : { dimension: 0 }, -1)
         )) != null ? _b3 : "0pt",
         atom.bodyToLatex(options)
       );
@@ -32417,9 +32418,9 @@ Note there are a different set of tooltip rules for the keyboard toggle
     // A 'commit' command is used to simulate pressing the return/enter key,
     // e.g. when using a virtual keyboard
     commit: (mathfield) => {
-      var _a3;
+      var _a4;
       if (contentWillChange(mathfield.model, { inputType: "insertLineBreak" })) {
-        (_a3 = mathfield.host) == null ? void 0 : _a3.dispatchEvent(
+        (_a4 = mathfield.host) == null ? void 0 : _a4.dispatchEvent(
           new Event("change", { bubbles: true, composed: true })
         );
         contentDidChange(mathfield.model, { inputType: "insertLineBreak" });
@@ -32554,11 +32555,11 @@ Note there are a different set of tooltip rules for the keyboard toggle
     }
   );
   function validateStyle(mathfield, style) {
-    var _a3, _b3, _c2, _d2, _e, _f;
+    var _a4, _b3, _c2, _d2, _e, _f;
     const result = {};
     if (typeof style.color === "string") {
       result.verbatimColor = style.color;
-      result.color = (_a3 = mathfield.colorMap(style.color)) != null ? _a3 : "none";
+      result.color = (_a4 = mathfield.colorMap(style.color)) != null ? _a4 : "none";
     }
     if (typeof style.backgroundColor === "string") {
       result.verbatimBackgroundColor = style.backgroundColor;
@@ -32623,7 +32624,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
 
   // src/editor-model/commands-select.ts
   function selectGroup(model) {
-    var _a3, _b3, _c2, _d2, _e, _f;
+    var _a4, _b3, _c2, _d2, _e, _f;
     if (getMode(model, model.position) === "text") {
       let [start, end] = range(model.selection);
       let done = false;
@@ -32653,7 +32654,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
       const atom = model.at(model.position);
       if (atom.isDigit()) {
         let [start, end] = range(model.selection);
-        while ((_a3 = model.at(start)) == null ? void 0 : _a3.isDigit())
+        while ((_a4 = model.at(start)) == null ? void 0 : _a4.isDigit())
           start -= 1;
         while ((_b3 = model.at(end)) == null ? void 0 : _b3.isDigit())
           end += 1;
@@ -32754,7 +32755,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     return evt instanceof PointerEvent;
   }
   function onPointerDown(mathfield, evt) {
-    var _a3;
+    var _a4;
     mathfield.atomBoundsCache = /* @__PURE__ */ new Map();
     const that = mathfield;
     let anchor;
@@ -32866,7 +32867,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
         } else if (mathfield.model.at(anchor).type === "placeholder") {
           mathfield.model.setSelection(anchor - 1, anchor);
           dirty = "selection";
-        } else if (((_a3 = mathfield.model.at(anchor).rightSibling) == null ? void 0 : _a3.type) === "placeholder") {
+        } else if (((_a4 = mathfield.model.at(anchor).rightSibling) == null ? void 0 : _a4.type) === "placeholder") {
           mathfield.model.setSelection(anchor, anchor + 1);
           dirty = "selection";
         } else {
@@ -32960,8 +32961,8 @@ Note there are a different set of tooltip rules for the keyboard toggle
     return atom;
   }
   function offsetFromPoint(mathfield, x, y, options) {
-    var _a3, _b3;
-    const bounds = (_a3 = mathfield.fieldContent) == null ? void 0 : _a3.getBoundingClientRect();
+    var _a4, _b3;
+    const bounds = (_a4 = mathfield.fieldContent) == null ? void 0 : _a4.getBoundingClientRect();
     if (!bounds)
       return 0;
     if (x > bounds.right || y > bounds.bottom + 8)
@@ -33111,8 +33112,8 @@ Note there are a different set of tooltip rules for the keyboard toggle
       return false;
     }
     insert(model, input, options) {
-      var _a3, _b3;
-      const data = typeof input === "string" ? input : (_b3 = (_a3 = window.MathfieldElement.computeEngine) == null ? void 0 : _a3.box(input).latex) != null ? _b3 : "";
+      var _a4, _b3;
+      const data = typeof input === "string" ? input : (_b3 = (_a4 = window.MathfieldElement.computeEngine) == null ? void 0 : _a4.box(input).latex) != null ? _b3 : "";
       if (!options.silenceNotifications && !contentWillChange(model, { data, inputType: "insertText" }))
         return false;
       if (!options.insertionMode)
@@ -33205,7 +33206,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
     }
   };
   function convertStringToAtoms(model, s, args, options) {
-    var _a3;
+    var _a4;
     let format = void 0;
     let result = [];
     if (typeof s !== "string" || options.format === "math-json") {
@@ -33222,7 +33223,7 @@ Note there are a different set of tooltip rules for the keyboard toggle
       result = parseLatex(s, { context: model.mathfield.context });
       if (format !== "latex" && model.mathfield.options.removeExtraneousParentheses)
         simplifyParen(result);
-    } else if (options.format === "auto" || ((_a3 = options.format) == null ? void 0 : _a3.startsWith("latex"))) {
+    } else if (options.format === "auto" || ((_a4 = options.format) == null ? void 0 : _a4.startsWith("latex"))) {
       if (options.format === "auto") {
         [format, s] = parseMathString(s, {
           format: "auto",
@@ -33582,8 +33583,8 @@ data-command='["setEnvironment","pmatrix"]'>
   var matrixButtons = { matrix, pmatrix, bmatrix, Bmatrix, vmatrix, Vmatrix };
   var casesButtons = { cases: cases2, rcases, Bmatrix };
   function showEnvironmentPopover(mf) {
-    var _a3, _d2;
-    const array = (_a3 = mf.model.parentEnvironment) == null ? void 0 : _a3.array;
+    var _a4, _d2;
+    const array = (_a4 = mf.model.parentEnvironment) == null ? void 0 : _a4.array;
     if (!array)
       return;
     let columnCount = 0;
@@ -33724,7 +33725,7 @@ data-command='["setEnvironment","pmatrix"]'>
      */
     constructor(element, options) {
       this.focusBlurInProgress = false;
-      var _a3, _b3, _c2;
+      var _a4, _b3, _c2;
       this.options = __spreadValues(__spreadProps(__spreadValues({}, getDefault()), {
         macros: getMacros(),
         registers: getDefaultRegisters()
@@ -33746,7 +33747,7 @@ data-command='["setEnvironment","pmatrix"]'>
       else
         this.element.classList.remove("ML__is-inline");
       this.dirty = false;
-      let elementText = (_b3 = (_a3 = options.value) != null ? _a3 : this.element.textContent) != null ? _b3 : "";
+      let elementText = (_b3 = (_a4 = options.value) != null ? _a4 : this.element.textContent) != null ? _b3 : "";
       elementText = elementText.trim();
       const mode = effectiveMode(this.options);
       const root = new Atom({
@@ -33872,34 +33873,34 @@ If you are using Vue, this may be because you are using the runtime-only build o
     }
     get colorMap() {
       return (name) => {
-        var _a3, _b3, _c2;
-        return (_c2 = (_b3 = (_a3 = this.options).colorMap) == null ? void 0 : _b3.call(_a3, name)) != null ? _c2 : defaultColorMap(name);
+        var _a4, _b3, _c2;
+        return (_c2 = (_b3 = (_a4 = this.options).colorMap) == null ? void 0 : _b3.call(_a4, name)) != null ? _c2 : defaultColorMap(name);
       };
     }
     get backgroundColorMap() {
       return (name) => {
-        var _a3, _b3, _c2, _d2, _e, _f;
-        return (_f = (_e = (_b3 = (_a3 = this.options).backgroundColorMap) == null ? void 0 : _b3.call(_a3, name)) != null ? _e : (_d2 = (_c2 = this.options).colorMap) == null ? void 0 : _d2.call(_c2, name)) != null ? _f : defaultBackgroundColorMap(name);
+        var _a4, _b3, _c2, _d2, _e, _f;
+        return (_f = (_e = (_b3 = (_a4 = this.options).backgroundColorMap) == null ? void 0 : _b3.call(_a4, name)) != null ? _e : (_d2 = (_c2 = this.options).colorMap) == null ? void 0 : _d2.call(_c2, name)) != null ? _f : defaultBackgroundColorMap(name);
       };
     }
     get smartFence() {
-      var _a3;
-      return (_a3 = this.options.smartFence) != null ? _a3 : false;
+      var _a4;
+      return (_a4 = this.options.smartFence) != null ? _a4 : false;
     }
     get readOnly() {
-      var _a3;
-      return (_a3 = this.options.readOnly) != null ? _a3 : false;
+      var _a4;
+      return (_a4 = this.options.readOnly) != null ? _a4 : false;
     }
     get disabled() {
-      var _a3, _b3;
-      return (_b3 = (_a3 = this.host) == null ? void 0 : _a3["disabled"]) != null ? _b3 : false;
+      var _a4, _b3;
+      return (_b3 = (_a4 = this.host) == null ? void 0 : _a4["disabled"]) != null ? _b3 : false;
     }
     // This reflects the contenteditable attribute.
     // Use hasEditableContent instead to take into account readonly and disabled
     // states.
     get contentEditable() {
-      var _a3;
-      return ((_a3 = this.host) == null ? void 0 : _a3.getAttribute("contenteditable")) !== "false";
+      var _a4;
+      return ((_a4 = this.host) == null ? void 0 : _a4.getAttribute("contenteditable")) !== "false";
     }
     // This reflect the `user-select` CSS property
     get userSelect() {
@@ -33937,8 +33938,8 @@ If you are using Vue, this may be because you are using the runtime-only build o
       return false;
     }
     get letterShapeStyle() {
-      var _a3;
-      return (_a3 = this.options.letterShapeStyle) != null ? _a3 : "tex";
+      var _a4;
+      return (_a4 = this.options.letterShapeStyle) != null ? _a4 : "tex";
     }
     get minFontScale() {
       return this.options.minFontScale;
@@ -33972,12 +33973,12 @@ If you are using Vue, this may be because you are using the runtime-only build o
       return style;
     }
     get keybindings() {
-      var _a3, _b3;
+      var _a4, _b3;
       if (this._keybindings)
         return this._keybindings;
       const [keybindings, errors] = normalizeKeybindings(
         this.options.keybindings,
-        (_a3 = getActiveKeyboardLayout()) != null ? _a3 : DEFAULT_KEYBOARD_LAYOUT
+        (_a4 = getActiveKeyboardLayout()) != null ? _a4 : DEFAULT_KEYBOARD_LAYOUT
       );
       if (((_b3 = getActiveKeyboardLayout()) == null ? void 0 : _b3.score) > 0) {
         this._keybindings = keybindings;
@@ -34033,11 +34034,11 @@ If you are using Vue, this may be because you are using the runtime-only build o
      * to be able to properly remove the event handler later.
      */
     handleEvent(evt) {
-      var _a3;
+      var _a4;
       if (!isValidMathfield(this))
         return;
       if (isVirtualKeyboardMessage(evt)) {
-        if (!validateOrigin(evt.origin, (_a3 = this.options.originValidator) != null ? _a3 : "none")) {
+        if (!validateOrigin(evt.origin, (_a4 = this.options.originValidator) != null ? _a4 : "none")) {
           throw new DOMException(
             `Message from unknown origin (${evt.origin}) cannot be handled`,
             "SecurityError"
@@ -34151,14 +34152,14 @@ If you are using Vue, this may be because you are using the runtime-only build o
       return this.model.getValue(arg1, arg2, arg3);
     }
     setValue(value, options) {
-      var _a3;
+      var _a4;
       options = options != null ? options : { mode: "math" };
       if (options.insertionMode === void 0)
         options.insertionMode = "replaceAll";
       if (options.format === void 0 || options.format === "auto")
         options.format = "latex";
       if (options.mode === void 0 || options.mode === "auto")
-        options.mode = (_a3 = getMode(this.model, this.model.position)) != null ? _a3 : "math";
+        options.mode = (_a4 = getMode(this.model, this.model.position)) != null ? _a4 : "math";
       if (ModeEditor.insert(this.model, value, options)) {
         requestUpdate(this);
         this.undoManager.snapshot("set-value");
@@ -34179,7 +34180,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
      * the page
      */
     scrollIntoView() {
-      var _a3;
+      var _a4;
       if (!this.element)
         return;
       if (this.host) {
@@ -34191,7 +34192,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
             const kbdBounds = window.mathVirtualKeyboard.boundingRect;
             const mathfieldBounds = this.host.getBoundingClientRect();
             if (mathfieldBounds.bottom > kbdBounds.top) {
-              (_a3 = window.document.scrollingElement) == null ? void 0 : _a3.scrollBy(
+              (_a4 = window.document.scrollingElement) == null ? void 0 : _a4.scrollBy(
                 0,
                 mathfieldBounds.bottom - kbdBounds.top + 8
               );
@@ -34285,10 +34286,10 @@ If you are using Vue, this may be because you are using the runtime-only build o
       return true;
     }
     switchMode(mode, prefix = "", suffix = "") {
-      var _a3;
+      var _a4;
       if (this.model.mode === mode || !this.hasEditableContent || !this.contentEditable || this.disabled)
         return;
-      if (!((_a3 = this.host) == null ? void 0 : _a3.dispatchEvent(
+      if (!((_a4 = this.host) == null ? void 0 : _a4.dispatchEvent(
         new Event("mode-change", {
           bubbles: true,
           composed: true,
@@ -34395,7 +34396,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
       this.model.selection = { ranges: [[0, this.model.lastOffset]] };
     }
     applyStyle(inStyle, inOptions = {}) {
-      var _a3, _b3;
+      var _a4, _b3;
       const options = {
         operation: "set",
         silenceNotifications: false
@@ -34404,7 +34405,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
         options.range = inOptions;
       else {
         options.range = inOptions.range;
-        options.silenceNotifications = (_a3 = inOptions.silenceNotifications) != null ? _a3 : false;
+        options.silenceNotifications = (_a4 = inOptions.silenceNotifications) != null ? _a4 : false;
       }
       const style = validateStyle(this, inStyle);
       const operation = (_b3 = options.operation) != null ? _b3 : "set";
@@ -34549,11 +34550,11 @@ If you are using Vue, this may be because you are using the runtime-only build o
       this.undoManager.pop();
     }
     snapshot(op) {
-      var _a3;
+      var _a4;
       if (this.undoManager.snapshot(op)) {
         if (window.mathVirtualKeyboard.visible)
           window.mathVirtualKeyboard.update(makeProxy(this));
-        (_a3 = this.host) == null ? void 0 : _a3.dispatchEvent(
+        (_a4 = this.host) == null ? void 0 : _a4.dispatchEvent(
           new CustomEvent("undo-state-change", {
             bubbles: true,
             composed: true,
@@ -34572,12 +34573,12 @@ If you are using Vue, this may be because you are using the runtime-only build o
       this.undoManager.startRecording();
     }
     undo() {
-      var _a3;
+      var _a4;
       if (!this.undoManager.undo())
         return;
       if (window.mathVirtualKeyboard.visible)
         window.mathVirtualKeyboard.update(makeProxy(this));
-      (_a3 = this.host) == null ? void 0 : _a3.dispatchEvent(
+      (_a4 = this.host) == null ? void 0 : _a4.dispatchEvent(
         new CustomEvent("undo-state-change", {
           bubbles: true,
           composed: true,
@@ -34586,12 +34587,12 @@ If you are using Vue, this may be because you are using the runtime-only build o
       );
     }
     redo() {
-      var _a3;
+      var _a4;
       if (!this.undoManager.redo())
         return;
       if (window.mathVirtualKeyboard.visible)
         window.mathVirtualKeyboard.update(makeProxy(this));
-      (_a3 = this.host) == null ? void 0 : _a3.dispatchEvent(
+      (_a4 = this.host) == null ? void 0 : _a4.dispatchEvent(
         new CustomEvent("undo-state-change", {
           bubbles: true,
           composed: true,
@@ -34600,18 +34601,18 @@ If you are using Vue, this may be because you are using the runtime-only build o
       );
     }
     resetUndo() {
-      var _a3;
-      (_a3 = this.undoManager) == null ? void 0 : _a3.reset();
+      var _a4;
+      (_a4 = this.undoManager) == null ? void 0 : _a4.reset();
     }
     onSelectionDidChange() {
-      var _a3, _b3;
+      var _a4, _b3;
       const model = this.model;
       this.keyboardDelegate.setValue(
         model.getValue(this.model.selection, "latex-expanded")
       );
       {
         const cursor = model.at(model.position);
-        const newMode = (_a3 = cursor.mode) != null ? _a3 : effectiveMode(this.options);
+        const newMode = (_a4 = cursor.mode) != null ? _a4 : effectiveMode(this.options);
         if (this.model.mode !== newMode) {
           if (this.model.mode === "latex") {
             complete(this, "accept", { mode: newMode });
@@ -34631,11 +34632,11 @@ If you are using Vue, this may be because you are using the runtime-only build o
       updateEnvironmentPopover(this);
     }
     onContentWillChange(options) {
-      var _a3, _b3, _c2;
+      var _a4, _b3, _c2;
       return (_c2 = (_b3 = this.host) == null ? void 0 : _b3.dispatchEvent(
         new InputEvent("beforeinput", __spreadProps(__spreadValues({}, options), {
           // To work around a bug in WebKit/Safari (the inputType property gets stripped), include the inputType as the 'data' property. (see #1843)
-          data: options.data ? options.data : (_a3 = options.inputType) != null ? _a3 : "",
+          data: options.data ? options.data : (_a4 = options.inputType) != null ? _a4 : "",
           cancelable: true,
           bubbles: true,
           composed: true
@@ -34656,7 +34657,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
       this.focusBlurInProgress = false;
     }
     onBlur() {
-      var _a3, _b3, _c2;
+      var _a4, _b3, _c2;
       if (this.focusBlurInProgress || this.blurred)
         return;
       this.focusBlurInProgress = true;
@@ -34665,7 +34666,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
       this.ariaLiveText.textContent = "";
       complete(this, "accept");
       if (this.model.getValue() !== this.valueOnFocus) {
-        (_a3 = this.host) == null ? void 0 : _a3.dispatchEvent(
+        (_a4 = this.host) == null ? void 0 : _a4.dispatchEvent(
           new Event("change", { bubbles: true, composed: true })
         );
       }
@@ -34791,9 +34792,9 @@ If you are using Vue, this may be because you are using the runtime-only build o
       );
     }
     get context() {
-      var _a3, _b3;
+      var _a4, _b3;
       return {
-        registers: (_a3 = this.options.registers) != null ? _a3 : {},
+        registers: (_a4 = this.options.registers) != null ? _a4 : {},
         smartFence: this.smartFence,
         letterShapeStyle: this.letterShapeStyle,
         minFontScale: this.minFontScale,
@@ -34854,9 +34855,9 @@ If you are using Vue, this may be because you are using the runtime-only build o
     return result - (dir > 0 ? 0 : 1);
   }
   function skip(model, direction, options) {
-    var _a3, _b3, _c2, _d2, _e, _f, _g;
+    var _a4, _b3, _c2, _d2, _e, _f, _g;
     const previousPosition = model.position;
-    if (!((_a3 = options == null ? void 0 : options.extend) != null ? _a3 : false))
+    if (!((_a4 = options == null ? void 0 : options.extend) != null ? _a4 : false))
       model.collapseSelection(direction);
     let atom = model.at(model.position);
     if (direction === "forward") {
@@ -34973,7 +34974,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
     return true;
   }
   function move(model, direction, options) {
-    var _a3, _b3;
+    var _a4, _b3;
     options = options != null ? options : { extend: false };
     model.mathfield.adoptStyle = direction === "backward" ? "right" : "left";
     if (direction !== "forward") {
@@ -35012,7 +35013,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
     if (pos < 0 || pos > model.lastOffset) {
       let result = true;
       if (!model.silenceNotifications) {
-        result = (_b3 = (_a3 = model.mathfield.host) == null ? void 0 : _a3.dispatchEvent(
+        result = (_b3 = (_a4 = model.mathfield.host) == null ? void 0 : _a4.dispatchEvent(
           new CustomEvent("move-out", {
             detail: { direction },
             cancelable: true,
@@ -35039,14 +35040,14 @@ If you are using Vue, this may be because you are using the runtime-only build o
     return pos;
   }
   function isValidPosition(model, pos) {
-    var _a3;
+    var _a4;
     const atom = model.at(pos);
     let parent = atom.parent;
     while (parent && !parent.inCaptureSelection)
       parent = parent.parent;
     if (parent == null ? void 0 : parent.inCaptureSelection)
       return false;
-    if ((_a3 = atom.parent) == null ? void 0 : _a3.skipBoundary) {
+    if ((_a4 = atom.parent) == null ? void 0 : _a4.skipBoundary) {
       if (!atom.isFirstSibling && atom.isLastSibling)
         return false;
       if (atom.type === "first")
@@ -35099,15 +35100,15 @@ If you are using Vue, this may be because you are using the runtime-only build o
     model.announce(`move ${direction}`);
   }
   function moveUpward(model, options) {
-    var _a3, _b3;
-    const extend = (_a3 = options == null ? void 0 : options.extend) != null ? _a3 : false;
+    var _a4, _b3;
+    const extend = (_a4 = options == null ? void 0 : options.extend) != null ? _a4 : false;
     if (!extend)
       model.collapseSelection("backward");
     const handleDeadEnd = () => {
-      var _a4, _b4;
+      var _a5, _b4;
       let result = true;
       if (!model.silenceNotifications) {
-        result = (_b4 = (_a4 = model.mathfield.host) == null ? void 0 : _a4.dispatchEvent(
+        result = (_b4 = (_a5 = model.mathfield.host) == null ? void 0 : _a5.dispatchEvent(
           new CustomEvent("move-out", {
             detail: { direction: "upward" },
             cancelable: true,
@@ -35149,15 +35150,15 @@ If you are using Vue, this may be because you are using the runtime-only build o
     return true;
   }
   function moveDownward(model, options) {
-    var _a3, _b3;
-    const extend = (_a3 = options == null ? void 0 : options.extend) != null ? _a3 : false;
+    var _a4, _b3;
+    const extend = (_a4 = options == null ? void 0 : options.extend) != null ? _a4 : false;
     if (!extend)
       model.collapseSelection("forward");
     const handleDeadEnd = () => {
-      var _a4, _b4;
+      var _a5, _b4;
       let result = true;
       if (!model.silenceNotifications) {
-        result = (_b4 = (_a4 = model.mathfield.host) == null ? void 0 : _a4.dispatchEvent(
+        result = (_b4 = (_a5 = model.mathfield.host) == null ? void 0 : _a5.dispatchEvent(
           new CustomEvent("move-out", {
             detail: { direction: "downward" },
             cancelable: true,
@@ -35244,10 +35245,10 @@ If you are using Vue, this may be because you are using the runtime-only build o
         removeHighlight(child);
   }
   function highlightAtomID(element, atomID) {
-    var _a3;
+    var _a4;
     if (!element)
       return;
-    if (!atomID || ((_a3 = element.dataset) == null ? void 0 : _a3.atomId) === atomID) {
+    if (!atomID || ((_a4 = element.dataset) == null ? void 0 : _a4.atomId) === atomID) {
       element.classList.add("ML__highlight");
       if (element.children && element.children.length > 0) {
         [...element.children].forEach((x) => {
@@ -35266,7 +35267,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
     }
   }
   function defaultReadAloudHook(element, text) {
-    var _a3;
+    var _a4;
     if (!isBrowser())
       return;
     if (window.MathfieldElement.speechEngine !== "amazon") {
@@ -35286,7 +35287,7 @@ If you are using Vue, this may be because you are using the runtime-only build o
     const polly = new window.AWS.Polly({ apiVersion: "2016-06-10" });
     const parameters = {
       OutputFormat: "json",
-      VoiceId: (_a3 = window.MathfieldElement.speechEngineVoice) != null ? _a3 : "Joanna",
+      VoiceId: (_a4 = window.MathfieldElement.speechEngineVoice) != null ? _a4 : "Joanna",
       Engine: "standard",
       // The neural engine does not appear to support ssml marks
       Text: text,
@@ -35929,7 +35930,7 @@ with this style */
       return this._keypressSound;
     }
     static set keypressSound(value) {
-      var _a3, _b3, _c2;
+      var _a4, _b3, _c2;
       this.audioBuffers = {};
       if (value === null) {
         this._keypressSound = {
@@ -35947,7 +35948,7 @@ with this style */
         };
       } else if (typeof value === "object" && "default" in value) {
         this._keypressSound = {
-          spacebar: (_a3 = value.spacebar) != null ? _a3 : value.default,
+          spacebar: (_a4 = value.spacebar) != null ? _a4 : value.default,
           return: (_b3 = value.return) != null ? _b3 : value.default,
           delete: (_c2 = value.delete) != null ? _c2 : value.default,
           default: value.default
@@ -36127,9 +36128,9 @@ with this style */
      * used. If `null` is specified, no compute engine is used.
      */
     static get computeEngine() {
-      var _a3, _b3;
+      var _a4, _b3;
       if (this._computeEngine === void 0) {
-        const ComputeEngineCtor = (_a3 = window[Symbol.for("io.cortexjs.compute-engine")]) == null ? void 0 : _a3.ComputeEngine;
+        const ComputeEngineCtor = (_a4 = window[Symbol.for("io.cortexjs.compute-engine")]) == null ? void 0 : _a4.ComputeEngine;
         if (ComputeEngineCtor)
           this._computeEngine = new ComputeEngineCtor();
         else {
@@ -36203,8 +36204,8 @@ with this style */
       window.addEventListener(
         "pointerup",
         (evt) => {
-          var _a3;
-          if (evt.target === this && !((_a3 = this._mathfield) == null ? void 0 : _a3.disabled)) {
+          var _a4;
+          if (evt.target === this && !((_a4 = this._mathfield) == null ? void 0 : _a4.disabled)) {
             this.dispatchEvent(
               new MouseEvent("click", {
                 altKey: evt.altKey,
@@ -36228,28 +36229,28 @@ with this style */
       );
     }
     getPromptValue(placeholderId) {
-      var _a3, _b3;
-      return (_b3 = (_a3 = this._mathfield) == null ? void 0 : _a3.getPromptValue(placeholderId)) != null ? _b3 : "";
+      var _a4, _b3;
+      return (_b3 = (_a4 = this._mathfield) == null ? void 0 : _a4.getPromptValue(placeholderId)) != null ? _b3 : "";
     }
     /** Return the id of the prompts matching the filter */
     getPrompts(filter) {
-      var _a3, _b3;
-      return (_b3 = (_a3 = this._mathfield) == null ? void 0 : _a3.getPrompts(filter)) != null ? _b3 : [];
+      var _a4, _b3;
+      return (_b3 = (_a4 = this._mathfield) == null ? void 0 : _a4.getPrompts(filter)) != null ? _b3 : [];
     }
     get form() {
-      var _a3;
-      return (_a3 = this._internals) == null ? void 0 : _a3["form"];
+      var _a4;
+      return (_a4 = this._internals) == null ? void 0 : _a4["form"];
     }
     get name() {
-      var _a3;
-      return (_a3 = this.getAttribute("name")) != null ? _a3 : "";
+      var _a4;
+      return (_a4 = this.getAttribute("name")) != null ? _a4 : "";
     }
     get type() {
       return this.localName;
     }
     get mode() {
-      var _a3, _b3;
-      return (_b3 = (_a3 = this._mathfield) == null ? void 0 : _a3.model.mode) != null ? _b3 : "math";
+      var _a4, _b3;
+      return (_b3 = (_a4 = this._mathfield) == null ? void 0 : _a4.model.mode) != null ? _b3 : "math";
     }
     set mode(value) {
       if (!this._mathfield)
@@ -36280,10 +36281,10 @@ with this style */
       return this._mathfield.expression;
     }
     set expression(mathJson) {
-      var _a3, _b3;
+      var _a4, _b3;
       if (!this._mathfield)
         return;
-      const latex = (_b3 = (_a3 = _MathfieldElement.computeEngine) == null ? void 0 : _a3.box(mathJson).latex) != null ? _b3 : null;
+      const latex = (_b3 = (_a4 = _MathfieldElement.computeEngine) == null ? void 0 : _a4.box(mathJson).latex) != null ? _b3 : null;
       if (latex !== null)
         this._mathfield.setValue(latex);
       if (!window[Symbol.for("io.cortexjs.compute-engine")]) {
@@ -36297,8 +36298,8 @@ with this style */
       }
     }
     get errors() {
-      var _a3, _b3;
-      return (_b3 = (_a3 = this._mathfield) == null ? void 0 : _a3.errors) != null ? _b3 : [];
+      var _a4, _b3;
+      return (_b3 = (_a4 = this._mathfield) == null ? void 0 : _a4.errors) != null ? _b3 : [];
     }
     _getOptions(keys) {
       if (this._mathfield)
@@ -36419,11 +36420,11 @@ with this style */
      * @inheritdoc Mathfield.executeCommand
      */
     executeCommand(command) {
-      var _a3, _b3;
-      return (_b3 = (_a3 = this._mathfield) == null ? void 0 : _a3.executeCommand(command)) != null ? _b3 : false;
+      var _a4, _b3;
+      return (_b3 = (_a4 = this._mathfield) == null ? void 0 : _a4.executeCommand(command)) != null ? _b3 : false;
     }
     getValue(arg1, arg2, arg3) {
-      var _a3, _b3;
+      var _a4, _b3;
       if (this._mathfield)
         return this._mathfield.model.getValue(arg1, arg2, arg3);
       if (gDeferredState.has(this)) {
@@ -36446,7 +36447,7 @@ with this style */
           format = arg1;
         }
         if ((format === void 0 || format === "latex") && start === 0 && end === -1)
-          return (_b3 = (_a3 = gDeferredState.get(this).value) != null ? _a3 : this.textContent) != null ? _b3 : "";
+          return (_b3 = (_a4 = gDeferredState.get(this).value) != null ? _a4 : this.textContent) != null ? _b3 : "";
       }
       return "";
     }
@@ -36489,8 +36490,8 @@ with this style */
      *
      */
     hasFocus() {
-      var _a3, _b3;
-      return (_b3 = (_a3 = this._mathfield) == null ? void 0 : _a3.hasFocus()) != null ? _b3 : false;
+      var _a4, _b3;
+      return (_b3 = (_a4 = this._mathfield) == null ? void 0 : _a4.hasFocus()) != null ? _b3 : false;
     }
     /**
      * Sets the focus to the mathfield (will respond to keyboard input).
@@ -36499,8 +36500,8 @@ with this style */
      *
      */
     focus() {
-      var _a3;
-      (_a3 = this._mathfield) == null ? void 0 : _a3.focus();
+      var _a4;
+      (_a4 = this._mathfield) == null ? void 0 : _a4.focus();
     }
     /**
      * Remove the focus from the mathfield (will no longer respond to keyboard
@@ -36510,16 +36511,16 @@ with this style */
      *
      */
     blur() {
-      var _a3;
-      (_a3 = this._mathfield) == null ? void 0 : _a3.blur();
+      var _a4;
+      (_a4 = this._mathfield) == null ? void 0 : _a4.blur();
     }
     /**
      * Select the content of the mathfield.
      * @category Selection
      */
     select() {
-      var _a3;
-      (_a3 = this._mathfield) == null ? void 0 : _a3.select();
+      var _a4;
+      (_a4 = this._mathfield) == null ? void 0 : _a4.select();
     }
     /**
        * @inheritdoc Mathfield.insert
@@ -36527,8 +36528,8 @@ with this style */
        *  @category Accessing and changing the content
        */
     insert(s, options) {
-      var _a3, _b3;
-      return (_b3 = (_a3 = this._mathfield) == null ? void 0 : _a3.insert(s, options)) != null ? _b3 : false;
+      var _a4, _b3;
+      return (_b3 = (_a4 = this._mathfield) == null ? void 0 : _a4.insert(s, options)) != null ? _b3 : false;
     }
     /**
      * @inheritdoc Mathfield.applyStyle
@@ -36536,8 +36537,8 @@ with this style */
      * @category Accessing and changing the content
      */
     applyStyle(style, options) {
-      var _a3;
-      return (_a3 = this._mathfield) == null ? void 0 : _a3.applyStyle(style, options);
+      var _a4;
+      return (_a4 = this._mathfield) == null ? void 0 : _a4.applyStyle(style, options);
     }
     /**
      * The bottom location of the caret (insertion point) in viewport
@@ -36546,14 +36547,14 @@ with this style */
      * @category Selection
      */
     get caretPoint() {
-      var _a3, _b3;
-      return (_b3 = (_a3 = this._mathfield) == null ? void 0 : _a3.getCaretPoint()) != null ? _b3 : null;
+      var _a4, _b3;
+      return (_b3 = (_a4 = this._mathfield) == null ? void 0 : _a4.getCaretPoint()) != null ? _b3 : null;
     }
     set caretPoint(point) {
-      var _a3;
+      var _a4;
       if (!point)
         return;
-      (_a3 = this._mathfield) == null ? void 0 : _a3.setCaretPoint(point.x, point.y);
+      (_a4 = this._mathfield) == null ? void 0 : _a4.setCaretPoint(point.x, point.y);
     }
     /**
      * `x` and `y` are in viewport coordinates.
@@ -36564,8 +36565,8 @@ with this style */
      * @category Selection
      */
     setCaretPoint(x, y) {
-      var _a3, _b3;
-      return (_b3 = (_a3 = this._mathfield) == null ? void 0 : _a3.setCaretPoint(x, y)) != null ? _b3 : false;
+      var _a4, _b3;
+      return (_b3 = (_a4 = this._mathfield) == null ? void 0 : _a4.setCaretPoint(x, y)) != null ? _b3 : false;
     }
     /** The offset closest to the location `(x, y)` in viewport coordinate.
      *
@@ -36606,8 +36607,8 @@ with this style */
      * (for parent components with their own undo/redo)
      */
     resetUndo() {
-      var _a3;
-      (_a3 = this._mathfield) == null ? void 0 : _a3.resetUndo();
+      var _a4;
+      (_a4 = this._mathfield) == null ? void 0 : _a4.resetUndo();
     }
     /**
      * Return whether there are undoable items
@@ -36628,11 +36629,11 @@ with this style */
       return this._mathfield.canRedo();
     }
     handleEvent(evt) {
-      var _a3, _b3;
+      var _a4, _b3;
       if (evt.type === "pointerdown")
         this.onPointerDown();
       if (evt.type === "focus")
-        (_a3 = this._mathfield) == null ? void 0 : _a3.focus();
+        (_a4 = this._mathfield) == null ? void 0 : _a4.focus();
       if (evt.type === "blur")
         (_b3 = this._mathfield) == null ? void 0 : _b3.blur();
     }
@@ -36641,7 +36642,7 @@ with this style */
      * @internal
      */
     connectedCallback() {
-      var _a3, _b3, _c2;
+      var _a4, _b3, _c2;
       this.shadowRoot.host.addEventListener("pointerdown", this, true);
       this.shadowRoot.host.addEventListener("focus", this, true);
       this.shadowRoot.host.addEventListener("blur", this, true);
@@ -36659,7 +36660,7 @@ with this style */
       const slot = this.shadowRoot.querySelector("slot:not([name])");
       let value = "";
       if (this.hasAttribute("value"))
-        value = (_a3 = this.getAttribute("value")) != null ? _a3 : "";
+        value = (_a4 = this.getAttribute("value")) != null ? _a4 : "";
       else {
         value = (_b3 = slot == null ? void 0 : slot.assignedNodes().map((x) => x.nodeType === 3 ? x.textContent : "").join("").trim()) != null ? _b3 : "";
       }
@@ -36799,7 +36800,7 @@ with this style */
       return this.hasAttribute("disabled");
     }
     set disabled(value) {
-      var _a3;
+      var _a4;
       const isDisabled = Boolean(value);
       if (isDisabled)
         this.setAttribute("disabled", "");
@@ -36809,7 +36810,7 @@ with this style */
         this._internals.ariaDisabled = isDisabled ? "true" : "false";
       else
         this.setAttribute("aria-disabled", isDisabled ? "true" : "false");
-      if (isDisabled && ((_a3 = this._mathfield) == null ? void 0 : _a3.hasFocus) && window.mathVirtualKeyboard.visible)
+      if (isDisabled && ((_a4 = this._mathfield) == null ? void 0 : _a4.hasFocus) && window.mathVirtualKeyboard.visible)
         this._mathfield.executeCommand("hideVirtualKeyboard");
     }
     /**
@@ -36967,25 +36968,25 @@ with this style */
       this._setOptions({ readOnly: value });
     }
     get isSelectionEditable() {
-      var _a3, _b3;
-      return (_b3 = (_a3 = this._mathfield) == null ? void 0 : _a3.isSelectionEditable) != null ? _b3 : false;
+      var _a4, _b3;
+      return (_b3 = (_a4 = this._mathfield) == null ? void 0 : _a4.isSelectionEditable) != null ? _b3 : false;
     }
     setPromptState(id, state, locked) {
-      var _a3;
-      (_a3 = this._mathfield) == null ? void 0 : _a3.setPromptState(id, state, locked);
+      var _a4;
+      (_a4 = this._mathfield) == null ? void 0 : _a4.setPromptState(id, state, locked);
     }
     getPromptState(id) {
-      var _a3, _b3;
-      return (_b3 = (_a3 = this._mathfield) == null ? void 0 : _a3.getPromptState(id)) != null ? _b3 : [void 0, true];
+      var _a4, _b3;
+      return (_b3 = (_a4 = this._mathfield) == null ? void 0 : _a4.getPromptState(id)) != null ? _b3 : [void 0, true];
     }
     setPromptContent(id, content, insertOptions) {
-      var _a3;
-      (_a3 = this._mathfield) == null ? void 0 : _a3.setPromptValue(id, content, insertOptions);
+      var _a4;
+      (_a4 = this._mathfield) == null ? void 0 : _a4.setPromptValue(id, content, insertOptions);
     }
     /** Remove the contents of all prompts, and return an object with the prompt contents */
     stripPromptContent(filter) {
-      var _a3, _b3;
-      return (_b3 = (_a3 = this._mathfield) == null ? void 0 : _a3.stripPromptContent(filter)) != null ? _b3 : {};
+      var _a4, _b3;
+      return (_b3 = (_a4 = this._mathfield) == null ? void 0 : _a4.stripPromptContent(filter)) != null ? _b3 : {};
     }
     get virtualKeyboardTargetOrigin() {
       return this._getOption("virtualKeyboardTargetOrigin");
@@ -37071,9 +37072,9 @@ with this style */
      * The depth of an offset represent the depth in the expression tree.
      */
     getOffsetDepth(offset) {
-      var _a3;
+      var _a4;
       if (this._mathfield)
-        return ((_a3 = this._mathfield.model.at(offset)) == null ? void 0 : _a3.treeDepth) - 2;
+        return ((_a4 = this._mathfield.model.at(offset)) == null ? void 0 : _a4.treeDepth) - 2;
       return 0;
     }
     /**
@@ -37081,8 +37082,8 @@ with this style */
      * @category Selection
      */
     get lastOffset() {
-      var _a3, _b3;
-      return (_b3 = (_a3 = this._mathfield) == null ? void 0 : _a3.model.lastOffset) != null ? _b3 : -1;
+      var _a4, _b3;
+      return (_b3 = (_a4 = this._mathfield) == null ? void 0 : _a4.model.lastOffset) != null ? _b3 : -1;
     }
   };
   var MathfieldElement = _MathfieldElement;
@@ -37180,8 +37181,8 @@ with this style */
     return true;
   }
   var mathfield_element_default = MathfieldElement;
-  var _a2, _b2, _c, _d;
-  if (isBrowser() && !((_a2 = window.customElements) == null ? void 0 : _a2.get("math-field"))) {
+  var _a3, _b2, _c, _d;
+  if (isBrowser() && !((_a3 = window.customElements) == null ? void 0 : _a3.get("math-field"))) {
     (_c = window[_b2 = Symbol.for("io.cortexjs.mathlive")]) != null ? _c : window[_b2] = {};
     const global = window[Symbol.for("io.cortexjs.mathlive")];
     global.version = "0.94.5";
@@ -37191,9 +37192,9 @@ with this style */
 
   // src/public/mathlive-ssr.ts
   function convertLatexToMarkup(text, options) {
-    var _a3, _b3;
+    var _a4, _b3;
     options != null ? options : options = {};
-    options.mathstyle = (_a3 = options.mathstyle) != null ? _a3 : "displaystyle";
+    options.mathstyle = (_a4 = options.mathstyle) != null ? _a4 : "displaystyle";
     const context = new Context({
       from: __spreadProps(__spreadValues({}, getDefaultContext()), {
         renderPlaceholder: () => new Box(160, { maxFontSize: 1 }),
@@ -37240,9 +37241,9 @@ with this style */
   }
   var gComputeEngine;
   function serializeMathJsonToLatex(json) {
-    var _a3, _b3;
+    var _a4, _b3;
     if (!gComputeEngine) {
-      const ComputeEngineCtor = (_a3 = globalThis[Symbol.for("io.cortexjs.compute-engine")]) == null ? void 0 : _a3.ComputeEngine;
+      const ComputeEngineCtor = (_a4 = globalThis[Symbol.for("io.cortexjs.compute-engine")]) == null ? void 0 : _a4.ComputeEngine;
       if (ComputeEngineCtor)
         gComputeEngine = new ComputeEngineCtor();
       else {
@@ -37404,7 +37405,7 @@ with this style */
     return span;
   }
   function createMarkupNode(text, options, mathstyle, createNodeOnFailure) {
-    var _a3;
+    var _a4;
     try {
       const html = options.renderToMarkup(text, {
         mathstyle,
@@ -37414,7 +37415,7 @@ with this style */
       element.dataset.latex = text;
       element.setAttribute("aria-hidden", "true");
       element.innerHTML = window.MathfieldElement.createHTML(html);
-      (_a3 = options.onCreateNode) == null ? void 0 : _a3.call(options, element);
+      (_a4 = options.onCreateNode) == null ? void 0 : _a4.call(options, element);
       return element;
     } catch (error) {
       console.error("Could not parse'" + text + "' with ", error);
@@ -37424,14 +37425,14 @@ with this style */
     return null;
   }
   function createAccessibleMarkupPair(latex, mathstyle, options, createNodeOnFailure) {
-    var _a3;
+    var _a4;
     const markupNode = createMarkupNode(
       latex,
       options,
       mathstyle ? mathstyle : "textstyle",
       createNodeOnFailure
     );
-    const accessibleContent = (_a3 = options.renderAccessibleContent) != null ? _a3 : "";
+    const accessibleContent = (_a4 = options.renderAccessibleContent) != null ? _a4 : "";
     if (markupNode && /\b(mathml|speakable-text)\b/i.test(accessibleContent)) {
       const fragment = document.createElement("span");
       if (/\bmathml\b/i.test(accessibleContent) && options.renderToMathML)
@@ -37449,9 +37450,9 @@ with this style */
     return markupNode;
   }
   function scanText2(text, options) {
-    var _a3, _b3, _c2;
+    var _a4, _b3, _c2;
     let fragment = null;
-    if (((_a3 = options.TeX) == null ? void 0 : _a3.processEnvironments) && /^\s*\\begin/.test(text)) {
+    if (((_a4 = options.TeX) == null ? void 0 : _a4.processEnvironments) && /^\s*\\begin/.test(text)) {
       fragment = document.createDocumentFragment();
       const node = createAccessibleMarkupPair(text, "", options, true);
       if (node)
@@ -37486,9 +37487,9 @@ with this style */
     return fragment;
   }
   function scanElement(element, options) {
-    var _a3, _b3, _c2, _d2, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p;
+    var _a4, _b3, _c2, _d2, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p;
     if (element.childNodes.length === 1 && element.childNodes[0].nodeType === 3) {
-      const text = (_a3 = element.childNodes[0].textContent) != null ? _a3 : "";
+      const text = (_a4 = element.childNodes[0].textContent) != null ? _a4 : "";
       if (((_b3 = options.TeX) == null ? void 0 : _b3.processEnvironments) && /^\s*\\begin/.test(text)) {
         element.textContent = "";
         const node = createAccessibleMarkupPair(text, "", options, true);
@@ -37624,11 +37625,11 @@ with this style */
     }
   };
   function autoRenderMathInElement(element, options) {
-    var _a3, _b3, _c2, _d2;
+    var _a4, _b3, _c2, _d2;
     try {
       const optionsPrivate = __spreadValues(__spreadValues({}, DEFAULT_AUTO_RENDER_OPTIONS), options);
       optionsPrivate.ignoreClassPattern = new RegExp(
-        (_a3 = optionsPrivate.ignoreClass) != null ? _a3 : ""
+        (_a4 = optionsPrivate.ignoreClass) != null ? _a4 : ""
       );
       optionsPrivate.processClassPattern = new RegExp(
         (_b3 = optionsPrivate.processClass) != null ? _b3 : ""
@@ -37692,8 +37693,8 @@ with this style */
 
   // src/mathlive.ts
   function globalMathLive() {
-    var _a3, _b3;
-    (_b3 = globalThis[_a3 = Symbol.for("io.cortexjs.mathlive")]) != null ? _b3 : globalThis[_a3] = {};
+    var _a4, _b3;
+    (_b3 = globalThis[_a4 = Symbol.for("io.cortexjs.mathlive")]) != null ? _b3 : globalThis[_a4] = {};
     return globalThis[Symbol.for("io.cortexjs.mathlive")];
   }
   function makeSharedVirtualKeyboard() {
@@ -37719,12 +37720,12 @@ with this style */
     return typeof element === "string" ? null : element;
   }
   function renderMathInElement(element, options) {
-    var _a3, _b3, _c2, _d2;
+    var _a4, _b3, _c2, _d2;
     const el = getElement(element);
     if (!el)
       return;
     const optionsPrivate = options != null ? options : {};
-    (_a3 = optionsPrivate.renderToMarkup) != null ? _a3 : optionsPrivate.renderToMarkup = convertLatexToMarkup;
+    (_a4 = optionsPrivate.renderToMarkup) != null ? _a4 : optionsPrivate.renderToMarkup = convertLatexToMarkup;
     (_b3 = optionsPrivate.renderToMathML) != null ? _b3 : optionsPrivate.renderToMathML = convertLatexToMathMl;
     (_c2 = optionsPrivate.renderToSpeakableText) != null ? _c2 : optionsPrivate.renderToSpeakableText = convertLatexToSpeakableText;
     (_d2 = optionsPrivate.serializeToLatex) != null ? _d2 : optionsPrivate.serializeToLatex = serializeMathJsonToLatex;

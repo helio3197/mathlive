@@ -808,13 +808,22 @@ export function defineFunction(
 
 let _DEFAULT_MACROS: NormalizedMacroDictionary;
 
+declare global {
+  interface Window {
+    mathfieldGlobalOptions?: { macros?: MacroDictionary };
+  }
+}
+
 export function getMacros(
   otherMacros?: MacroDictionary | null
 ): NormalizedMacroDictionary {
   if (!_DEFAULT_MACROS)
     _DEFAULT_MACROS = normalizeMacroDictionary(DEFAULT_MACROS);
 
-  if (!otherMacros) return _DEFAULT_MACROS;
+  otherMacros = {
+    ...(otherMacros ?? {}),
+    ...(window.mathfieldGlobalOptions?.macros ?? {}),
+  };
   return normalizeMacroDictionary({ ..._DEFAULT_MACROS, ...otherMacros });
 }
 
