@@ -24426,7 +24426,7 @@ var VirtualKeyboard = class {
      */
     this._shiftPressCount = 0;
     this._isShifted = false;
-    var _a4, _b3, _c2;
+    var _a4, _b3, _c2, _d2;
     this.targetOrigin = window.origin;
     this.originValidator = "none";
     this._alphabeticLayout = "auto";
@@ -24443,7 +24443,8 @@ var VirtualKeyboard = class {
       this.sendMessage("geometry-changed", { boundingRect: this.boundingRect });
     });
     this.listeners = {};
-    (_c2 = window.top) == null ? void 0 : _c2.addEventListener("message", this);
+    if (!((_c2 = window.mathfieldGlobalOptions) == null ? void 0 : _c2.avoidVirtualKeyboardProxy))
+      (_d2 = window.top) == null ? void 0 : _d2.addEventListener("message", this);
     document.body.addEventListener("focusin", (event) => {
       var _a5;
       const target = event.target;

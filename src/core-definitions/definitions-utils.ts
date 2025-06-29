@@ -810,7 +810,10 @@ let _DEFAULT_MACROS: NormalizedMacroDictionary;
 
 declare global {
   interface Window {
-    mathfieldGlobalOptions?: { macros?: MacroDictionary };
+    mathfieldGlobalOptions?: {
+      macros?: MacroDictionary;
+      avoidVirtualKeyboardProxy?: boolean;
+    };
   }
 }
 

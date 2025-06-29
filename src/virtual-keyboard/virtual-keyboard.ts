@@ -317,7 +317,8 @@ export class VirtualKeyboard implements VirtualKeyboardInterface, EventTarget {
 
     this.listeners = {};
 
-    window.top?.addEventListener('message', this);
+    if (!window.mathfieldGlobalOptions?.avoidVirtualKeyboardProxy)
+      window.top?.addEventListener('message', this);
 
     document.body.addEventListener('focusin', (event: FocusEvent) => {
       const target = event.target as HTMLElement;
