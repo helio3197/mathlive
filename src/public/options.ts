@@ -501,4 +501,6 @@ export type StaticRenderOptions = Partial<LayoutOptions> & {
       inline?: string;
     };
   };
+
+  onCreateNode?: (node: Node) => void;
 };

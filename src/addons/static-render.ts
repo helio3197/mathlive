@@ -252,6 +252,7 @@ function createMarkupNode(
     element.setAttribute('aria-hidden', 'true');
     element.setAttribute('translate', 'no');
     element.innerHTML = globalThis.MathfieldElement.createHTML(html);
+    options.onCreateNode?.(element);
     return element;
   } catch (error: unknown) {
     console.error("Could not parse'" + text + "' with ", error);

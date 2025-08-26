@@ -53,6 +53,11 @@ export class VirtualKeyboard implements VirtualKeyboardInterface, EventTarget {
   private keycapRegistry: Record<string, Partial<VirtualKeyboardKeycap>> = {};
 
   latentLayer: string;
+  overrideAutoClose: boolean;
+  renderKeycap: (
+    keycap: Partial<VirtualKeyboardKeycap>,
+    options?: { shifted: boolean }
+  ) => [markup: string, classes: string];
 
   get currentLayer(): string {
     return this._element?.querySelector('.MLK__layer.is-visible')?.id ?? '';
@@ -243,6 +248,9 @@ export class VirtualKeyboard implements VirtualKeyboardInterface, EventTarget {
     this.targetOrigin = window.origin;
     this.originValidator = 'none';
 
+    this.overrideAutoClose = false;
+    this.renderKeycap = renderKeycap;
+
     this._alphabeticLayout = 'auto';
     this._layouts = Object.freeze(['default']);
     this._editToolbar = 'default';
@@ -285,7 +293,7 @@ export class VirtualKeyboard implements VirtualKeyboardInterface, EventTarget {
     });
 
     document.addEventListener('focusout', (evt) => {
-      if (!(evt.target instanceof MathfieldElement)) return;
+      if (!(evt.target instanceof MathfieldElement) || this.overrideAutoClose) return;
       if (evt.target.mathVirtualKeyboardPolicy !== 'manual') {
         // If after a short delay the active element is no longer
         // a mathfield (or there is no active element), hide the virtual keyboard
@@ -767,6 +775,11 @@ export class VirtualKeyboard implements VirtualKeyboardInterface, EventTarget {
         { targetOrigin: this.targetOrigin }
       );
     } else {
+      if (payload.command) {
+        this.dispatchEvent(
+          new CustomEvent('mathkb-command', { detail: payload.command })
+        );
+      }
       if (
         action === 'execute-command' &&
         Array.isArray(payload.command) &&

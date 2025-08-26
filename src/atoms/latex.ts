@@ -31,6 +31,7 @@ export class LatexAtom extends Atom {
   }
 
   render(context: Context): Box | null {
+    if (this.isError) return null;
     const result = new Box(this.value, {
       classes: this.isSuggestion
         ? 'ML__suggestion'
